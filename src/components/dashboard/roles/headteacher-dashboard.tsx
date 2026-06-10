@@ -1,11 +1,11 @@
 'use client';
 
-import { DashboardStatsGrid, defaultStats } from '@/components/dashboard/stats-grid';
+import { DashboardStatsGrid } from '@/components/dashboard/stats-grid';
 import { EnrollmentChart, AttendanceChart, FeeCollectionChart, ClassDistributionChart } from '@/components/dashboard/charts';
 import { RecentActivity } from '@/components/dashboard/recent-activity';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, Filter } from 'lucide-react';
+import { Plus, Download, Filter, Users, UserCog, CreditCard, ClipboardCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useStaffStore } from '@/stores/staff';
 import { useStudentStore } from '@/stores/students';
@@ -27,6 +27,15 @@ export function HeadteacherDashboard() {
 
   const upcomingTasks = tasks.filter((t) => t.status !== 'completed').slice(0, 5);
   const totalCollected = records.reduce((sum, r) => sum + r.paid, 0);
+  const totalExpected = records.reduce((sum, r) => sum + r.amount, 0);
+  const attRate = students.length > 0 ? Math.round((records.filter((r) => r.status === 'paid').length / records.length) * 100) : 0;
+
+  const stats = [
+    { title: 'Total Students', value: students.length, icon: <Users size={24} />, trend: { value: 0, positive: true }, color: '#6366f1' },
+    { title: 'Total Staff', value: staff.length, icon: <UserCog size={24} />, trend: { value: 0, positive: true }, color: '#8b5cf6' },
+    { title: 'Revenue (GHS)', value: `GHS ${totalCollected.toLocaleString()}`, icon: <CreditCard size={24} />, trend: { value: totalExpected > 0 ? Math.round((totalCollected / totalExpected) * 100) : 0, positive: true }, color: '#06b6d4' },
+    { title: 'Pending Tasks', value: tasks.filter((t) => t.status === 'pending' || t.status === 'in_progress').length, icon: <ClipboardCheck size={24} />, trend: { value: 0, positive: false }, color: '#f59e0b' },
+  ];
 
   return (
     <div className="space-y-6">
@@ -42,7 +51,7 @@ export function HeadteacherDashboard() {
         </div>
       </motion.div>
 
-      <DashboardStatsGrid stats={defaultStats} />
+      <DashboardStatsGrid stats={stats} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <EnrollmentChart />

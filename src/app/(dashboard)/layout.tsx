@@ -1,5 +1,6 @@
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
+import { DataLoader } from '@/components/layout/data-loader';
 import { MessageCircle, Phone } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -9,6 +10,7 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
+      <DataLoader />
       <Sidebar />
       <div className="ml-64 transition-all duration-300">
         <Header />

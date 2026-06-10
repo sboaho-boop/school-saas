@@ -6,28 +6,35 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { motion } from 'framer-motion';
 import { Check, X, Clock, AlertCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAttendanceStore, type AttendanceRecord } from '@/stores/attendance';
-
-const classes = [
-  { id: 'basic-4a', name: 'Basic 4A' },
-  { id: 'basic-5b', name: 'Basic 5B' },
-  { id: 'basic-6a', name: 'Basic 6A' },
-];
+import { useAcademicsStore } from '@/stores/academics';
 
 export default function AttendancePage() {
-  const { records, markAttendance, markAll } = useAttendanceStore();
-  const [selectedClass, setSelectedClass] = useState('basic-4a');
+  const { records, markAttendance, markAll, fetchRecords, loading } = useAttendanceStore();
+  const classes = useAcademicsStore((s) => s.classes);
+  const fetchClasses = useAcademicsStore((s) => s.fetchClasses);
+  const [selectedClass, setSelectedClass] = useState('');
   const today = new Date().toISOString().split('T')[0];
 
+  useEffect(() => { fetchClasses(); }, [fetchClasses]);
+
+  useEffect(() => {
+    if (selectedClass) fetchRecords({ classId: selectedClass, date: today });
+  }, [selectedClass, fetchRecords, today]);
+
+  const classOptions = classes.map((c) => ({ id: c.id, name: c.name }));
+  const activeClass = classOptions.find((c) => c.id === selectedClass);
+
   const classRecords = records.filter((r) => r.classId === selectedClass && r.date === today);
+  const isLoading = loading && classRecords.length === 0;
 
   const statusIcons = { present: <Check size={14} />, absent: <X size={14} />, late: <Clock size={14} />, excused: <AlertCircle size={14} /> };
   const statusColors = { present: 'bg-emerald-500/10 text-emerald-600', absent: 'bg-red-500/10 text-red-600', late: 'bg-amber-500/10 text-amber-600', excused: 'bg-blue-500/10 text-blue-600' };
 
   const handleMarkAll = (status: AttendanceRecord['status']) => {
     const studentIds = classRecords.map((r) => r.studentId);
-    const className = classes.find((c) => c.id === selectedClass)?.name || '';
+    const className = activeClass?.name || '';
     markAll(studentIds, selectedClass, className, today, status);
   };
 
@@ -44,7 +51,7 @@ export default function AttendancePage() {
         <Select value={selectedClass} onValueChange={(v) => v && setSelectedClass(v)}>
           <SelectTrigger className="w-[200px]"><SelectValue placeholder="Select class" /></SelectTrigger>
           <SelectContent>
-            {classes.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+            {classOptions.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
           </SelectContent>
         </Select>
         <span className="text-sm text-muted-foreground">Date: {today}</span>
@@ -83,7 +90,7 @@ export default function AttendancePage() {
                   {(['present', 'absent', 'late', 'excused'] as const).map((status) => (
                     <button
                       key={status}
-                      onClick={() => markAttendance(record.studentId, record.classId, record.date, status)}
+                      onClick={() => markAttendance(record.studentId, selectedClass, activeClass?.name || '', record.studentName, today, status)}
                       className={`rounded-full p-2 text-xs transition-all ${record.status === status ? statusColors[status] + ' ring-2 ring-offset-1' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}
                       title={status}
                     >

@@ -1,19 +1,15 @@
 import { create } from 'zustand';
+import { api, getToken, setToken } from '@/lib/api';
 import type { Staff, StaffType } from '@/types';
 
 interface AuthStore {
   currentUser: Staff | null;
-  login: (staff: Staff) => void;
+  loading: boolean;
+  error: string | null;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  initialize: () => Promise<void>;
 }
-
-const demoUsers: Record<string, Staff> = {
-  headteacher: { id: '1', name: 'Mr. Kwame Asante', email: 'kwame@school.edu', phone: '+233 24 123 4567', role: 'Head Teacher', department: 'Administration', staffType: 'headteacher', status: 'active', hireDate: '2020-09-01' },
-  admin: { id: '99', name: 'Admin User', email: 'admin@school.edu', phone: '+233 20 111 2222', role: 'System Admin', department: 'Administration', staffType: 'admin', status: 'active', hireDate: '2021-01-01' },
-  accountant: { id: '5', name: 'Mr. Emmanuel Osei', email: 'emmanuel@school.edu', phone: '+233 20 654 3210', role: 'Accountant', department: 'Finance', staffType: 'accountant', status: 'active', hireDate: '2019-03-01' },
-  teaching: { id: '2', name: 'Mrs. Ama Mensah', email: 'ama@school.edu', phone: '+233 20 987 6543', role: 'Mathematics Teacher', department: 'Mathematics', staffType: 'teaching', assignedClass: 'Basic 5B', assignedSubjects: ['Mathematics', 'Algebra'], status: 'active', hireDate: '2021-09-01' },
-  'non-teaching': { id: '6', name: 'Mr. John Doe', email: 'john@school.edu', phone: '+233 24 555 6666', role: 'Librarian', department: 'Library', staffType: 'non-teaching', status: 'active', hireDate: '2022-06-01' },
-};
 
 export const ROLE_NAV_ITEMS: Record<StaffType, string[]> = {
   headteacher: ['dashboard', 'students', 'staff', 'academics', 'attendance', 'tasks', 'transport', 'finance', 'communication', 'reports', 'settings'],
@@ -25,8 +21,41 @@ export const ROLE_NAV_ITEMS: Record<StaffType, string[]> = {
 
 export const useAuthStore = create<AuthStore>((set) => ({
   currentUser: null,
-  login: (staff) => set({ currentUser: staff }),
-  logout: () => set({ currentUser: null }),
-}));
+  loading: false,
+  error: null,
 
-export { demoUsers };
+  login: async (email, password) => {
+    set({ loading: true, error: null });
+    try {
+      const { user, token } = await api.post<{ user: { id: string; email: string; name: string; role: string }; token: string }>('/auth/login', { email, password });
+      setToken(token);
+      const staffList = await api.get<Staff[]>('/staff');
+      const matched = staffList.find((s) => s.email === user.email);
+      set({
+        currentUser: matched || { id: user.id, name: user.name, email: user.email, role: user.role, phone: '', department: '', staffType: user.role as StaffType, status: 'active', hireDate: '' },
+        loading: false,
+      });
+    } catch (err: any) {
+      set({ error: err.message, loading: false });
+      throw err;
+    }
+  },
+
+  logout: () => {
+    setToken(null);
+    set({ currentUser: null, error: null });
+  },
+
+  initialize: async () => {
+    const token = getToken();
+    if (!token) return;
+    try {
+      const staffList = await api.get<Staff[]>('/staff');
+      const user = await api.get<{ id: string; email: string; name: string; role: string }>('/auth/me');
+      const matched = staffList.find((s) => s.email === user.email);
+      if (matched) set({ currentUser: matched });
+    } catch {
+      setToken(null);
+    }
+  },
+}));

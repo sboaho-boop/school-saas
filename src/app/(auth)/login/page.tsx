@@ -4,36 +4,28 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useAuthStore, demoUsers } from '@/stores/auth';
-import type { StaffType } from '@/types';
-
-const roleLabels: Record<StaffType, string> = {
-  headteacher: 'Head Teacher',
-  admin: 'Admin',
-  accountant: 'Accountant',
-  teaching: 'Teacher',
-  'non-teaching': 'Non-Teaching Staff',
-};
+import { useAuthStore } from '@/stores/auth';
 
 export default function LoginPage() {
   const router = useRouter();
   const login = useAuthStore((s) => s.login);
+  const loading = useAuthStore((s) => s.loading);
+  const error = useAuthStore((s) => s.error);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [selectedRole, setSelectedRole] = useState<StaffType | ''>('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const role = selectedRole as StaffType;
-    if (role && demoUsers[role]) {
-      login(demoUsers[role]);
+    try {
+      await login(email, password);
+      router.push('/dashboard');
+    } catch {
+      // error is set in the store
     }
-    router.push('/dashboard');
   };
 
   return (
@@ -57,19 +49,7 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="role">Staff Role (Demo)</Label>
-                <Select value={selectedRole} onValueChange={(v) => setSelectedRole(v as StaffType)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(roleLabels).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>{label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {error && <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/50 px-3 py-2 rounded-md">{error}</p>}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -100,12 +80,17 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-md shadow-primary/20">
-                Sign In
+              <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-md shadow-primary/20">
+                {loading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
 
-            <div className="mt-6 text-center text-sm">
+            <div className="mt-4 text-xs text-muted-foreground space-y-1">
+              <p className="font-medium">Demo accounts (password: <code className="bg-muted px-1 rounded">password123</code>):</p>
+              <p>headteacher@school.com · admin@school.com · accountant@school.com</p>
+              <p>teacher1@school.com · teacher2@school.com · nont@school.com</p>
+            </div>
+            <div className="mt-4 text-center text-sm">
               <span className="text-muted-foreground">Don&apos;t have an account? </span>
               <Link href="/register" className="font-medium text-primary hover:underline">
                 Register your school

@@ -9,34 +9,39 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { motion } from 'framer-motion';
-import { MessageSquare, Megaphone, Plus, Send, Bell, MailOpen, AlertTriangle, Info, AlertCircle } from 'lucide-react';
-import { useState } from 'react';
+import { MessageSquare, Megaphone, Plus, Send, MailOpen, AlertTriangle, Info, AlertCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useCommunicationStore } from '@/stores/communication';
+import { useStaffStore } from '@/stores/staff';
 
 export default function CommunicationPage() {
-  const { messages, announcements, sendMessage, markRead, addAnnouncement } = useCommunicationStore();
+  const { messages, announcements, sendMessage, markRead, addAnnouncement, fetchMessages, fetchAnnouncements } = useCommunicationStore();
+  const staff = useStaffStore((s) => s.staff);
+  const fetchStaff = useStaffStore((s) => s.fetchStaff);
   const [tab, setTab] = useState<'messages' | 'announcements'>('messages');
   const [msgOpen, setMsgOpen] = useState(false);
   const [annOpen, setAnnOpen] = useState(false);
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
-  const [toName, setToName] = useState('');
+  const [toId, setToId] = useState('');
   const [annTitle, setAnnTitle] = useState('');
   const [annBody, setAnnBody] = useState('');
   const [annPriority, setAnnPriority] = useState<'low' | 'normal' | 'high'>('normal');
 
+  useEffect(() => { fetchMessages(); fetchAnnouncements(); fetchStaff(); }, [fetchMessages, fetchAnnouncements, fetchStaff]);
+
   const handleSend = () => {
-    if (!subject || !body || !toName) return;
-    sendMessage({ subject, body, fromName: 'Current User', toName });
+    if (!subject || !body || !toId) return;
+    sendMessage({ subject, body, toId });
     setSubject('');
     setBody('');
-    setToName('');
+    setToId('');
     setMsgOpen(false);
   };
 
   const handleAnnounce = () => {
     if (!annTitle || !annBody) return;
-    addAnnouncement({ title: annTitle, body: annBody, author: 'Current User', priority: annPriority });
+    addAnnouncement({ title: annTitle, body: annBody, priority: annPriority });
     setAnnTitle('');
     setAnnBody('');
     setAnnOpen(false);
@@ -83,7 +88,7 @@ export default function CommunicationPage() {
                 <DialogDescription>Send a message to parents or staff.</DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
-                <div><Label>To</Label><Input value={toName} onChange={(e) => setToName(e.target.value)} placeholder="Recipient" /></div>
+                <div><Label>To</Label><Select value={toId} onValueChange={(v) => v && setToId(v)}><SelectTrigger><SelectValue placeholder="Select recipient" /></SelectTrigger><SelectContent>{staff.map((s) => <SelectItem key={s.id} value={s.id}>{s.name} ({s.email})</SelectItem>)}</SelectContent></Select></div>
                 <div><Label>Subject</Label><Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Message subject" /></div>
                 <div><Label>Body</Label><Textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="Message content" /></div>
               </div>
@@ -118,7 +123,7 @@ export default function CommunicationPage() {
                       {!msg.read && <Badge className="h-2 w-2 rounded-full p-0 bg-primary" />}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">{msg.body}</p>
-                    <p className="text-xs text-muted-foreground mt-2">From: {msg.fromName} &middot; To: {msg.toName} &middot; {new Date(msg.createdAt).toLocaleDateString()}</p>
+                    <p className="text-xs text-muted-foreground mt-2">From: {msg.sender?.name || 'Unknown'} &middot; To: {msg.receiver?.name || 'Unknown'} &middot; {new Date(msg.createdAt).toLocaleDateString()}</p>
                   </div>
                   {!msg.read && <Button size="sm" variant="ghost" onClick={() => markRead(msg.id)}><MailOpen size={14} /></Button>}
                 </div>
@@ -131,7 +136,7 @@ export default function CommunicationPage() {
       {tab === 'announcements' && (
         <div className="space-y-3">
           {announcements.map((ann) => {
-            const p = priorityConfig[ann.priority];
+            const p = priorityConfig[ann.priority as keyof typeof priorityConfig] || priorityConfig.normal;
             const PIcon = p.icon;
             return (
               <Card key={ann.id} className="border-border/50 shadow-sm">
@@ -144,7 +149,7 @@ export default function CommunicationPage() {
                         <Badge variant="outline" className="text-xs capitalize">{ann.priority}</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">{ann.body}</p>
-                      <p className="text-xs text-muted-foreground mt-2">{ann.author} &middot; {new Date(ann.createdAt).toLocaleDateString()}</p>
+                      <p className="text-xs text-muted-foreground mt-2">{ann.author?.name || 'Unknown'} &middot; {new Date(ann.createdAt).toLocaleDateString()}</p>
                     </div>
                   </div>
                 </CardContent>
