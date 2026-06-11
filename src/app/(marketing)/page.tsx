@@ -118,6 +118,9 @@ export default function HomePage() {
             <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Login
             </Link>
+            <Link href="/parent/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Parents
+            </Link>
             <Link href="/register">
               <Button size="sm">Get Started</Button>
             </Link>
@@ -350,6 +353,7 @@ export default function HomePage() {
                 <Link href="#about" className="hover:text-foreground transition-colors">About</Link>
                 <Link href="/login" className="hover:text-foreground transition-colors">Login</Link>
                 <Link href="/register" className="hover:text-foreground transition-colors">Register</Link>
+                <Link href="/parent/login" className="hover:text-foreground transition-colors">Parent Portal</Link>
               </div>
             </div>
             <div>

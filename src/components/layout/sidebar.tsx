@@ -22,6 +22,7 @@ import {
   Mail,
   Wallet,
   Shield,
+  Scan,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -43,6 +44,7 @@ const iconMap = {
   Settings,
   Wallet,
   Shield,
+  Scan,
 };
 
 interface SidebarItem {
@@ -66,6 +68,7 @@ const sidebarItems: SidebarItem[] = [
   { id: 'communication', label: 'Communication', icon: 'MessageSquare', href: '/communication' },
   { id: 'reports', label: 'Reports', icon: 'BarChart3', href: '/reports' },
   { id: 'audit-logs', label: 'Audit Logs', icon: 'Shield', href: '/audit-logs' },
+  { id: 'terminal', label: 'Terminal', icon: 'Scan', href: '/terminal' },
   { id: 'settings', label: 'Settings', icon: 'Settings', href: '/settings' },
 ];
 

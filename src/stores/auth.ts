@@ -13,8 +13,8 @@ interface AuthStore {
 }
 
 export const ROLE_NAV_ITEMS: Record<StaffType, string[]> = {
-  headteacher: ['dashboard', 'students', 'staff', 'academics', 'attendance', 'marks', 'wallet', 'tasks', 'transport', 'finance', 'communication', 'reports', 'audit-logs', 'settings'],
-  admin: ['dashboard', 'students', 'staff', 'academics', 'attendance', 'marks', 'wallet', 'tasks', 'transport', 'finance', 'communication', 'reports', 'audit-logs', 'settings'],
+  headteacher: ['dashboard', 'students', 'staff', 'academics', 'attendance', 'marks', 'wallet', 'tasks', 'transport', 'finance', 'communication', 'reports', 'audit-logs', 'terminal', 'settings'],
+  admin: ['dashboard', 'students', 'staff', 'academics', 'attendance', 'marks', 'wallet', 'tasks', 'transport', 'finance', 'communication', 'reports', 'audit-logs', 'terminal', 'settings'],
   accountant: ['dashboard', 'finance', 'tasks', 'communication', 'reports'],
   teaching: ['dashboard', 'students', 'academics', 'attendance', 'marks', 'tasks', 'communication'],
   'non-teaching': ['dashboard', 'tasks', 'communication'],

@@ -11,7 +11,8 @@ import { useStudentStore } from '@/stores/students';
 import { useMarksStore } from '@/stores/marks';
 import { useAuthStore } from '@/stores/auth';
 import { ImportDialog } from '@/components/import-dialog';
-import { Save, Upload } from 'lucide-react';
+import Link from 'next/link';
+import { Save, Upload, Printer } from 'lucide-react';
 
 export default function MarksPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
@@ -77,6 +78,7 @@ export default function MarksPage() {
         </div>
         <div className="flex gap-2">
           <ImportDialog resource="marks" onSuccess={() => window.location.reload()} />
+          <Link href="/marks/print"><Button variant="outline" size="sm"><Printer size={16} className="mr-2" />QR Sheets</Button></Link>
         </div>
       </motion.div>
 
