@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { useStaffStore } from '@/stores/staff';
 import { useAuthStore } from '@/stores/auth';
 import { AddStaffDialog } from '@/components/staff/add-staff-dialog';
+import { ImportDialog } from '@/components/import-dialog';
 import { NewTaskDialog } from '@/components/tasks/new-task-dialog';
 import type { StaffType } from '@/types';
 
@@ -70,7 +71,9 @@ export default function StaffPage() {
           <Button variant="outline" size="sm">
             <Download size={16} className="mr-2" /> Export
           </Button>
-          {currentUser?.staffType === 'headteacher' || currentUser?.staffType === 'admin' ? <AddStaffDialog /> : null}
+          {currentUser?.staffType === 'headteacher' || currentUser?.staffType === 'admin' ? (
+            <><AddStaffDialog /><ImportDialog resource="staff" onSuccess={() => window.location.reload()} /></>
+          ) : null}
         </div>
       </motion.div>
 

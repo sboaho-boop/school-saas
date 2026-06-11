@@ -20,6 +20,8 @@ import {
   Phone,
   MessageCircle,
   Mail,
+  Wallet,
+  Shield,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -39,6 +41,8 @@ const iconMap = {
   MessageSquare,
   BarChart3,
   Settings,
+  Wallet,
+  Shield,
 };
 
 interface SidebarItem {
@@ -55,11 +59,13 @@ const sidebarItems: SidebarItem[] = [
   { id: 'academics', label: 'Academics', icon: 'GraduationCap', href: '/academics' },
   { id: 'attendance', label: 'Attendance', icon: 'ClipboardCheck', href: '/attendance' },
   { id: 'marks', label: 'Marks', icon: 'ClipboardList', href: '/marks' },
+  { id: 'wallet', label: 'Wallet', icon: 'Wallet', href: '/wallet' },
   { id: 'tasks', label: 'Tasks', icon: 'ListChecks', href: '/tasks' },
   { id: 'transport', label: 'Transport', icon: 'Bus', href: '/transport' },
   { id: 'finance', label: 'Finance', icon: 'CreditCard', href: '/finance' },
   { id: 'communication', label: 'Communication', icon: 'MessageSquare', href: '/communication' },
   { id: 'reports', label: 'Reports', icon: 'BarChart3', href: '/reports' },
+  { id: 'audit-logs', label: 'Audit Logs', icon: 'Shield', href: '/audit-logs' },
   { id: 'settings', label: 'Settings', icon: 'Settings', href: '/settings' },
 ];
 

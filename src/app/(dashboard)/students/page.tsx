@@ -26,6 +26,7 @@ import { useState } from 'react';
 import { useStudentStore } from '@/stores/students';
 import { useAuthStore } from '@/stores/auth';
 import { AddStudentDialog } from '@/components/students/add-student-dialog';
+import { ImportDialog } from '@/components/import-dialog';
 
 const statusColors = {
   active: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300',
@@ -68,7 +69,10 @@ export default function StudentsPage() {
         </div>
         <div className="flex gap-2">
           {currentUser?.staffType === 'headteacher' || currentUser?.staffType === 'admin' ? (
-            <AddStudentDialog />
+            <>
+              <AddStudentDialog />
+              <ImportDialog resource="students" onSuccess={() => window.location.reload()} />
+            </>
           ) : null}
           <Button variant="outline" size="sm">
             <Download size={16} className="mr-2" />

@@ -10,7 +10,8 @@ import { useAcademicsStore } from '@/stores/academics';
 import { useStudentStore } from '@/stores/students';
 import { useMarksStore } from '@/stores/marks';
 import { useAuthStore } from '@/stores/auth';
-import { Save } from 'lucide-react';
+import { ImportDialog } from '@/components/import-dialog';
+import { Save, Upload } from 'lucide-react';
 
 export default function MarksPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
@@ -73,6 +74,9 @@ export default function MarksPage() {
         <div>
           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Marks Entry</h1>
           <p className="text-muted-foreground">Enter and manage student scores.</p>
+        </div>
+        <div className="flex gap-2">
+          <ImportDialog resource="marks" onSuccess={() => window.location.reload()} />
         </div>
       </motion.div>
 
