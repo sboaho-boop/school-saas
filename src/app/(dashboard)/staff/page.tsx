@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { Search, Download, MoreHorizontal, BookOpen, Users, ListChecks, Bus } from 'lucide-react';
 import { useState } from 'react';
 import { useStaffStore } from '@/stores/staff';
+import { useAuthStore } from '@/stores/auth';
 import { AddStaffDialog } from '@/components/staff/add-staff-dialog';
 import { NewTaskDialog } from '@/components/tasks/new-task-dialog';
 import type { StaffType } from '@/types';
@@ -24,6 +25,7 @@ const staffTypeConfig: Record<StaffType, { label: string; className: string }> =
 };
 
 export default function StaffPage() {
+  const currentUser = useAuthStore((s) => s.currentUser);
   const staff = useStaffStore((s) => s.staff);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<StaffType | 'all'>('all');
@@ -68,7 +70,7 @@ export default function StaffPage() {
           <Button variant="outline" size="sm">
             <Download size={16} className="mr-2" /> Export
           </Button>
-          <AddStaffDialog />
+          {currentUser?.staffType === 'headteacher' || currentUser?.staffType === 'admin' ? <AddStaffDialog /> : null}
         </div>
       </motion.div>
 

@@ -67,11 +67,13 @@ export default function StudentsPage() {
           <p className="text-muted-foreground">Manage all enrolled students.</p>
         </div>
         <div className="flex gap-2">
+          {currentUser?.staffType === 'headteacher' || currentUser?.staffType === 'admin' ? (
+            <AddStudentDialog />
+          ) : null}
           <Button variant="outline" size="sm">
             <Download size={16} className="mr-2" />
             Export
           </Button>
-          <AddStudentDialog />
         </div>
       </motion.div>
 

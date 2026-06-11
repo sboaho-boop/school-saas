@@ -11,10 +11,12 @@ import { motion } from 'framer-motion';
 import { Plus, GraduationCap, BookOpen, Calendar, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useAcademicsStore } from '@/stores/academics';
+import { useAuthStore } from '@/stores/auth';
 
 const sections = ['Kindergarten', 'Lower Primary', 'Upper Primary', 'Junior High', 'Senior High'];
 
 export default function AcademicsPage() {
+  const currentUser = useAuthStore((s) => s.currentUser);
   const { classes, subjects, terms, addClass, removeClass, addSubject, removeSubject, setActiveTerm } = useAcademicsStore();
   const [classOpen, setClassOpen] = useState(false);
   const [subjectOpen, setSubjectOpen] = useState(false);
@@ -48,6 +50,7 @@ export default function AcademicsPage() {
           <p className="text-muted-foreground">Manage classes, subjects, and grading.</p>
         </div>
         <div className="flex gap-2">
+        {currentUser?.staffType === 'headteacher' || currentUser?.staffType === 'admin' ? (<>
           <Dialog open={subjectOpen} onOpenChange={setSubjectOpen}>
             <DialogTrigger render={<Button variant="outline" size="sm"><BookOpen size={16} className="mr-2" />Add Subject</Button>} />
             <DialogContent>
@@ -108,6 +111,7 @@ export default function AcademicsPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+        </>) : null}
         </div>
       </motion.div>
 
