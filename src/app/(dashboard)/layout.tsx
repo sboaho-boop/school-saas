@@ -1,6 +1,7 @@
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { DataLoader } from '@/components/layout/data-loader';
+import { AuthGuard } from '@/components/layout/auth-guard';
 import { MessageCircle, Phone } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -9,6 +10,7 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
+    <AuthGuard>
     <div className="min-h-screen bg-background">
       <DataLoader />
       <Sidebar />
@@ -35,5 +37,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </a>
       </div>
     </div>
+    </AuthGuard>
   );
 }

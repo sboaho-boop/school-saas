@@ -12,8 +12,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useAuthStore } from '@/stores/auth';
 import { ArrowRight, ArrowLeft, Building, Palette, UserCheck } from 'lucide-react';
 
 const countries = [
@@ -33,6 +35,9 @@ const academicStructures = [
 
 export default function RegisterPage() {
   const router = useRouter();
+  const register = useAuthStore((s) => s.register);
+  const loading = useAuthStore((s) => s.loading);
+  const error = useAuthStore((s) => s.error);
   const [step, setStep] = useState(1);
   const [schoolName, setSchoolName] = useState('');
   const [country, setCountry] = useState('');
@@ -43,8 +48,11 @@ export default function RegisterPage() {
   const [academicStructure, setAcademicStructure] = useState('');
   const [primaryColor, setPrimaryColor] = useState('#6366f1');
 
-  const handleSubmit = () => {
-    router.push('/dashboard');
+  const handleSubmit = async () => {
+    try {
+      await register(email, adminPassword, adminName);
+      router.push('/dashboard');
+    } catch {}
   };
 
   return (
@@ -73,6 +81,7 @@ export default function RegisterPage() {
 
         <Card className="border-border/50 shadow-lg shadow-primary/5">
           <div className="h-1.5 rounded-t-xl bg-gradient-to-r from-primary via-accent to-secondary" />
+          {error && <p className="mx-6 mt-4 px-3 py-2 text-sm text-red-500 bg-red-50 dark:bg-red-950/50 rounded-md">{error}</p>}
           {step === 1 && (
             <>
               <CardHeader>
@@ -257,14 +266,21 @@ export default function RegisterPage() {
                   <Button
                     className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-md shadow-primary/20"
                     onClick={handleSubmit}
-                    disabled={!adminName || adminPassword.length < 8}
+                    disabled={!adminName || adminPassword.length < 8 || loading}
                   >
-                    Complete Setup
+                    {loading ? 'Creating account...' : 'Complete Setup'}
                   </Button>
                 </div>
               </CardContent>
             </>
           )}
+
+          <div className="px-6 pb-6 text-center text-sm">
+            <span className="text-muted-foreground">Already have an account? </span>
+            <Link href="/login" className="font-medium text-primary hover:underline">
+              Sign in
+            </Link>
+          </div>
         </Card>
       </motion.div>
     </div>

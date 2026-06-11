@@ -7,6 +7,7 @@ interface AuthStore {
   loading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
   initialize: () => Promise<void>;
 }
@@ -35,6 +36,18 @@ export const useAuthStore = create<AuthStore>((set) => ({
         currentUser: matched || { id: user.id, name: user.name, email: user.email, role: user.role, phone: '', department: '', staffType: user.role as StaffType, status: 'active', hireDate: '' },
         loading: false,
       });
+    } catch (err: any) {
+      set({ error: err.message, loading: false });
+      throw err;
+    }
+  },
+
+  register: async (email, password, name) => {
+    set({ loading: true, error: null });
+    try {
+      const { user, token } = await api.post<{ user: { id: string; email: string; name: string; role: string }; token: string }>('/auth/register', { email, password, name, role: 'headteacher' });
+      setToken(token);
+      set({ currentUser: { id: user.id, name: user.name, email: user.email, role: user.role, phone: '', department: '', staffType: 'headteacher', status: 'active', hireDate: '' }, loading: false });
     } catch (err: any) {
       set({ error: err.message, loading: false });
       throw err;
