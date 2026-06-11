@@ -21,9 +21,10 @@ import {
 } from '@/components/ui/select';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { motion } from 'framer-motion';
-import { Search, Filter, Download, MoreHorizontal } from 'lucide-react';
+import { Search, Filter, Download, MoreHorizontal, Eye } from 'lucide-react';
 import { useState } from 'react';
 import { useStudentStore } from '@/stores/students';
+import { useAuthStore } from '@/stores/auth';
 import { AddStudentDialog } from '@/components/students/add-student-dialog';
 
 const statusColors = {
@@ -33,6 +34,7 @@ const statusColors = {
 };
 
 export default function StudentsPage() {
+  const currentUser = useAuthStore((s) => s.currentUser);
   const students = useStudentStore((s) => s.students);
   const [searchTerm, setSearchTerm] = useState('');
   const [classFilter, setClassFilter] = useState('all');
@@ -72,6 +74,13 @@ export default function StudentsPage() {
           <AddStudentDialog />
         </div>
       </motion.div>
+
+      {currentUser?.staffType === 'teaching' && currentUser?.assignedClass && (
+        <div className="flex items-center gap-2 rounded-lg bg-primary/5 border border-primary/20 px-4 py-3 text-sm text-primary">
+          <Eye size={16} />
+          You are viewing students in <strong>{currentUser.assignedClass}</strong> — only students assigned to your class are shown.
+        </div>
+      )}
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}

@@ -9,8 +9,10 @@ import { Check, X, Clock, AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAttendanceStore, type AttendanceRecord } from '@/stores/attendance';
 import { useAcademicsStore } from '@/stores/academics';
+import { useAuthStore } from '@/stores/auth';
 
 export default function AttendancePage() {
+  const currentUser = useAuthStore((s) => s.currentUser);
   const { records, markAttendance, markAll, fetchRecords, loading } = useAttendanceStore();
   const classes = useAcademicsStore((s) => s.classes);
   const fetchClasses = useAcademicsStore((s) => s.fetchClasses);
@@ -19,11 +21,15 @@ export default function AttendancePage() {
 
   useEffect(() => { fetchClasses(); }, [fetchClasses]);
 
+  const isTeaching = currentUser?.staffType === 'teaching';
+  const classOptions = isTeaching
+    ? classes.filter((c) => c.name === currentUser?.assignedClass).map((c) => ({ id: c.id, name: c.name }))
+    : classes.map((c) => ({ id: c.id, name: c.name }));
+
   useEffect(() => {
     if (selectedClass) fetchRecords({ classId: selectedClass, date: today });
   }, [selectedClass, fetchRecords, today]);
 
-  const classOptions = classes.map((c) => ({ id: c.id, name: c.name }));
   const activeClass = classOptions.find((c) => c.id === selectedClass);
 
   const classRecords = records.filter((r) => r.classId === selectedClass && r.date === today);
