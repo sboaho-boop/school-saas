@@ -12,13 +12,23 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useThemeStore } from '@/stores/theme';
+import { useBillingStore } from '@/stores/billing';
 import { motion } from 'framer-motion';
-import { Building, Palette, Globe, Bell, Shield, CreditCard } from 'lucide-react';
+import { useEffect } from 'react';
+import { Building, Palette, Globe, Bell, Shield, CreditCard, Check, Sparkles, ExternalLink, XCircle } from 'lucide-react';
 
 export default function SettingsPage() {
   const { theme, setSchoolName, setPrimaryColor, setTheme } = useThemeStore();
+  const { subscription, plans, loading, fetchSubscription, fetchPlans, createCheckoutSession, createPortalSession, cancelSubscription } = useBillingStore();
+
+  useEffect(() => {
+    fetchSubscription();
+    fetchPlans();
+  }, [fetchSubscription, fetchPlans]);
 
   return (
     <div className="space-y-6">
@@ -251,21 +261,123 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="billing" className="mt-6">
+        <TabsContent value="billing" className="mt-6 space-y-6">
           <Card className="border-border/50 shadow-sm">
             <CardHeader>
-              <CardTitle>Subscription</CardTitle>
-              <CardDescription>Manage your plan and billing.</CardDescription>
+              <CardTitle>Current Plan</CardTitle>
+              <CardDescription>Your subscription and usage.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="rounded-lg bg-primary/5 p-4 mb-4">
-                <p className="font-medium">Professional Plan</p>
-                <p className="text-sm text-muted-foreground">GH₵ 299/month • Renews on June 1, 2026</p>
+              {loading && !subscription ? (
+                <p className="text-muted-foreground">Loading...</p>
+              ) : subscription ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-lg font-semibold capitalize">{subscription.planName}</p>
+                      <p className="text-sm text-muted-foreground capitalize">
+                        Status: <Badge variant={subscription.status === 'active' ? 'default' : 'secondary'}>{subscription.status}</Badge>
+                      </p>
+                    </div>
+                    {subscription.plan === 'free' ? (
+                      <Button onClick={() => createCheckoutSession('pro')}>
+                        <Sparkles size={16} className="mr-2" />
+                        Upgrade
+                      </Button>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Button variant="outline" onClick={() => createPortalSession()}>
+                          <ExternalLink size={16} className="mr-2" />
+                          Manage
+                        </Button>
+                        <Button variant="outline" onClick={cancelSubscription}>
+                          <XCircle size={16} className="mr-2" />
+                          Cancel
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Students ({subscription.studentCount}/{subscription.studentLimit})</span>
+                        <span className="text-muted-foreground">{Math.round((subscription.studentCount / subscription.studentLimit) * 100)}%</span>
+                      </div>
+                      <Progress value={Math.min(subscription.studentCount / subscription.studentLimit, 1)} className="h-2" />
+                      </div>
+                      <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Staff ({subscription.staffCount}/{subscription.staffLimit})</span>
+                        <span className="text-muted-foreground">{Math.round((subscription.staffCount / subscription.staffLimit) * 100)}%</span>
+                      </div>
+                      <Progress value={Math.min(subscription.staffCount / subscription.staffLimit, 1)} className="h-2" />
+                    </div>
+                  </div>
+
+                  {subscription.currentPeriodEnd && (
+                    <p className="text-xs text-muted-foreground">
+                      Current period ends: {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">Failed to load subscription.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50 shadow-sm">
+            <CardHeader>
+              <CardTitle>Available Plans</CardTitle>
+              <CardDescription>Choose the plan that fits your school.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-3">
+                {plans.filter(p => p.id !== 'enterprise').map((plan) => (
+                  <div key={plan.id} className={`rounded-lg border p-4 ${subscription?.plan === plan.id ? 'border-primary ring-1 ring-primary' : 'border-border/50'}`}>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="font-semibold capitalize">{plan.name}</p>
+                        <p className="text-2xl font-bold">{plan.amount === 0 ? 'Free' : `$${(plan.amount / 100).toFixed(2)}`}</p>
+                        {plan.amount > 0 && <p className="text-xs text-muted-foreground">per month</p>}
+                      </div>
+                      <ul className="space-y-1.5 text-sm">
+                        <li className="flex items-center gap-2"><Check size={14} className="text-emerald-500" />Up to {plan.studentLimit} students</li>
+                        <li className="flex items-center gap-2"><Check size={14} className="text-emerald-500" />Up to {plan.staffLimit} staff</li>
+                        <li className="flex items-center gap-2"><Check size={14} className="text-emerald-500" />All modules included</li>
+                        {plan.id === 'pro' && <li className="flex items-center gap-2"><Check size={14} className="text-emerald-500" />Priority support</li>}
+                      </ul>
+                      {subscription?.plan === plan.id ? (
+                        <Badge variant="outline" className="w-full justify-center">Current Plan</Badge>
+                      ) : (
+                        <Button
+                          variant={plan.id === 'free' ? 'outline' : 'default'}
+                          className="w-full"
+                          onClick={() => plan.amount === 0 ? null : createCheckoutSession(plan.id)}
+                        >
+                          {plan.amount === 0 ? 'Downgrade' : 'Upgrade'}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline">Change Plan</Button>
-                <Button variant="outline">View Invoices</Button>
-              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50 shadow-sm">
+            <CardHeader>
+              <CardTitle>Need More?</CardTitle>
+              <CardDescription>Contact us for enterprise pricing with unlimited everything.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Enterprise plan includes unlimited students and staff, dedicated support, custom branding, and SLA guarantees.
+              </p>
+              <Button variant="outline" onClick={() => window.open('mailto:sboaho@gmail.com?subject=Enterprise%20Plan%20Inquiry')}>
+                Contact Sales
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>

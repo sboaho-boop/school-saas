@@ -125,36 +125,48 @@ export default function HomePage() {
         </div>
       </nav>
 
-      <section className="container mx-auto px-6 py-24 text-center">
+      <section className="relative flex items-center justify-center overflow-hidden px-6 py-32 text-center">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+          poster="https://images.unsplash.com/photo-1588072432836-e10032774350?w=1920&q=80"
+        >
+          <source src="https://cdn.coverr.co/videos/coverr-students-walking-to-school-5671/1080p.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
+          className="relative z-10"
         >
           <span
-            className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground mb-4"
+            className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/80 backdrop-blur-sm mb-4"
           >
             <Globe size={12} className="mr-1" />
             Built for Africa, Ready for the World
           </span>
-          <h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
+          <h1 className="text-5xl font-bold tracking-tight text-white sm:text-6xl">
             School Management
             <br />
             <span className="text-primary">Made Simple</span>
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80">
             A modern, cloud-based platform that helps schools manage students, staff,
             fees, and academics. Built for schools across Africa and beyond.
           </p>
           <div className="mt-10 flex justify-center gap-4">
             <Link href="/register">
-              <Button size="lg">
+              <Button size="lg" className="bg-white text-foreground hover:bg-white/90">
                 Start Free Trial
                 <ArrowRight size={16} className="ml-2" />
               </Button>
             </Link>
             <Link href="#features">
-              <Button size="lg" variant="outline">
+              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
                 See Features
               </Button>
             </Link>
