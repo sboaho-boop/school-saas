@@ -19,38 +19,44 @@ import {
   Mail,
   MapPin,
   Building2,
+  QrCode,
+  Scan,
+  UsersRound,
+  Import,
+  Shield,
+  Smartphone,
 } from 'lucide-react';
 
 const features = [
   {
-    icon: LayoutDashboard,
-    title: 'Modern Dashboard',
-    description: 'Beautiful analytics and real-time insights for your school.',
-  },
-  {
-    icon: Users,
-    title: 'Student Management',
-    description: 'Complete student lifecycle from enrollment to graduation.',
-  },
-  {
     icon: CreditCard,
-    title: 'Fee Management',
-    description: 'Multi-currency support with automated reminders and receipts.',
+    title: 'Digital Wallet & NFC Tap',
+    description: 'Student wallets with NFC card tap for attendance, canteen, transport, and fee payments.',
   },
   {
-    icon: ClipboardCheck,
-    title: 'Smart Attendance',
-    description: 'Track attendance with real-time alerts and reports.',
+    icon: QrCode,
+    title: 'QR Answer Sheets',
+    description: 'Print QR-coded answer sheets, scan to auto-fill marks — no manual entry needed.',
   },
   {
-    icon: MessageSquare,
-    title: 'Task Management',
-    description: 'Assign, track, and manage school tasks efficiently.',
+    icon: UsersRound,
+    title: 'Parent Portal',
+    description: 'Parents log in to view attendance, marks, wallet balance, and top-up in real time.',
   },
   {
-    icon: BarChart3,
-    title: 'Advanced Reports',
-    description: 'Generate detailed reports for academics, finance, and more.',
+    icon: Scan,
+    title: 'Tablet Tap Terminal',
+    description: 'Full-screen PWA tap terminal for gate, canteen, transport, printing & fees.',
+  },
+  {
+    icon: Import,
+    title: 'CSV Import',
+    description: 'Bulk import students, staff, and marks from spreadsheets with validation.',
+  },
+  {
+    icon: Shield,
+    title: 'Audit Trail',
+    description: 'Complete activity logging for every create, update, and delete action.',
   },
 ];
 
