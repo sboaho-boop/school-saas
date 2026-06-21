@@ -13,13 +13,14 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const init = async () => {
-      const token = getToken();
-      if (!token) {
-        router.replace('/login');
-        return;
-      }
       if (!currentUser) {
         await initialize();
+      }
+      const token = getToken();
+      const hasUser = !!useAuthStore.getState().currentUser;
+      if (!token && !hasUser) {
+        router.replace('/login');
+        return;
       }
       setChecking(false);
     };
@@ -27,7 +28,10 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!checking && !getToken()) {
+    if (checking) return;
+    const token = getToken();
+    const hasUser = !!useAuthStore.getState().currentUser;
+    if (!token && !hasUser) {
       router.replace('/login');
     }
   }, [currentUser, checking, router]);

@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
+import { Logo } from '@/components/logo';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
@@ -44,7 +45,7 @@ function ResetForm() {
         className="w-full max-w-md"
       >
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">EduPlatform</h1>
+          <Logo className="justify-center" />
           <p className="mt-2 text-muted-foreground">Set a new password</p>
         </div>
 

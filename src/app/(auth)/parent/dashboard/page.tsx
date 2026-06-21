@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/logo';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, getToken, setToken } from '@/lib/api';
-import { GraduationCap, Wallet, ArrowLeft, LogOut, Check, X, Clock, AlertCircle, Eye, Plus } from 'lucide-react';
+import { GraduationCap, Wallet, ArrowLeft, LogOut, Check, X, Clock, AlertCircle, Eye, Plus, Lock, Settings, KeyRound } from 'lucide-react';
 
 interface ChildSummary {
   id: string;
@@ -26,6 +27,13 @@ export default function ParentDashboardPage() {
   const [selected, setSelected] = useState<ChildSummary | null>(null);
   const [topUpAmount, setTopUpAmount] = useState('');
   const [loading, setLoading] = useState(true);
+  const [pin, setPin] = useState('');
+  const [pinMsg, setPinMsg] = useState('');
+  const [dailyLimit, setDailyLimit] = useState('');
+  const [limitMsg, setLimitMsg] = useState('');
+  const [studentPassword, setStudentPassword] = useState('');
+  const [passwordMsg, setPasswordMsg] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const token = getToken();
@@ -48,6 +56,38 @@ export default function ParentDashboardPage() {
     fetchChild(selected.id);
   };
 
+  const handleSetPin = async () => {
+    if (!selected || !pin) return;
+    setSaving(true); setPinMsg('');
+    try {
+      await api.put('/parent/wallet/pin', { studentId: selected.id, pin });
+      setPinMsg('PIN set successfully');
+      setPin('');
+    } catch (err: any) { setPinMsg(err.message); }
+    setSaving(false);
+  };
+
+  const handleSetLimit = async () => {
+    if (!selected || dailyLimit === '') return;
+    setSaving(true); setLimitMsg('');
+    try {
+      await api.put('/parent/wallet/daily-limit', { studentId: selected.id, dailyLimit: parseFloat(dailyLimit) });
+      setLimitMsg(`Daily limit set to GHS ${parseFloat(dailyLimit).toFixed(2)}`);
+    } catch (err: any) { setLimitMsg(err.message); }
+    setSaving(false);
+  };
+
+  const handleSetStudentPassword = async () => {
+    if (!selected || !studentPassword) return;
+    setSaving(true); setPasswordMsg('');
+    try {
+      await api.post('/student/set-password', { studentId: selected.id, password: studentPassword });
+      setPasswordMsg('Student login password set');
+      setStudentPassword('');
+    } catch (err: any) { setPasswordMsg(err.message); }
+    setSaving(false);
+  };
+
   const handleLogout = () => { setToken(null); router.push('/parent/login'); };
 
   const statusIcons: Record<string, any> = { present: <Check size={14} />, absent: <X size={14} />, late: <Clock size={14} />, excused: <AlertCircle size={14} /> };
@@ -60,10 +100,13 @@ export default function ParentDashboardPage() {
       <header className="border-b border-border bg-card">
         <div className="max-w-4xl mx-auto flex items-center justify-between px-4 h-14">
           <div className="flex items-center gap-2">
-            <GraduationCap size={18} className="text-primary" />
-            <span className="font-semibold">EduPlatform Parent</span>
+            <Logo iconOnly size="sm" />
+            <span className="font-semibold">Parent Portal</span>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout}><LogOut size={14} className="mr-1" />Sign Out</Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => router.push('/parent/login')}><Lock size={14} className="mr-1" />Change Password</Button>
+            <Button variant="ghost" size="sm" onClick={handleLogout}><LogOut size={14} className="mr-1" />Sign Out</Button>
+          </div>
         </div>
       </header>
 
@@ -109,6 +152,46 @@ export default function ParentDashboardPage() {
                 </CardContent>
               </Card>
             )}
+
+            {selected.wallet && (
+              <Card className="border-border/50 shadow-sm">
+                <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Lock size={16} />Transaction PIN</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-xs text-muted-foreground">Set a 4-6 digit PIN. If the tap amount exceeds the school threshold (GHS 20), the student must enter this PIN to complete payment.</p>
+                  <div className="flex gap-2">
+                    <Input type="password" inputMode="numeric" maxLength={6} placeholder="Enter PIN" value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))} className="font-mono" />
+                    <Button onClick={handleSetPin} disabled={pin.length < 4 || saving} variant="outline">Set PIN</Button>
+                  </div>
+                  {pinMsg && <p className={`text-xs ${pinMsg.includes('successfully') ? 'text-emerald-600' : 'text-red-500'}`}>{pinMsg}</p>}
+                </CardContent>
+              </Card>
+            )}
+
+            {selected.wallet && (
+              <Card className="border-border/50 shadow-sm">
+                <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Settings size={16} />Daily Spend Limit</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-xs text-muted-foreground">Set a daily spending limit for contactless payments. Set to 0 for no limit.</p>
+                  <div className="flex gap-2">
+                    <Input type="number" min="0" step="1" placeholder="Amount in GHS" value={dailyLimit} onChange={(e) => setDailyLimit(e.target.value)} />
+                    <Button onClick={handleSetLimit} disabled={dailyLimit === '' || saving} variant="outline">Save</Button>
+                  </div>
+                  {limitMsg && <p className={`text-xs ${limitMsg.includes('set to') ? 'text-emerald-600' : 'text-red-500'}`}>{limitMsg}</p>}
+                </CardContent>
+              </Card>
+            )}
+
+            <Card className="border-border/50 shadow-sm">
+              <CardHeader><CardTitle className="text-sm flex items-center gap-2"><KeyRound size={16} />Student Login Password</CardTitle></CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-xs text-muted-foreground">Set a password so your child can log in to their own student dashboard using your email.</p>
+                <div className="flex gap-2">
+                  <Input type="password" minLength={6} placeholder="Min 6 characters" value={studentPassword} onChange={(e) => setStudentPassword(e.target.value)} />
+                  <Button onClick={handleSetStudentPassword} disabled={studentPassword.length < 6 || saving} variant="outline">Set</Button>
+                </div>
+                {passwordMsg && <p className={`text-xs ${passwordMsg.includes('set') ? 'text-emerald-600' : 'text-red-500'}`}>{passwordMsg}</p>}
+              </CardContent>
+            </Card>
 
             {selected.attendanceRecs && selected.attendanceRecs.length > 0 && (
               <Card className="border-border/50 shadow-sm">

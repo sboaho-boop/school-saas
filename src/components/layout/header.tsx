@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Search, User, Globe, LogOut } from 'lucide-react';
+import { Bell, Search, User, Globe, LogOut, Menu } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,9 +10,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { useNotificationStore } from '@/stores/notifications';
 import { useAuthStore } from '@/stores/auth';
+import { useThemeStore } from '@/stores/theme';
+import { SidebarNavContent } from '@/components/layout/sidebar';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -35,16 +38,30 @@ const roleLabels: Record<string, string> = {
 export function Header() {
   const { notifications, unreadCount, markAsRead } = useNotificationStore();
   const user = useAuthStore((s) => s.currentUser);
+  const { theme } = useThemeStore();
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/50 bg-gradient-to-r from-background to-muted/80 px-6 backdrop-blur-sm">
-      <div className="relative w-80">
-        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          type="text"
-          placeholder="Search anything..."
-          className="h-10 w-full rounded-lg border border-border bg-muted/50 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
-        />
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/50 bg-gradient-to-r from-background to-muted/80 px-3 sm:px-6 backdrop-blur-sm">
+      <div className="flex items-center gap-2">
+        <Sheet>
+          <SheetTrigger className="lg:hidden rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
+            <Menu size={20} />
+          </SheetTrigger>
+          <SheetContent side="left" className="w-72 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border">
+            <div className="flex h-16 items-center border-b border-sidebar-border px-4">
+              <span className="text-lg font-bold text-sidebar-foreground">{theme.schoolName}</span>
+            </div>
+            <SidebarNavContent />
+          </SheetContent>
+        </Sheet>
+        <div className="relative w-40 sm:w-64 lg:w-80">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search..."
+            className="h-10 w-full rounded-lg border border-border bg-muted/50 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
+          />
+        </div>
       </div>
 
       <div className="flex items-center gap-2">

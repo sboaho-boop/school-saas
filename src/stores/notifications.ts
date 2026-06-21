@@ -1,53 +1,54 @@
 import { create } from 'zustand';
+import { api } from '@/lib/api';
 import type { Notification } from '@/types';
 
 interface NotificationStore {
   notifications: Notification[];
   unreadCount: number;
+  loading: boolean;
+  fetchNotifications: () => Promise<void>;
+  markAsRead: (id: string) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
   addNotification: (notification: Omit<Notification, 'id' | 'read'>) => void;
-  markAsRead: (id: string) => void;
-  markAllAsRead: () => void;
-  removeNotification: (id: string) => void;
 }
 
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    type: 'fee_reminder',
-    title: 'Fee Payment Due',
-    message: '15 students have outstanding fees due this week.',
-    read: false,
-    createdAt: '2026-05-02T10:00:00Z',
-  },
-  {
-    id: '2',
-    type: 'task_deadline',
-    title: 'Task Deadline Approaching',
-    message: 'Staff meeting minutes submission due tomorrow.',
-    read: false,
-    createdAt: '2026-05-02T09:00:00Z',
-  },
-  {
-    id: '3',
-    type: 'attendance_alert',
-    title: 'Low Attendance Alert',
-    message: 'Basic 4 has below 70% attendance this week.',
-    read: true,
-    createdAt: '2026-05-01T14:00:00Z',
-  },
-  {
-    id: '4',
-    type: 'exam_announcement',
-    title: 'Mid-Term Exams Scheduled',
-    message: 'Mid-term exams begin on May 15, 2026.',
-    read: true,
-    createdAt: '2026-05-01T08:00:00Z',
-  },
-];
+export const useNotificationStore = create<NotificationStore>((set, get) => ({
+  notifications: [],
+  unreadCount: 0,
+  loading: false,
 
-export const useNotificationStore = create<NotificationStore>((set) => ({
-  notifications: mockNotifications,
-  unreadCount: mockNotifications.filter((n) => !n.read).length,
+  fetchNotifications: async () => {
+    set({ loading: true });
+    try {
+      const notifications = await api.get<Notification[]>('/notifications');
+      set({ notifications, unreadCount: notifications.filter((n) => !n.read).length, loading: false });
+    } catch {
+      set({ loading: false });
+    }
+  },
+
+  markAsRead: async (id) => {
+    try {
+      await api.put(`/notifications/${id}/read`);
+      set((state) => ({
+        notifications: state.notifications.map((n) =>
+          n.id === id ? { ...n, read: true } : n
+        ),
+        unreadCount: Math.max(0, state.unreadCount - 1),
+      }));
+    } catch {}
+  },
+
+  markAllAsRead: async () => {
+    try {
+      await api.put('/notifications/read-all');
+      set((state) => ({
+        notifications: state.notifications.map((n) => ({ ...n, read: true })),
+        unreadCount: 0,
+      }));
+    } catch {}
+  },
+
   addNotification: (notification) =>
     set((state) => {
       const newNotification = {
@@ -60,21 +61,4 @@ export const useNotificationStore = create<NotificationStore>((set) => ({
         unreadCount: state.unreadCount + 1,
       };
     }),
-  markAsRead: (id) =>
-    set((state) => ({
-      notifications: state.notifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
-      ),
-      unreadCount: state.unreadCount - 1,
-    })),
-  markAllAsRead: () =>
-    set(() => ({
-      notifications: [],
-      unreadCount: 0,
-    })),
-  removeNotification: (id) =>
-    set((state) => ({
-      notifications: state.notifications.filter((n) => n.id !== id),
-      unreadCount: state.unreadCount - (state.notifications.find((n) => n.id === id)?.read ? 0 : 1),
-    })),
 }));

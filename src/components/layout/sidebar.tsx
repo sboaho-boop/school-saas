@@ -23,6 +23,7 @@ import {
   Wallet,
   Shield,
   Scan,
+  Package,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -45,6 +46,7 @@ const iconMap = {
   Wallet,
   Shield,
   Scan,
+  Package,
 };
 
 interface SidebarItem {
@@ -69,22 +71,50 @@ const sidebarItems: SidebarItem[] = [
   { id: 'reports', label: 'Reports', icon: 'BarChart3', href: '/reports' },
   { id: 'audit-logs', label: 'Audit Logs', icon: 'Shield', href: '/audit-logs' },
   { id: 'terminal', label: 'Terminal', icon: 'Scan', href: '/terminal' },
+  { id: 'orders', label: 'Fulfillment', icon: 'Package', href: '/orders/admin' },
   { id: 'settings', label: 'Settings', icon: 'Settings', href: '/settings' },
 ];
 
-export function Sidebar() {
+export function SidebarNavContent({ collapsed = false }: { collapsed?: boolean }) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
-  const { theme } = useThemeStore();
   const user = useAuthStore((s) => s.currentUser);
 
   const allowedIds = user ? ROLE_NAV_ITEMS[user.staffType] : sidebarItems.map((i) => i.id);
   const visibleItems = sidebarItems.filter((item) => allowedIds.includes(item.id));
 
   return (
+    <nav className="flex-1 space-y-1 px-2 py-4">
+      {visibleItems.map((item) => {
+        const Icon = iconMap[item.icon];
+        const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+        return (
+          <Link
+            key={item.id}
+            href={item.href}
+            className={cn(
+              'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
+              isActive
+                ? 'bg-gradient-to-r from-primary to-[oklch(0.6_0.25_220)] text-primary-foreground shadow-sm'
+                : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
+            )}
+          >
+            <Icon size={20} className={cn("shrink-0", isActive ? "text-primary-foreground" : "text-sidebar-foreground/50")} />
+            {!collapsed && <span>{item.label}</span>}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+export function Sidebar() {
+  const [collapsed, setCollapsed] = useState(false);
+  const { theme } = useThemeStore();
+
+  return (
     <aside
       className={cn(
-        'fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border bg-sidebar transition-all duration-300',
+        'fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border bg-sidebar transition-all duration-300 max-lg:hidden',
         collapsed ? 'w-[70px]' : 'w-64'
       )}
     >
@@ -103,29 +133,7 @@ export function Sidebar() {
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 px-2 py-4">
-          {visibleItems.map((item) => {
-            const Icon = iconMap[item.icon];
-            const isActive =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
-
-            return (
-              <Link
-                key={item.id}
-                href={item.href}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
-                  isActive
-                    ? 'bg-gradient-to-r from-primary to-[oklch(0.6_0.25_220)] text-primary-foreground shadow-sm'
-                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
-                )}
-              >
-                <Icon size={20} className={cn("shrink-0", isActive ? "text-primary-foreground" : "text-sidebar-foreground/50")} />
-                {!collapsed && <span>{item.label}</span>}
-              </Link>
-            );
-          })}
-        </nav>
+        <SidebarNavContent collapsed={collapsed} />
 
         {!collapsed && (
           <div className="border-t border-sidebar-border p-4">

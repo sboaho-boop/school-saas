@@ -7,8 +7,8 @@ export interface SubscriptionInfo {
   status: string;
   studentLimit: number;
   staffLimit: number;
-  stripeCustomerId: string | null;
-  stripeSubscriptionId: string | null;
+  pendingPlan: string | null;
+  pendingCheckoutRef: string | null;
   currentPeriodStart: string | null;
   currentPeriodEnd: string | null;
   trialEndsAt: string | null;
@@ -31,11 +31,11 @@ interface BillingStore {
   plans: Plan[];
   loading: boolean;
   error: string | null;
+  hubtelLoading: boolean;
   fetchSubscription: () => Promise<void>;
   fetchPlans: () => Promise<void>;
-  createCheckoutSession: (plan: string) => Promise<string | null>;
+  upgradePlan: (plan: string) => Promise<void>;
   cancelSubscription: () => Promise<void>;
-  createPortalSession: () => Promise<string | null>;
 }
 
 export const useBillingStore = create<BillingStore>((set) => ({
@@ -43,6 +43,7 @@ export const useBillingStore = create<BillingStore>((set) => ({
   plans: [],
   loading: false,
   error: null,
+  hubtelLoading: false,
 
   fetchSubscription: async () => {
     set({ loading: true, error: null });
@@ -61,13 +62,17 @@ export const useBillingStore = create<BillingStore>((set) => ({
     } catch {}
   },
 
-  createCheckoutSession: async (plan) => {
+  upgradePlan: async (plan) => {
+    set({ hubtelLoading: true, error: null });
     try {
-      const { url } = await api.post<{ url: string }>('/billing/create-checkout-session', { plan });
-      return url;
+      const res = await api.post<{ checkoutUrl?: string; message?: string; reference?: string }>('/billing/upgrade', { plan });
+      if (res.checkoutUrl) {
+        window.location.href = res.checkoutUrl;
+        return;
+      }
+      await set({ subscription: null, hubtelLoading: false });
     } catch (err: any) {
-      set({ error: err.message });
-      return null;
+      set({ error: err.message, hubtelLoading: false });
     }
   },
 
@@ -77,15 +82,6 @@ export const useBillingStore = create<BillingStore>((set) => ({
       await set({ subscription: null });
     } catch (err: any) {
       set({ error: err.message });
-    }
-  },
-
-  createPortalSession: async () => {
-    try {
-      const { url } = await api.post<{ url: string }>('/billing/create-portal-session');
-      return url;
-    } catch {
-      return null;
     }
   },
 }));

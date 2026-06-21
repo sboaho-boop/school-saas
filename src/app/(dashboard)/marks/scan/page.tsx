@@ -16,6 +16,7 @@ function ScanContent() {
   const studentId = searchParams.get('studentId') || '';
   const subjectId = searchParams.get('subjectId') || '';
   const termId = searchParams.get('termId') || '';
+  const classId = searchParams.get('classId') || '';
   const studentName = searchParams.get('studentName') || '';
   const className = searchParams.get('className') || '';
 
@@ -24,6 +25,7 @@ function ScanContent() {
   const [manualStudentId, setManualStudentId] = useState('');
   const [manualSubjectId, setManualSubjectId] = useState('');
   const [manualTermId, setManualTermId] = useState('');
+  const [manualClassId, setManualClassId] = useState('');
 
   const hasQrData = studentId && subjectId && termId;
 
@@ -33,10 +35,11 @@ function ScanContent() {
     await saveGrade({
       studentId: studentId || manualStudentId,
       subjectId: subjectId || manualSubjectId,
-      classId: '',
+      classId: classId || manualClassId,
       termId: termId || manualTermId,
       score: s,
       grade: '',
+      components: '{}',
       remarks: '',
     });
     setSaved(true);
@@ -96,6 +99,7 @@ function ScanContent() {
             <p className="text-sm text-muted-foreground">No QR data detected. Enter details manually:</p>
             <Input placeholder="Student ID" value={manualStudentId} onChange={(e) => setManualStudentId(e.target.value)} />
             <Input placeholder="Subject ID" value={manualSubjectId} onChange={(e) => setManualSubjectId(e.target.value)} />
+            <Input placeholder="Class ID" value={manualClassId} onChange={(e) => setManualClassId(e.target.value)} />
             <Input placeholder="Term ID" value={manualTermId} onChange={(e) => setManualTermId(e.target.value)} />
             <Input type="number" step="0.5" placeholder="Score" value={score} onChange={(e) => setScore(e.target.value)} />
             <Button className="w-full" onClick={handleSave} disabled={!score || saved}>

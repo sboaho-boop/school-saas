@@ -30,6 +30,7 @@ export function AddStudentDialog() {
   const [parentName, setParentName] = useState('');
   const [parentPhone, setParentPhone] = useState('');
   const [parentEmail, setParentEmail] = useState('');
+  const [photoUrl, setPhotoUrl] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +43,7 @@ export function AddStudentDialog() {
       className,
       dateOfBirth,
       gender,
+      photoUrl: photoUrl || undefined,
       parentName,
       parentPhone,
       parentEmail,
@@ -58,6 +60,7 @@ export function AddStudentDialog() {
     setParentName('');
     setParentPhone('');
     setParentEmail('');
+    setPhotoUrl('');
   };
 
   return (
@@ -129,6 +132,10 @@ export function AddStudentDialog() {
                 <Label htmlFor="parentEmail">Parent Email</Label>
                 <Input id="parentEmail" type="email" value={parentEmail} onChange={(e) => setParentEmail(e.target.value)} />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="photoUrl">Photo URL (optional)</Label>
+              <Input id="photoUrl" value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)} placeholder="https://example.com/student-photo.jpg" />
             </div>
           </div>
           <DialogFooter>

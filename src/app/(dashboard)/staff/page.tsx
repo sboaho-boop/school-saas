@@ -7,11 +7,13 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { motion } from 'framer-motion';
-import { Search, Download, MoreHorizontal, BookOpen, Users, ListChecks, Bus } from 'lucide-react';
-import { useState } from 'react';
+import { Search, Download, MoreHorizontal, BookOpen, Users, ListChecks, Bus, School, CreditCard, Hand } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useStaffStore } from '@/stores/staff';
 import { useAuthStore } from '@/stores/auth';
+import { api } from '@/lib/api';
 import { AddStaffDialog } from '@/components/staff/add-staff-dialog';
 import { ImportDialog } from '@/components/import-dialog';
 import { NewTaskDialog } from '@/components/tasks/new-task-dialog';
@@ -30,7 +32,34 @@ export default function StaffPage() {
   const staff = useStaffStore((s) => s.staff);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<StaffType | 'all'>('all');
+  const [campusFilter, setCampusFilter] = useState<string>('all');
+  const [campuses, setCampuses] = useState<any[]>([]);
   const [taskAssignee, setTaskAssignee] = useState<string | null>(null);
+  const [genMsg, setGenMsg] = useState<Record<string, string>>({});
+  const [wristbandInput, setWristbandInput] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    import('@/lib/api').then(({ api }) => api.get<any[]>('/campus').then(setCampuses).catch(() => {}));
+  }, []);
+
+  const handleGenerateCard = async (staffId: string) => {
+    try {
+      const { cardUid } = await api.post<{ cardUid: string }>('/staff/generate-card', { staffId });
+      setGenMsg((p) => ({ ...p, [staffId]: `Card: ${cardUid}` }));
+      setTimeout(() => setGenMsg((p) => { const c = { ...p }; delete c[staffId]; return c; }), 5000);
+      useStaffStore.getState().fetchStaff();
+    } catch {}
+  };
+
+  const handleLinkWristband = async (staffId: string) => {
+    const uid = wristbandInput[staffId];
+    if (!uid) return;
+    try {
+      await api.post('/staff/link-wristband', { staffId, wristbandUid: uid });
+      setWristbandInput((p) => { const c = { ...p }; delete c[staffId]; return c; });
+      useStaffStore.getState().fetchStaff();
+    } catch {}
+  };
 
   const filteredStaff = staff.filter((member) => {
     const query = searchTerm.toLowerCase();
@@ -40,7 +69,8 @@ export default function StaffPage() {
       member.role.toLowerCase().includes(query) ||
       member.department.toLowerCase().includes(query);
     const matchesType = typeFilter === 'all' || member.staffType === typeFilter;
-    return matchesSearch && matchesType;
+    const matchesCampus = campusFilter === 'all' || member.campusId === campusFilter || (!member.campusId && campusFilter === 'none');
+    return matchesSearch && matchesType && matchesCampus;
   });
 
   const getInitials = (name: string) =>
@@ -78,6 +108,7 @@ export default function StaffPage() {
       </motion.div>
 
       <Tabs value={typeFilter} onValueChange={(v) => v && setTypeFilter(v as StaffType | 'all')}>
+        <div className="overflow-x-auto pb-1">
         <TabsList>
           <TabsTrigger value="all">All ({counts.all})</TabsTrigger>
           <TabsTrigger value="teaching">Teaching ({counts.teaching})</TabsTrigger>
@@ -86,6 +117,7 @@ export default function StaffPage() {
           <TabsTrigger value="accountant">Accountant ({counts.accountant})</TabsTrigger>
           <TabsTrigger value="non-teaching">Non-Teaching ({counts['non-teaching']})</TabsTrigger>
         </TabsList>
+        </div>
 
         <TabsContent value={typeFilter} className="mt-6">
           <motion.div
@@ -95,14 +127,28 @@ export default function StaffPage() {
           >
             <Card className="border-border/50 shadow-sm mb-6">
               <CardContent className="p-4">
-                <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Search staff..."
-                    className="pl-10"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
+                <div className="flex flex-wrap gap-3">
+                  <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Search staff..."
+                      className="pl-10"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  {campuses.length > 0 && (
+                    <Select value={campusFilter} onValueChange={(v) => v && setCampusFilter(v)}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="All campuses" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Campuses</SelectItem>
+                        <SelectItem value="none">No Campus</SelectItem>
+                        {campuses.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -134,6 +180,17 @@ export default function StaffPage() {
                           <DropdownMenuItem onClick={() => setTaskAssignee(member.name)}>
                             <ListChecks size={14} className="mr-2" />
                             Assign Task
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleGenerateCard(member.id)}>
+                            <CreditCard size={14} className="mr-2" />
+                            {member.cardUid ? 'Regenerate Card' : 'Generate Card'}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => {
+                            const uid = prompt('Enter wristband UID:');
+                            if (uid) api.post('/staff/link-wristband', { staffId: member.id, wristbandUid: uid }).then(() => useStaffStore.getState().fetchStaff());
+                          }}>
+                            <Hand size={14} className="mr-2" />
+                            Link Wristband
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -168,10 +225,28 @@ export default function StaffPage() {
                         <span>Bus: <strong>{member.assignedRouteName}</strong></span>
                       </div>
                     )}
+                    {member.cardUid && (
+                      <div className="mt-2 flex items-center gap-2 text-sm">
+                        <CreditCard size={14} className="text-emerald-600" />
+                        <span className="font-mono text-xs">{member.cardUid}</span>
+                      </div>
+                    )}
+                    {member.wristbandUid && (
+                      <div className="mt-1 flex items-center gap-2 text-sm">
+                        <Hand size={14} className="text-sky-600" />
+                        <span className="font-mono text-xs">{member.wristbandUid}</span>
+                      </div>
+                    )}
+                    {genMsg[member.id] && (
+                      <div className="mt-2 rounded bg-emerald-500/10 p-2 text-xs text-center font-mono text-emerald-600">
+                        {genMsg[member.id]}
+                      </div>
+                    )}
                     <div className="mt-3 space-y-1 text-sm">
                       <p className="text-muted-foreground">{member.department}</p>
                       <p className="text-muted-foreground">{member.email}</p>
                       <p className="text-muted-foreground">{member.phone}</p>
+                      {member.campusName && <p className="text-muted-foreground flex items-center gap-1"><School size={12} />{member.campusName}</p>}
                     </div>
                   </CardContent>
                 </Card>

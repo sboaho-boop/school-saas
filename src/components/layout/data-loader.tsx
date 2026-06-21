@@ -8,6 +8,7 @@ import { useFinanceStore } from '@/stores/finance';
 import { useTransportStore } from '@/stores/transport';
 import { useTaskStore } from '@/stores/tasks';
 import { useAcademicsStore } from '@/stores/academics';
+import { useNotificationStore } from '@/stores/notifications';
 
 export function DataLoader() {
   const currentUser = useAuthStore((s) => s.currentUser);
@@ -20,6 +21,7 @@ export function DataLoader() {
   const fetchClasses = useAcademicsStore((s) => s.fetchClasses);
   const fetchSubjects = useAcademicsStore((s) => s.fetchSubjects);
   const fetchTerms = useAcademicsStore((s) => s.fetchTerms);
+  const fetchNotifications = useNotificationStore((s) => s.fetchNotifications);
 
   useEffect(() => {
     initialize();
@@ -35,7 +37,8 @@ export function DataLoader() {
     fetchClasses();
     fetchSubjects();
     fetchTerms();
-  }, [currentUser, fetchStudents, fetchStaff, fetchRecords, fetchRoutes, fetchTasks, fetchClasses, fetchSubjects, fetchTerms]);
+    fetchNotifications();
+  }, [currentUser, fetchStudents, fetchStaff, fetchRecords, fetchRoutes, fetchTasks, fetchClasses, fetchSubjects, fetchTerms, fetchNotifications]);
 
   return null;
 }

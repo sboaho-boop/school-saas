@@ -2,6 +2,7 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { DataLoader } from '@/components/layout/data-loader';
 import { AuthGuard } from '@/components/layout/auth-guard';
+import { PushSetup } from '@/components/layout/push-setup';
 import { MessageCircle, Phone } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -11,12 +12,13 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <AuthGuard>
+    <PushSetup />
     <div className="min-h-screen bg-background">
       <DataLoader />
       <Sidebar />
-      <div className="ml-64 transition-all duration-300">
+      <div className="lg:ml-64 transition-all duration-300">
         <Header />
-        <main className="p-6">{children}</main>
+        <main className="p-4 sm:p-6">{children}</main>
       </div>
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2">
         <a

@@ -1,6 +1,10 @@
 import { create } from 'zustand';
 import { api } from '@/lib/api';
 
+export const COMPONENT_NAMES = ['classExercise', 'homework', 'quiz', 'midterm', 'exam'] as const;
+export const COMPONENT_LABELS: Record<string, string> = { classExercise: 'Class Ex', homework: 'Hwk', quiz: 'Quiz', midterm: 'Mid-Term', exam: 'Exam' };
+export const COMPONENT_MAX: Record<string, number> = { classExercise: 10, homework: 10, quiz: 30, midterm: 20, exam: 30 };
+
 export interface Grade {
   id: string;
   studentId: string;
@@ -9,6 +13,7 @@ export interface Grade {
   termId: string;
   score: number;
   grade: string;
+  components: string;
   remarks: string;
 }
 

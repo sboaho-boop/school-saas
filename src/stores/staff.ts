@@ -7,7 +7,7 @@ interface StaffStore {
   loading: boolean;
   error: string | null;
   fetchStaff: () => Promise<void>;
-  addStaff: (member: Omit<Staff, 'id'>) => Promise<void>;
+  addStaff: (member: Omit<Staff, 'id'>) => Promise<any>;
   updateStaff: (id: string, updates: Partial<Staff>) => Promise<void>;
   removeStaff: (id: string) => Promise<void>;
 }

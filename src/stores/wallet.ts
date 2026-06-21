@@ -8,6 +8,11 @@ export interface WalletInfo {
   balance: number;
   totalSpent: number;
   cardUid: string | null;
+  wristbandUid: string | null;
+  transactionPin: string | null;
+  dailyLimit: number;
+  todaySpent: number;
+  lastSpentReset: string;
   frozen: boolean;
   student?: any;
   transactions?: any[];
@@ -24,7 +29,12 @@ interface WalletStore {
   freezeCard: (studentId: string) => Promise<void>;
   unfreezeCard: (studentId: string) => Promise<void>;
   linkCard: (studentId: string, cardUid: string) => Promise<void>;
-  tapCard: (cardUid: string, service: string, amount?: number, terminalId?: string) => Promise<any>;
+  linkWristband: (studentId: string, wristbandUid: string) => Promise<void>;
+  generateCard: (studentId: string) => Promise<{ cardUid: string }>;
+  setPin: (studentId: string, pin: string) => Promise<void>;
+  setDailyLimit: (studentId: string, dailyLimit: number) => Promise<void>;
+  tapCard: (uid: string, service: string, amount?: number, terminalId?: string) => Promise<any>;
+  tapConfirm: (tapToken: string, pin: string) => Promise<any>;
 }
 
 export const useWalletStore = create<WalletStore>((set) => ({
@@ -71,7 +81,30 @@ export const useWalletStore = create<WalletStore>((set) => ({
     await set({});
   },
 
-  tapCard: async (cardUid, service, amount, terminalId) => {
-    return api.post('/wallet/tap', { cardUid, service, amount, terminalId });
+  linkWristband: async (studentId, wristbandUid) => {
+    await api.post('/wallet/link-wristband', { studentId, wristbandUid });
+    await set({});
+  },
+
+  generateCard: async (studentId) => {
+    const res = await api.post<{ cardUid: string }>('/wallet/generate-card', { studentId });
+    await set({});
+    return res;
+  },
+
+  setPin: async (studentId, pin) => {
+    await api.put('/wallet/pin', { studentId, pin });
+  },
+
+  setDailyLimit: async (studentId, dailyLimit) => {
+    await api.put('/wallet/daily-limit', { studentId, dailyLimit });
+  },
+
+  tapCard: async (uid, service, amount, terminalId) => {
+    return api.post('/wallet/tap', { uid, service, amount, terminalId });
+  },
+
+  tapConfirm: async (tapToken, pin) => {
+    return api.post('/wallet/tap/confirm', { tapToken, pin });
   },
 }));

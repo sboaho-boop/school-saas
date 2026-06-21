@@ -91,7 +91,7 @@ export default function PrintMarksPage() {
         {selectedClass && selectedSubject && termId ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {classStudents.map((student) => {
-              const scanUrl = `${BASE}/marks/scan?studentId=${student.id}&subjectId=${selectedSubject}&termId=${termId}&studentName=${encodeURIComponent(student.firstName + ' ' + student.lastName)}&className=${encodeURIComponent(student.className)}`;
+              const scanUrl = `${BASE}/marks/scan?studentId=${student.id}&subjectId=${selectedSubject}&termId=${termId}&classId=${selectedClass}&studentName=${encodeURIComponent(student.firstName + ' ' + student.lastName)}&className=${encodeURIComponent(student.className)}`;
               return (
                 <div key={student.id} className="border border-border/50 rounded-lg p-3 text-center print:border-gray-300 print:shadow-none break-inside-avoid">
                   <img

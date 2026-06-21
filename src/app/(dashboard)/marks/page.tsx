@@ -4,15 +4,29 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useAcademicsStore } from '@/stores/academics';
 import { useStudentStore } from '@/stores/students';
-import { useMarksStore } from '@/stores/marks';
+import { useMarksStore, COMPONENT_NAMES, COMPONENT_LABELS, COMPONENT_MAX, Grade } from '@/stores/marks';
 import { useAuthStore } from '@/stores/auth';
 import { ImportDialog } from '@/components/import-dialog';
 import Link from 'next/link';
-import { Save, Upload, Printer } from 'lucide-react';
+import { Save, Printer, FileText } from 'lucide-react';
+
+function calcTotal(components: Record<string, string>): number {
+  return COMPONENT_NAMES.reduce((sum, name) => sum + (parseFloat(components[name]) || 0), 0);
+}
+
+function scoreToGrade(total: number): string {
+  if (total >= 80) return 'A';
+  if (total >= 70) return 'B';
+  if (total >= 60) return 'C';
+  if (total >= 50) return 'D';
+  if (total >= 40) return 'E';
+  return 'F';
+}
 
 export default function MarksPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
@@ -20,13 +34,16 @@ export default function MarksPage() {
   const fetchClasses = useAcademicsStore((s) => s.fetchClasses);
   const subjects = useAcademicsStore((s) => s.subjects);
   const fetchSubjects = useAcademicsStore((s) => s.fetchSubjects);
+  const terms = useAcademicsStore((s) => s.terms);
+  const fetchTerms = useAcademicsStore((s) => s.fetchTerms);
   const students = useStudentStore((s) => s.students);
   const fetchStudents = useStudentStore((s) => s.fetchStudents);
   const { grades, fetchGrades, saveGrade, loading } = useMarksStore();
 
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
-  const [scores, setScores] = useState<Record<string, string>>({});
+  const [selectedTerm, setSelectedTerm] = useState('');
+  const [components, setComponents] = useState<Record<string, Record<string, string>>>({});
 
   const isTeaching = currentUser?.staffType === 'teaching';
   const availableClasses = isTeaching
@@ -37,48 +54,73 @@ export default function MarksPage() {
     fetchClasses();
     fetchSubjects();
     fetchStudents();
-  }, [fetchClasses, fetchSubjects, fetchStudents]);
+    fetchTerms();
+  }, [fetchClasses, fetchSubjects, fetchStudents, fetchTerms]);
 
   useEffect(() => {
-    if (selectedClass && selectedSubject) {
-      fetchGrades({ classId: selectedClass, subjectId: selectedSubject });
+    if (terms.length > 0 && !selectedTerm) {
+      const active = terms.find((t) => t.isActive);
+      if (active) setSelectedTerm(active.id);
+      else setSelectedTerm(terms[0].id);
     }
-  }, [selectedClass, selectedSubject, fetchGrades]);
+  }, [terms, selectedTerm]);
+
+  useEffect(() => {
+    if (selectedClass && selectedSubject && selectedTerm) {
+      fetchGrades({ classId: selectedClass, subjectId: selectedSubject, termId: selectedTerm });
+    }
+  }, [selectedClass, selectedSubject, selectedTerm, fetchGrades]);
 
   useEffect(() => {
     if (grades.length > 0) {
-      const map: Record<string, string> = {};
-      grades.forEach((g) => { map[g.studentId] = String(g.score); });
-      setScores((prev) => ({ ...prev, ...map }));
+      const map: Record<string, Record<string, string>> = {};
+      grades.forEach((g) => {
+        let comps: Record<string, string> = {};
+        try { comps = JSON.parse(g.components || '{}'); } catch { comps = {}; }
+        map[g.studentId] = comps;
+      });
+      setComponents((prev) => ({ ...prev, ...map }));
     }
   }, [grades]);
 
   const classStudents = students.filter((s) => s.classId === selectedClass);
 
   const handleSave = async (studentId: string) => {
-    const score = parseFloat(scores[studentId]);
-    if (isNaN(score)) return;
+    const studentComps = components[studentId] || {};
+    const hasAny = COMPONENT_NAMES.some((n) => studentComps[n] && studentComps[n] !== '');
+    if (!hasAny) return;
     await saveGrade({
       studentId,
       subjectId: selectedSubject,
       classId: selectedClass,
-      termId: '',
-      score,
+      termId: selectedTerm,
+      score: 0,
       grade: '',
+      components: JSON.stringify(studentComps),
       remarks: '',
     });
+  };
+
+  const updateComponent = (studentId: string, compName: string, value: string) => {
+    setComponents((prev) => ({
+      ...prev,
+      [studentId]: { ...(prev[studentId] || {}), [compName]: value },
+    }));
   };
 
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="flex items-center justify-between rounded-xl bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Marks Entry</h1>
-          <p className="text-muted-foreground">Enter and manage student scores.</p>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Continuous Assessment</h1>
+          <p className="text-muted-foreground">Enter component scores. Total and grade auto-calculate.</p>
         </div>
         <div className="flex gap-2">
           <ImportDialog resource="marks" onSuccess={() => window.location.reload()} />
           <Link href="/marks/print"><Button variant="outline" size="sm"><Printer size={16} className="mr-2" />QR Sheets</Button></Link>
+          {selectedTerm && selectedClass && (
+            <Link href={`/reports?classId=${selectedClass}&termId=${selectedTerm}`}><Button variant="outline" size="sm"><FileText size={16} className="mr-2" />Report Cards</Button></Link>
+          )}
         </div>
       </motion.div>
 
@@ -97,38 +139,66 @@ export default function MarksPage() {
             ))}
           </SelectContent>
         </Select>
+        <Select value={selectedTerm} onValueChange={(v) => v && setSelectedTerm(v)}>
+          <SelectTrigger className="w-[180px]"><SelectValue placeholder="Select term" /></SelectTrigger>
+          <SelectContent>
+            {terms.map((t) => (
+              <SelectItem key={t.id} value={t.id}>{t.name} {t.academicYear} {t.isActive ? '(Active)' : ''}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      {selectedClass && selectedSubject && (
+      {selectedClass && selectedSubject && selectedTerm && (
         <Card className="border-border/50 shadow-sm">
-          <CardHeader><CardTitle className="text-base font-medium">Score Entry</CardTitle></CardHeader>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-medium">Score Entry</CardTitle>
+              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                {COMPONENT_NAMES.map((n) => (
+                  <span key={n}>{COMPONENT_LABELS[n]}/{COMPONENT_MAX[n]}</span>
+                ))}
+                <span className="font-semibold text-foreground">Total/100</span>
+                <span className="font-semibold text-foreground">Grade</span>
+              </div>
+            </div>
+          </CardHeader>
           <CardContent>
             {classStudents.length === 0 ? (
               <p className="text-sm text-muted-foreground">No students in this class.</p>
             ) : (
               <div className="divide-y divide-border/50">
-                {classStudents.map((student) => (
-                  <div key={student.id} className="flex items-center justify-between py-3">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{student.firstName} {student.lastName}</p>
-                      <p className="text-xs text-muted-foreground">{student.className}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        className="w-20 text-center"
-                        placeholder="Score"
-                        value={scores[student.id] ?? ''}
-                        onChange={(e) => setScores((prev) => ({ ...prev, [student.id]: e.target.value }))}
-                      />
-                      <Button size="sm" variant="outline" onClick={() => handleSave(student.id)} disabled={loading}>
+                {classStudents.map((student) => {
+                  const comps = components[student.id] || {};
+                  const total = calcTotal(comps);
+                  const grade = total > 0 ? scoreToGrade(total) : '-';
+                  return (
+                    <div key={student.id} className="flex items-center gap-2 py-2">
+                      <div className="w-44 shrink-0">
+                        <p className="text-sm font-medium truncate">{student.firstName} {student.lastName}</p>
+                      </div>
+                      {COMPONENT_NAMES.map((name) => (
+                        <Input
+                          key={name}
+                          type="number"
+                          min="0"
+                          max={COMPONENT_MAX[name]}
+                          className="w-16 text-center text-xs h-8"
+                          placeholder="0"
+                          value={comps[name] ?? ''}
+                          onChange={(e) => updateComponent(student.id, name, e.target.value)}
+                        />
+                      ))}
+                      <div className="w-12 text-center text-sm font-bold">{total > 0 ? total : '-'}</div>
+                      <div className="w-8 text-center">
+                        {total > 0 && <Badge variant={grade === 'F' ? 'destructive' : grade === 'A' ? 'default' : 'secondary'} className="text-xs">{grade}</Badge>}
+                      </div>
+                      <Button size="sm" variant="ghost" className="h-8 w-8 shrink-0" onClick={() => handleSave(student.id)} disabled={loading}>
                         <Save size={14} />
                       </Button>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>

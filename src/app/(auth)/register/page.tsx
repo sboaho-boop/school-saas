@@ -12,11 +12,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { motion } from 'framer-motion';
+import { Logo } from '@/components/logo';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/auth';
-import { ArrowRight, ArrowLeft, Building, Palette, UserCheck } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Building, Palette, UserCheck, Shield } from 'lucide-react';
 
 const countries = [
   { value: 'GH', label: 'Ghana', currency: 'GHS' },
@@ -47,10 +48,11 @@ export default function RegisterPage() {
   const [adminPassword, setAdminPassword] = useState('');
   const [academicStructure, setAcademicStructure] = useState('');
   const [primaryColor, setPrimaryColor] = useState('#6366f1');
+  const [privacyConsent, setPrivacyConsent] = useState(false);
 
   const handleSubmit = async () => {
     try {
-      await register(email, adminPassword, adminName);
+      await register(email, adminPassword, adminName, phone, { privacyConsent: true });
       router.push('/dashboard');
     } catch {}
   };
@@ -64,7 +66,7 @@ export default function RegisterPage() {
         className="w-full max-w-lg"
       >
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">EduPlatform</h1>
+          <Logo className="justify-center" />
           <p className="mt-2 text-muted-foreground">Set up your school in minutes</p>
         </div>
 
@@ -254,6 +256,24 @@ export default function RegisterPage() {
                     onChange={(e) => setAdminPassword(e.target.value)}
                   />
                 </div>
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                  <Shield size={16} className="mt-0.5 shrink-0 text-muted-foreground" />
+                  <div>
+                    <label className="text-xs leading-relaxed text-muted-foreground cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={privacyConsent}
+                        onChange={(e) => setPrivacyConsent(e.target.checked)}
+                        className="mr-2 size-4 accent-primary align-text-top"
+                      />
+                      I have read and agree to the{' '}
+                      <Link href="/privacy" className="text-primary hover:underline" target="_blank">
+                        Privacy Policy
+                      </Link>
+                      . I consent to the collection and processing of my personal data in accordance with the Data Protection Act 2012 (Act 843) of Ghana.
+                    </label>
+                  </div>
+                </div>
                 <div className="flex gap-3">
                   <Button
                     variant="outline"
@@ -266,7 +286,7 @@ export default function RegisterPage() {
                   <Button
                     className="flex-1 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-md shadow-primary/20"
                     onClick={handleSubmit}
-                    disabled={!adminName || adminPassword.length < 8 || loading}
+                    disabled={!adminName || adminPassword.length < 8 || !privacyConsent || loading}
                   >
                     {loading ? 'Creating account...' : 'Complete Setup'}
                   </Button>

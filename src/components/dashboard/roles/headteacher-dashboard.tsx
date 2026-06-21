@@ -5,7 +5,7 @@ import { EnrollmentChart, AttendanceChart, FeeCollectionChart, ClassDistribution
 import { RecentActivity } from '@/components/dashboard/recent-activity';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Download, Filter, Users, UserCog, CreditCard, ClipboardCheck } from 'lucide-react';
+import { Plus, Download, Filter, Users, UserCog, CreditCard, ClipboardCheck, Building2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useStaffStore } from '@/stores/staff';
 import { useStudentStore } from '@/stores/students';
@@ -44,7 +44,7 @@ export function HeadteacherDashboard() {
           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Dashboard</h1>
           <p className="text-muted-foreground">School overview at a glance.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap justify-end">
           <Button variant="outline" size="sm"><Filter size={16} className="mr-2" />Filter</Button>
           <Button variant="outline" size="sm"><Download size={16} className="mr-2" />Export</Button>
           <Button size="sm"><Plus size={16} className="mr-2" />New Student</Button>
@@ -52,6 +52,30 @@ export function HeadteacherDashboard() {
       </motion.div>
 
       <DashboardStatsGrid stats={stats} />
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="border-dashed border-2 hover:border-indigo-500/50 transition-colors cursor-pointer" onClick={() => window.location.href = '/register'}>
+          <CardContent className="flex flex-col items-center justify-center py-6 gap-2">
+            <div className="flex size-12 items-center justify-center rounded-full bg-indigo-500/10"><Building2 size={24} className="text-indigo-500" /></div>
+            <p className="font-medium text-sm">Register New School</p>
+            <p className="text-xs text-muted-foreground text-center">Create another school account</p>
+          </CardContent>
+        </Card>
+        <Card className="border-dashed border-2 hover:border-emerald-500/50 transition-colors cursor-pointer" onClick={() => window.location.href = '/students'}>
+          <CardContent className="flex flex-col items-center justify-center py-6 gap-2">
+            <div className="flex size-12 items-center justify-center rounded-full bg-emerald-500/10"><Users size={24} className="text-emerald-500" /></div>
+            <p className="font-medium text-sm">Add Students</p>
+            <p className="text-xs text-muted-foreground text-center">Enroll new students</p>
+          </CardContent>
+        </Card>
+        <Card className="border-dashed border-2 hover:border-amber-500/50 transition-colors cursor-pointer" onClick={() => window.location.href = '/staff'}>
+          <CardContent className="flex flex-col items-center justify-center py-6 gap-2">
+            <div className="flex size-12 items-center justify-center rounded-full bg-amber-500/10"><UserCog size={24} className="text-amber-500" /></div>
+            <p className="font-medium text-sm">Add Staff</p>
+            <p className="text-xs text-muted-foreground text-center">Hire new staff members</p>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <EnrollmentChart />

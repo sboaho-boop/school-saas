@@ -57,7 +57,7 @@ export interface Student {
   parentEmail: string;
   enrollmentDate: string;
   status: 'active' | 'inactive' | 'graduated';
-  photo?: string;
+  photoUrl?: string;
 }
 
 export type StaffType = 'teaching' | 'non-teaching' | 'headteacher' | 'admin' | 'accountant';
@@ -70,10 +70,14 @@ export interface Staff {
   role: string;
   department: string;
   staffType: StaffType;
+  campusId?: string;
+  campusName?: string;
   assignedClass?: string;
   assignedSubjects?: string[];
   assignedRouteId?: string;
   assignedRouteName?: string;
+  cardUid?: string;
+  wristbandUid?: string;
   status: 'active' | 'inactive';
   hireDate: string;
   photo?: string;
