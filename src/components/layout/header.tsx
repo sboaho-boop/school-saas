@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { useNotificationStore } from '@/stores/notifications';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeStore } from '@/stores/theme';
+import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { SidebarNavContent } from '@/components/layout/sidebar';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -80,6 +81,8 @@ export function Header() {
             <DropdownMenuItem>العربية</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <ThemeToggle />
 
         <DropdownMenu>
           <DropdownMenuTrigger className="relative rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
