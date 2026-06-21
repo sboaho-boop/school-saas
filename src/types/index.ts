@@ -197,6 +197,7 @@ export const SIDEBAR_ITEMS = [
   { id: 'finance', label: 'Finance', icon: 'CreditCard', href: '/finance' },
   { id: 'communication', label: 'Communication', icon: 'MessageSquare', href: '/communication' },
   { id: 'marks', label: 'Marks', icon: 'ClipboardList', href: '/marks' },
+  { id: 'assignments', label: 'Assignments', icon: 'BookOpen', href: '/assignments' },
   { id: 'reports', label: 'Reports', icon: 'BarChart3', href: '/reports' },
   { id: 'settings', label: 'Settings', icon: 'Settings', href: '/settings' },
 ] as const;

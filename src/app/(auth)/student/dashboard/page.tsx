@@ -10,7 +10,74 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, getToken, setToken } from '@/lib/api';
-import { GraduationCap, Wallet, Check, X, Clock, AlertCircle, Eye, LogOut, Send, Plus, FileText } from 'lucide-react';
+import { GraduationCap, Wallet, Check, X, Clock, AlertCircle, Eye, LogOut, Send, Plus, FileText, BookOpen } from 'lucide-react';
+
+export default function AssignmentSection({ studentId }: { studentId?: string }) {
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitId, setSubmitId] = useState<string | null>(null);
+  const [submitContent, setSubmitContent] = useState('');
+
+  useEffect(() => {
+    api.get('/student/assignments').then((data: any) => { setAssignments(data); setLoading(false); }).catch(() => setLoading(false));
+  }, []);
+
+  const handleSubmit = async () => {
+    if (!submitId || !submitContent) return;
+    try {
+      await api.post('/submissions', { assignmentId: submitId, content: submitContent });
+      setSubmitId(null);
+      setSubmitContent('');
+      const data = await api.get<any[]>('/student/assignments');
+      setAssignments(data);
+    } catch {}
+  };
+
+  if (loading) return null;
+  if (assignments.length === 0) return null;
+
+  return (
+    <Card className="border-border/50 shadow-sm">
+      <CardHeader><CardTitle className="text-sm flex items-center gap-2"><BookOpen size={16} />Assignments</CardTitle></CardHeader>
+      <CardContent className="space-y-2">
+        {assignments.map((a) => {
+          const sub = a.submissions?.[0];
+          const pastDue = new Date(a.dueDate) < new Date();
+          return (
+            <div key={a.id} className="border border-border/50 rounded-lg p-3">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="font-medium text-sm">{a.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Due: {a.dueDate}</p>
+                </div>
+                <Badge variant={sub ? (sub.status === 'graded' ? 'default' : 'secondary') : pastDue ? 'destructive' : 'outline'} className="text-[10px] shrink-0">
+                  {sub ? (sub.status === 'graded' ? `${sub.grade}/${a.totalPoints}` : 'Submitted') : pastDue ? 'Overdue' : 'Pending'}
+                </Badge>
+              </div>
+              {a.description && <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{a.description}</p>}
+              {sub?.feedback && <p className="text-xs text-muted-foreground mt-1 italic">Feedback: {sub.feedback}</p>}
+              {!sub && (
+                <div className="mt-2">
+                  {submitId === a.id ? (
+                    <div className="space-y-2">
+                      <textarea className="w-full min-h-[60px] rounded-md border border-border bg-background p-2 text-xs" placeholder="Write your answer..." value={submitContent} onChange={(e) => setSubmitContent(e.target.value)} />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={handleSubmit} disabled={!submitContent}><Send size={12} className="mr-1" />Submit</Button>
+                        <Button size="sm" variant="outline" onClick={() => setSubmitId(null)}>Cancel</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button size="sm" variant="outline" onClick={() => setSubmitId(a.id)} className="text-xs">Submit Answer</Button>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function StudentDashboardPage() {
   const router = useRouter();
@@ -94,6 +161,8 @@ export default function StudentDashboardPage() {
             </CardContent>
           </Card>
         )}
+
+        <AssignmentSection studentId={data?.id} />
 
         {data?.attendance && data.attendance.length > 0 && (
           <Card className="border-border/50 shadow-sm">

@@ -102,7 +102,7 @@ export default function ReportsPage() {
         </div>
       </motion.div>
 
-      <Tabs value={tab} onValueChange={setTab}>
+      <Tabs value={tab} onValueChange={(v) => v && setTab(v)}>
         <TabsList className="print:hidden">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="class">Class Report</TabsTrigger>
@@ -155,7 +155,7 @@ export default function ReportsPage() {
         <TabsContent value="class">
           <Card className="border-border/50 shadow-sm print:hidden">
             <CardContent className="p-4">
-              <Select value={selectedClass} onValueChange={setSelectedClass}>
+              <Select value={selectedClass} onValueChange={(v) => v && setSelectedClass(v)}>
                 <SelectTrigger className="max-w-xs"><SelectValue placeholder="Select a class..." /></SelectTrigger>
                 <SelectContent>{classes.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
               </Select>
@@ -204,7 +204,7 @@ export default function ReportsPage() {
         <TabsContent value="fees">
           <Card className="border-border/50 shadow-sm print:hidden">
             <CardContent className="p-4">
-              <Select value={feesClass} onValueChange={setFeesClass}>
+              <Select value={feesClass} onValueChange={(v) => v && setFeesClass(v)}>
                 <SelectTrigger className="max-w-xs"><SelectValue placeholder="Filter by class..." /></SelectTrigger>
                 <SelectContent><SelectItem value="___all___">All Classes</SelectItem>{classes.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
               </Select>
@@ -260,7 +260,7 @@ export default function ReportsPage() {
         <TabsContent value="attendance">
           <Card className="border-border/50 shadow-sm print:hidden">
             <CardContent className="flex gap-3 p-4">
-              <Select value={attClass} onValueChange={setAttClass}>
+              <Select value={attClass} onValueChange={(v) => v && setAttClass(v)}>
                 <SelectTrigger className="max-w-xs"><SelectValue placeholder="Filter by class..." /></SelectTrigger>
                 <SelectContent><SelectItem value="___all___">All Classes</SelectItem>{classes.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
               </Select>

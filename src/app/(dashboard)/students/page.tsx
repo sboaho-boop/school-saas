@@ -71,7 +71,7 @@ export default function StudentsPage() {
     setHistoryLoading(true);
     setExpandSection(null);
     try {
-      const data: StudentHistory = await api.get(`/students/${student.id}/history`);
+      const data = await api.get<StudentHistory>(`/students/${student.id}/history`);
       setHistory(data);
     } catch {
       setHistory(null);
@@ -88,7 +88,7 @@ export default function StudentsPage() {
     if (!selectedStudent) return;
     setSaving(true);
     try {
-      const updated = await api.put(`/students/${selectedStudent.id}`, editForm);
+      const updated: any = await api.put(`/students/${selectedStudent.id}`, editForm);
       updateStudent(selectedStudent.id, updated);
       setSelectedStudent(updated);
       setEditing(false);
@@ -101,7 +101,7 @@ export default function StudentsPage() {
   const fetchReports = async () => {
     setReportsLoading(true);
     try {
-      const data: any = await api.get('/student/all-reports');
+      const data = await api.get<any[]>('/student/all-reports');
       setStudentReports(data);
     } catch {}
     setReportsLoading(false);
