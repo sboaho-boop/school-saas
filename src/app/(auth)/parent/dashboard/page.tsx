@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, getToken, setToken } from '@/lib/api';
-import { GraduationCap, Wallet, ArrowLeft, LogOut, Check, X, Clock, AlertCircle, Eye, Plus, Lock, Settings, KeyRound } from 'lucide-react';
+import { GraduationCap, Wallet, ArrowLeft, LogOut, Check, X, Clock, AlertCircle, Eye, Plus, Lock, Settings, KeyRound, Smartphone, CreditCard, ExternalLink, Loader2 } from 'lucide-react';
 
 interface ChildSummary {
   id: string;
@@ -26,6 +26,10 @@ export default function ParentDashboardPage() {
   const [children, setChildren] = useState<ChildSummary[]>([]);
   const [selected, setSelected] = useState<ChildSummary | null>(null);
   const [topUpAmount, setTopUpAmount] = useState('');
+  const [topUpMethod, setTopUpMethod] = useState<'momo' | 'card' | null>(null);
+  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
+  const [initiating, setInitiating] = useState(false);
+  const [topUpMsg, setTopUpMsg] = useState('');
   const [loading, setLoading] = useState(true);
   const [pin, setPin] = useState('');
   const [pinMsg, setPinMsg] = useState('');
@@ -38,6 +42,18 @@ export default function ParentDashboardPage() {
   useEffect(() => {
     const token = getToken();
     if (!token) { router.push('/parent/login'); return; }
+
+    const params = new URLSearchParams(window.location.search);
+    const topupStatus = params.get('topup');
+    if (topupStatus === 'success') {
+      setTopUpMsg('Payment successful! Wallet will be credited shortly. Please refresh to see updated balance.');
+    } else if (topupStatus === 'cancelled') {
+      setTopUpMsg('Payment was cancelled.');
+    }
+    if (topupStatus) {
+      window.history.replaceState({}, '', '/parent/dashboard');
+    }
+
     api.get<ChildSummary[]>('/parent/children').then((data) => {
       setChildren(data);
       setLoading(false);
@@ -49,11 +65,19 @@ export default function ParentDashboardPage() {
     setSelected(data);
   };
 
-  const handleTopUp = async () => {
-    if (!selected || !topUpAmount) return;
-    await api.post('/parent/wallet/top-up', { studentId: selected.id, amount: parseFloat(topUpAmount) });
-    setTopUpAmount('');
-    fetchChild(selected.id);
+  const initiateTopUp = async () => {
+    if (!selected || !topUpAmount || !topUpMethod) return;
+    setInitiating(true);
+    setTopUpMsg('');
+    try {
+      const res = await api.post<{ checkoutUrl: string; reference: string }>('/parent/wallet/initiate-topup', { studentId: selected.id, amount: parseFloat(topUpAmount), method: topUpMethod });
+      setTopUpMsg('Redirecting to payment...');
+      window.location.href = res.checkoutUrl;
+    } catch (err: any) {
+      setTopUpMsg(err.message || 'Failed to initiate payment');
+    } finally {
+      setInitiating(false);
+    }
   };
 
   const handleSetPin = async () => {
@@ -132,9 +156,30 @@ export default function ParentDashboardPage() {
                     <span className="text-2xl font-bold">GHS {selected.wallet.balance.toFixed(2)}</span>
                     {selected.wallet.frozen && <Badge variant="secondary">Frozen</Badge>}
                   </div>
-                  <div className="flex gap-2">
-                    <Input type="number" placeholder="Amount" value={topUpAmount} onChange={(e) => setTopUpAmount(e.target.value)} />
-                    <Button onClick={handleTopUp}><Plus size={16} className="mr-1" />Top Up</Button>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <Input type="number" min="1" max="5000" step="any" placeholder="Amount (GHS 1–5,000)" value={topUpAmount} onChange={(e) => setTopUpAmount(e.target.value)} />
+                      <Button onClick={() => { if (topUpAmount) setShowPaymentOptions(true); }} disabled={!topUpAmount || parseFloat(topUpAmount) < 1}>
+                        <Plus size={16} className="mr-1" />Top Up
+                      </Button>
+                    </div>
+                    {topUpMsg && <p className={`text-xs ${topUpMsg.includes('failed') || topUpMsg.includes('Error') ? 'text-red-500' : topUpMsg.includes('Redirecting') ? 'text-blue-500' : 'text-emerald-600'}`}>{topUpMsg}</p>}
+                    {showPaymentOptions && (
+                      <div className="p-3 rounded-lg border border-border/50 space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground">Choose payment method</p>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant={topUpMethod === 'momo' ? 'default' : 'outline'} className="flex-1" onClick={() => { setTopUpMethod('momo'); initiateTopUp(); }}>
+                            {initiating && topUpMethod === 'momo' ? <Loader2 size={14} className="mr-1 animate-spin" /> : <Smartphone size={14} className="mr-1" />}
+                            Mobile Money
+                          </Button>
+                          <Button size="sm" variant={topUpMethod === 'card' ? 'default' : 'outline'} className="flex-1" onClick={() => { setTopUpMethod('card'); initiateTopUp(); }}>
+                            {initiating && topUpMethod === 'card' ? <Loader2 size={14} className="mr-1 animate-spin" /> : <CreditCard size={14} className="mr-1" />}
+                            Card / Bank
+                          </Button>
+                        </div>
+                        {initiating && <p className="text-xs text-blue-500 flex items-center gap-1"><Loader2 size={12} className="animate-spin" />Creating checkout...</p>}
+                      </div>
+                    )}
                   </div>
                   {selected.transactions && selected.transactions.length > 0 && (
                     <div className="max-h-40 overflow-y-auto space-y-1">

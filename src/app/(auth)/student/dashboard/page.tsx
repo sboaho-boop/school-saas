@@ -9,49 +9,126 @@ import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { api, getToken, setToken } from '@/lib/api';
-import { GraduationCap, Wallet, Check, X, Clock, AlertCircle, Eye, LogOut, Send, Plus, FileText, BookOpen } from 'lucide-react';
+import { api, getToken, setToken, API_URL } from '@/lib/api';
+import { GraduationCap, Wallet, Check, X, Clock, AlertCircle, Eye, LogOut, Send, Plus, FileText, BookOpen, Calendar, Bell, Upload, File, Image, Loader2 } from 'lucide-react';
 
-export default function AssignmentSection({ studentId }: { studentId?: string }) {
+const DAY_LABELS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+function TimetableSection() {
+  const [slots, setSlots] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get('/student/timetable')
+      .then((data: any) => { setSlots(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  if (loading) return null;
+  if (slots.length === 0) return null;
+
+  const byDay: Record<number, any[]> = {};
+  for (let i = 0; i < 5; i++) byDay[i] = [];
+  for (const s of slots) {
+    if (byDay[s.dayOfWeek]) byDay[s.dayOfWeek].push(s);
+  }
+
+  return (
+    <Card className="border-border/50 shadow-sm">
+      <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Calendar size={16} />Timetable</CardTitle></CardHeader>
+      <CardContent className="overflow-x-auto">
+        <div className="grid grid-cols-5 gap-2 min-w-[500px]">
+          {DAY_LABELS.map((day, idx) => (
+            <div key={idx} className="space-y-1">
+              <p className="text-[10px] font-semibold text-center text-muted-foreground uppercase tracking-wider mb-2">{day.slice(0, 3)}</p>
+              {byDay[idx].length === 0 ? (
+                <p className="text-[10px] text-center text-muted-foreground">—</p>
+              ) : (
+                byDay[idx].slice(0, 6).map((s: any) => (
+                  <div key={s.id} className="text-[10px] bg-muted/30 rounded p-1.5 border border-border/30">
+                    <p className="font-medium truncate">{s.startTime}-{s.endTime}</p>
+                    <p className="text-muted-foreground truncate">{s.room}</p>
+                  </div>
+                ))
+              )}
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function TasksReminderSection() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitId, setSubmitId] = useState<string | null>(null);
   const [submitContent, setSubmitContent] = useState('');
+  const [submitFile, setSubmitFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     api.get('/student/assignments').then((data: any) => { setAssignments(data); setLoading(false); }).catch(() => setLoading(false));
   }, []);
 
   const handleSubmit = async () => {
-    if (!submitId || !submitContent) return;
+    if (!submitId || !submitContent && !submitFile) return;
+    setUploading(true);
     try {
-      await api.post('/submissions', { assignmentId: submitId, content: submitContent });
+      let fileUrl = '';
+      if (submitFile) {
+        const formData = new FormData();
+        formData.append('file', submitFile);
+        const uploadRes = await fetch(`${API_URL.replace('/api', '')}/api/upload`, { method: 'POST', headers: { Authorization: `Bearer ${getToken()}` }, body: formData });
+        const uploadData = await uploadRes.json();
+        fileUrl = uploadData.url;
+      }
+      await api.post('/submissions', { assignmentId: submitId, content: submitContent, fileUrl });
       setSubmitId(null);
       setSubmitContent('');
+      setSubmitFile(null);
       const data = await api.get<any[]>('/student/assignments');
       setAssignments(data);
-    } catch {}
+    } catch (e) { console.error(e); } finally { setUploading(false); }
   };
 
   if (loading) return null;
   if (assignments.length === 0) return null;
 
+  const now = new Date();
+  const upcoming = assignments.filter((a) => new Date(a.dueDate) > now).sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+  const overdue = assignments.filter((a) => new Date(a.dueDate) <= now && !a.submissions?.[0]);
+
   return (
     <Card className="border-border/50 shadow-sm">
-      <CardHeader><CardTitle className="text-sm flex items-center gap-2"><BookOpen size={16} />Assignments</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Bell size={16} />Task Reminders</CardTitle></CardHeader>
       <CardContent className="space-y-2">
-        {assignments.map((a) => {
+        {overdue.length > 0 && (
+          <div>
+            <p className="text-[10px] font-semibold text-red-500 uppercase mb-1">Overdue ({overdue.length})</p>
+            {overdue.map((a) => (
+              <div key={a.id} className="border border-red-200 dark:border-red-900 rounded-lg p-2 mb-1">
+                <p className="font-medium text-xs">{a.title}</p>
+                <p className="text-[10px] text-muted-foreground">Due: {a.dueDate}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        {upcoming.slice(0, 5).map((a) => {
           const sub = a.submissions?.[0];
-          const pastDue = new Date(a.dueDate) < new Date();
+          const daysLeft = Math.ceil((new Date(a.dueDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
           return (
             <div key={a.id} className="border border-border/50 rounded-lg p-3">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="font-medium text-sm">{a.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Due: {a.dueDate}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    Due {a.dueDate}
+                    {daysLeft > 0 && daysLeft <= 3 && <span className="text-amber-500 ml-1">({daysLeft}d left)</span>}
+                  </p>
                 </div>
-                <Badge variant={sub ? (sub.status === 'graded' ? 'default' : 'secondary') : pastDue ? 'destructive' : 'outline'} className="text-[10px] shrink-0">
-                  {sub ? (sub.status === 'graded' ? `${sub.grade}/${a.totalPoints}` : 'Submitted') : pastDue ? 'Overdue' : 'Pending'}
+                <Badge variant={sub ? (sub.status === 'graded' ? 'default' : 'secondary') : daysLeft <= 1 ? 'destructive' : 'outline'} className="text-[10px] shrink-0">
+                  {sub ? (sub.status === 'graded' ? `${sub.grade}/${a.totalPoints}` : 'Submitted') : daysLeft <= 1 ? 'Due Soon' : 'Pending'}
                 </Badge>
               </div>
               {a.description && <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{a.description}</p>}
@@ -61,15 +138,28 @@ export default function AssignmentSection({ studentId }: { studentId?: string })
                   {submitId === a.id ? (
                     <div className="space-y-2">
                       <textarea className="w-full min-h-[60px] rounded-md border border-border bg-background p-2 text-xs" placeholder="Write your answer..." value={submitContent} onChange={(e) => setSubmitContent(e.target.value)} />
+                      <div className="flex items-center gap-2">
+                        <label className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                          <input type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => setSubmitFile(e.target.files?.[0] || null)} />
+                          {submitFile ? <><File size={12} />{submitFile.name}</> : <><Upload size={12} />Attach file</>}
+                        </label>
+                      </div>
                       <div className="flex gap-2">
-                        <Button size="sm" onClick={handleSubmit} disabled={!submitContent}><Send size={12} className="mr-1" />Submit</Button>
-                        <Button size="sm" variant="outline" onClick={() => setSubmitId(null)}>Cancel</Button>
+                        <Button size="sm" onClick={handleSubmit} disabled={!submitContent && !submitFile || uploading}>
+                          {uploading ? <Loader2 size={12} className="mr-1 animate-spin" /> : <Send size={12} className="mr-1" />}{uploading ? 'Uploading...' : 'Submit'}
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => { setSubmitId(null); setSubmitFile(null); }}>Cancel</Button>
                       </div>
                     </div>
                   ) : (
                     <Button size="sm" variant="outline" onClick={() => setSubmitId(a.id)} className="text-xs">Submit Answer</Button>
                   )}
                 </div>
+              )}
+              {sub?.fileUrl && (
+                <a href={sub.fileUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary flex items-center gap-1 mt-1 hover:underline">
+                  <File size={12} />View attached file
+                </a>
               )}
             </div>
           );
@@ -137,6 +227,9 @@ export default function StudentDashboardPage() {
           <p className="text-sm text-muted-foreground">{data?.className}</p>
         </motion.div>
 
+        <TimetableSection />
+        <TasksReminderSection />
+
         {data?.wallet && (
           <Card className="border-border/50 shadow-sm">
             <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Wallet size={16} />Wallet Balance</CardTitle></CardHeader>
@@ -161,8 +254,6 @@ export default function StudentDashboardPage() {
             </CardContent>
           </Card>
         )}
-
-        <AssignmentSection studentId={data?.id} />
 
         {data?.attendance && data.attendance.length > 0 && (
           <Card className="border-border/50 shadow-sm">
