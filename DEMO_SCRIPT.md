@@ -1,4 +1,4 @@
-# EduPlatform Demo Script — NFC Cards, Wallet & Terminal
+# EDUPLATFORM SOFTWARE SERVICES Demo Script — NFC Cards, Wallet & Terminal
 
 **Duration:** ~7 minutes at normal pace
 **Setup:** Log in as headteacher/admin, school must have students enrolled

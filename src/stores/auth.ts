@@ -11,7 +11,7 @@ interface AuthStore {
   pendingUserId: string | null;
   login: (email: string, password: string) => Promise<void>;
   verifyOtp: (otp: string) => Promise<void>;
-  register: (email: string, password: string, name: string, phone?: string, options?: { privacyConsent?: boolean }) => Promise<void>;
+  register: (email: string, password: string, name: string, phone?: string, options?: { privacyConsent?: boolean; schoolName?: string }) => Promise<{ message: string; user: { id: string; email: string; name: string; role: string; isVerified: boolean }; verification: { otp: string; sentVia: { email?: boolean; sms?: boolean }; expiresAt: string; message: string } }>;
   logout: () => void;
   initialize: () => Promise<void>;
   clearError: () => void;
@@ -19,11 +19,11 @@ interface AuthStore {
 }
 
 export const ROLE_NAV_ITEMS: Record<StaffType, string[]> = {
-  headteacher: ['dashboard', 'students', 'staff', 'academics', 'attendance', 'marks', 'wallet', 'tasks', 'transport', 'finance', 'communication', 'reports', 'audit-logs', 'terminal', 'settings', 'orders'],
-  admin: ['dashboard', 'students', 'staff', 'academics', 'attendance', 'marks', 'wallet', 'tasks', 'transport', 'finance', 'communication', 'reports', 'audit-logs', 'terminal', 'settings', 'orders'],
-  accountant: ['dashboard', 'finance', 'tasks', 'communication', 'reports'],
-  teaching: ['dashboard', 'students', 'academics', 'attendance', 'marks', 'tasks', 'communication'],
-  'non-teaching': ['dashboard', 'tasks', 'communication'],
+  headteacher: ['dashboard', 'students', 'staff', 'academics', 'attendance', 'marks', 'wallet', 'tasks', 'transport', 'finance', 'communication', 'conferences', 'calendar', 'reports', 'audit-logs', 'terminal', 'settings', 'orders', 'library', 'hostel', 'inventory', 'behavior', 'alumni', 'assignments', 'exams', 'lesson-plans', 'feedback', 'ai-tutor'],
+  admin: ['dashboard', 'students', 'staff', 'academics', 'attendance', 'marks', 'wallet', 'tasks', 'transport', 'finance', 'communication', 'conferences', 'calendar', 'reports', 'audit-logs', 'terminal', 'settings', 'orders', 'library', 'hostel', 'inventory', 'behavior', 'alumni', 'assignments', 'exams', 'lesson-plans', 'feedback', 'ai-tutor'],
+  accountant: ['dashboard', 'finance', 'tasks', 'communication', 'reports', 'library', 'inventory', 'feedback', 'ai-tutor'],
+  teaching: ['dashboard', 'students', 'academics', 'attendance', 'marks', 'tasks', 'communication', 'conferences', 'calendar', 'library', 'behavior', 'assignments', 'exams', 'lesson-plans', 'feedback', 'ai-tutor'],
+  'non-teaching': ['dashboard', 'tasks', 'communication', 'library', 'hostel', 'inventory', 'alumni', 'feedback', 'ai-tutor'],
 };
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
@@ -80,9 +80,9 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   register: async (email, password, name, phone, options) => {
     set({ loading: true, error: null });
     try {
-      const { user, token } = await api.post<{ user: { id: string; email: string; name: string; role: string }; token: string }>('/auth/register', { email, password, name, role: 'headteacher', phone: phone || '', privacyConsent: options?.privacyConsent || false });
-      setToken(token);
-      set({ currentUser: { id: user.id, name: user.name, email: user.email, role: user.role, phone: phone || '', department: '', staffType: 'headteacher', status: 'active', hireDate: '' }, loading: false });
+      const res = await api.post<{ message: string; user: { id: string; email: string; name: string; role: string; isVerified: boolean }; verification: { otp: string; sentVia: { email?: boolean; sms?: boolean }; expiresAt: string; message: string } }>('/auth/register', { email, password, name, role: 'admin', phone: phone || '', privacyConsent: options?.privacyConsent || false, schoolName: options?.schoolName });
+      set({ currentUser: null, loading: false });
+      return res;
     } catch (err: any) {
       set({ error: err.message, loading: false });
       throw err;

@@ -13,6 +13,9 @@ import { GraduationCap, Wallet, ArrowLeft, LogOut, Check, X, Clock, AlertCircle,
 
 interface ChildSummary {
   id: string;
+  indexNumber?: string;
+  firstName?: string;
+  lastName?: string;
   name: string;
   className: string;
   wallet?: { balance: number; totalSpent: number; frozen: boolean };
@@ -144,6 +147,7 @@ export default function ParentDashboardPage() {
                 <CardHeader>
                   <CardTitle className="text-lg">{selected.name}</CardTitle>
                   <p className="text-sm text-muted-foreground">{selected.className}</p>
+                  {selected.indexNumber && <p className="text-xs font-mono text-muted-foreground/60 mt-0.5">{selected.indexNumber}</p>}
                 </CardHeader>
               </Card>
             </motion.div>
@@ -229,7 +233,7 @@ export default function ParentDashboardPage() {
             <Card className="border-border/50 shadow-sm">
               <CardHeader><CardTitle className="text-sm flex items-center gap-2"><KeyRound size={16} />Student Login Password</CardTitle></CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-xs text-muted-foreground">Set a password so your child can log in to their own student dashboard using your email.</p>
+                <p className="text-xs text-muted-foreground">Set a password so your child can log in to their own student dashboard using their index number{selected?.indexNumber ? <span className="font-mono text-primary"> ({selected.indexNumber})</span> : ''}.</p>
                 <div className="flex gap-2">
                   <Input type="password" minLength={6} placeholder="Min 6 characters" value={studentPassword} onChange={(e) => setStudentPassword(e.target.value)} />
                   <Button onClick={handleSetStudentPassword} disabled={studentPassword.length < 6 || saving} variant="outline">Set</Button>
@@ -285,6 +289,7 @@ export default function ParentDashboardPage() {
                       <div>
                         <p className="font-medium">{child.name}</p>
                         <p className="text-sm text-muted-foreground">{child.className}</p>
+                        {child.indexNumber && <p className="text-xs font-mono text-muted-foreground/60 mt-0.5">{child.indexNumber}</p>}
                       </div>
                       <div className="text-right">
                         {child.wallet ? (

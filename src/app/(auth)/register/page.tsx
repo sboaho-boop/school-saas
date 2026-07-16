@@ -17,7 +17,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/auth';
-import { ArrowRight, ArrowLeft, Building, Palette, UserCheck, Shield } from 'lucide-react';
+import { api } from '@/lib/api';
+import { ArrowRight, ArrowLeft, Building, Palette, UserCheck, Shield, CheckCircle2, Copy } from 'lucide-react';
 
 const countries = [
   { value: 'GH', label: 'Ghana', currency: 'GHS' },
@@ -49,11 +50,22 @@ export default function RegisterPage() {
   const [academicStructure, setAcademicStructure] = useState('');
   const [primaryColor, setPrimaryColor] = useState('#6366f1');
   const [privacyConsent, setPrivacyConsent] = useState(false);
+  const [registered, setRegistered] = useState<any>(null);
+  const [verificationOtp, setVerificationOtp] = useState('');
+  const [verified, setVerified] = useState(false);
 
   const handleSubmit = async () => {
     try {
-      await register(email, adminPassword, adminName, phone, { privacyConsent: true });
-      router.push('/dashboard');
+      const res = await register(email, adminPassword, adminName, phone, { privacyConsent: true, schoolName });
+      setRegistered(res);
+      setStep(4);
+    } catch {}
+  };
+
+  const handleVerify = async () => {
+    try {
+      await api.post('/auth/verify-otp', { email, otp: verificationOtp });
+      setVerified(true);
     } catch {}
   };
 
@@ -291,6 +303,75 @@ export default function RegisterPage() {
                     {loading ? 'Creating account...' : 'Complete Setup'}
                   </Button>
                 </div>
+              </CardContent>
+            </>
+          )}
+
+          {step === 4 && !verified && registered && (
+            <>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle2 size={20} className="text-emerald-500" />
+                  Verify Your Email
+                </CardTitle>
+                <CardDescription>
+                  {registered.verification?.sentVia?.email
+                    ? 'A verification code has been sent to your email.'
+                    : registered.verification?.sentVia?.sms
+                    ? 'A verification code has been sent via SMS.'
+                    : 'Your verification code is shown below.'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {!registered.verification?.sentVia?.email && !registered.verification?.sentVia?.sms && (
+                  <div className="rounded-lg bg-indigo-500/10 border border-indigo-200 p-4 text-center space-y-2">
+                    <p className="text-xs text-muted-foreground">Verification Code</p>
+                    <p className="text-3xl font-bold tracking-widest text-indigo-600">{registered.verification?.otp}</p>
+                    <button
+                      onClick={() => navigator.clipboard.writeText(registered.verification?.otp || '')}
+                      className="text-xs text-indigo-500 hover:text-indigo-700 inline-flex items-center gap-1"
+                    >
+                      <Copy size={12} /> Copy
+                    </button>
+                  </div>
+                )}
+                <p className="text-sm text-muted-foreground">Enter the 6-digit code sent to your email or phone:</p>
+                <Input
+                  placeholder="000000"
+                  value={verificationOtp}
+                  onChange={(e) => setVerificationOtp(e.target.value)}
+                  maxLength={6}
+                  className="text-center text-2xl tracking-widest"
+                />
+                <Button
+                  className="w-full bg-gradient-to-r from-primary to-accent"
+                  onClick={handleVerify}
+                  disabled={verificationOtp.length !== 6}
+                >
+                  Verify
+                </Button>
+              </CardContent>
+            </>
+          )}
+
+          {step === 4 && verified && (
+            <>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle2 size={20} className="text-emerald-500" />
+                  Verified Successfully!
+                </CardTitle>
+                <CardDescription>
+                  Your account has been verified. You can now log in.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button
+                  className="w-full bg-gradient-to-r from-primary to-accent"
+                  onClick={() => router.push('/login')}
+                >
+                  Go to Login
+                </Button>
               </CardContent>
             </>
           )}

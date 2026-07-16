@@ -16,7 +16,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">1. Introduction</h2>
             <p>
-              EduPlatform (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting the privacy and
+              EDUPLATFORM SOFTWARE SERVICES (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting the privacy and
               security of your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard
               your information when you use our school management platform.
             </p>
@@ -135,7 +135,7 @@ export default function PrivacyPage() {
               please contact our Data Protection Officer:
             </p>
             <div className="mt-2 bg-muted p-4 rounded-lg space-y-1">
-              <p><strong>EduPlatform</strong></p>
+              <p><strong>EDUPLATFORM SOFTWARE SERVICES</strong></p>
               <p>Email: <a href="mailto:sboaho@gmail.com" className="text-primary hover:underline">sboaho@gmail.com</a></p>
               <p>Phone: <a href="tel:+233502262294" className="text-primary hover:underline">050 226 2294</a></p>
               <p>WhatsApp: <a href="https://wa.me/447735310744" className="text-primary hover:underline">+44 7735 310744</a></p>

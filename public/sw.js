@@ -1,5 +1,5 @@
 self.addEventListener('push', (event) => {
-  let data = { title: 'EduPlatform', message: '', type: '', id: '' };
+  let data = { title: 'EDUPLATFORM SOFTWARE SERVICES', message: '', type: '', id: '' };
   try {
     if (event.data) data = event.data.json();
   } catch {}
@@ -10,7 +10,7 @@ self.addEventListener('push', (event) => {
     tag: data.type || 'notification',
     data: { url: data.type === 'task_deadline' ? '/tasks' : '/dashboard', id: data.id },
   };
-  event.waitUntil(self.registration.showNotification(data.title || 'EduPlatform', options));
+  event.waitUntil(self.registration.showNotification(data.title || 'EDUPLATFORM SOFTWARE SERVICES', options));
 });
 
 self.addEventListener('notificationclick', (event) => {

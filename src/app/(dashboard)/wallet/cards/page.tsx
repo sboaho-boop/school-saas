@@ -79,7 +79,7 @@ export default function CardsPage() {
       <div className="card-grid p-6 pt-0">
         {cards.map((card, i) => (
           <div key={i} className="id-card">
-            <div className="id-card-school">{schoolName || 'EduPlatform'}</div>
+            <div className="id-card-school">{schoolName || 'EDUPLATFORM SOFTWARE SERVICES'}</div>
             <div className="id-card-photo">
               {card.photoUrl ? (
                 <img src={card.photoUrl} alt={card.studentName} />

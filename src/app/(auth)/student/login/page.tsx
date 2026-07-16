@@ -12,7 +12,7 @@ import { GraduationCap, Eye, EyeOff } from 'lucide-react';
 
 export default function StudentLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [indexNumber, setIndexNumber] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -23,7 +23,7 @@ export default function StudentLoginPage() {
     setLoading(true);
     setError('');
     try {
-      const { token } = await api.post<{ token: string }>('/student/login', { email, password });
+      const { token } = await api.post<{ token: string }>('/student/login', { indexNumber, password });
       setToken(token);
       router.push('/student/dashboard');
     } catch (err: any) {
@@ -41,19 +41,19 @@ export default function StudentLoginPage() {
             <GraduationCap size={28} className="text-primary" />
           </div>
           <h1 className="text-2xl font-bold">Student Portal</h1>
-          <p className="text-muted-foreground text-sm mt-1">Sign in to view your progress</p>
+          <p className="text-muted-foreground text-sm mt-1">Sign in with your index number</p>
         </div>
 
         <Card className="border-border/50 shadow-lg">
           <CardHeader>
             <CardTitle>Sign In</CardTitle>
-            <CardDescription>Use your parent&apos;s email and the password your parent set for you.</CardDescription>
+            <CardDescription>Use your index number and the password your parent set for you.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Parent Email</Label>
-                <Input id="email" type="email" placeholder="parent@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <Label htmlFor="indexNumber">Index Number</Label>
+                <Input id="indexNumber" placeholder="e.g. SCH-ABC123-STU-001" value={indexNumber} onChange={(e) => setIndexNumber(e.target.value)} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>

@@ -8,7 +8,8 @@ interface LogoProps {
 
 export function Logo({ className, iconOnly, size = 'md' }: LogoProps) {
   const iconSize = size === 'sm' ? 28 : size === 'lg' ? 48 : 36;
-  const fontSize = size === 'sm' ? 'text-base' : size === 'lg' ? 'text-2xl' : 'text-xl';
+  const fontSize = size === 'sm' ? 'text-xs' : size === 'lg' ? 'text-lg' : 'text-sm';
+  const subSize = size === 'sm' ? 'text-[8px]' : size === 'lg' ? 'text-xs' : 'text-[10px]';
 
   return (
     <div className={cn('flex items-center gap-2.5', className)}>
@@ -27,57 +28,33 @@ export function Logo({ className, iconOnly, size = 'md' }: LogoProps) {
           </linearGradient>
         </defs>
 
-        <rect x="2" y="2" width="32" height="32" rx="8" fill="url(#logo-primary)" />
+        <rect x="1" y="1" width="34" height="34" rx="9" fill="url(#logo-primary)" />
 
-        <path
-          d="M10 18 L10 26 Q10 28 12 28 L24 28 Q26 28 26 26 L26 18"
-          stroke="white"
-          strokeWidth="1.5"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+        {/* Open book base */}
+        <path d="M8 16 L18 11 L28 16" stroke="white" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M8 16 L8 24 Q8 25.5 9 26 L18 22 L27 26 Q28 25.5 28 24 L28 16" stroke="white" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M18 11 L18 22" stroke="white" strokeWidth="1.4" fill="none" strokeLinecap="round" />
 
-        <path
-          d="M8 14 L18 8 L28 14"
-          stroke="white"
-          strokeWidth="1.5"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+        {/* Graduation cap on top */}
+        <path d="M13 14 L18 11 L23 14 L18 17 Z" stroke="white" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M13 14 L13 17 Q15.5 18.5 18 17" stroke="white" strokeWidth="1.2" fill="none" strokeLinecap="round" />
 
-        <path
-          d="M14 28 L14 22 Q14 20 18 20 Q22 20 22 22 L22 28"
-          stroke="white"
-          strokeWidth="1.3"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-
-        <path
-          d="M10 16 L10 22 L14 22"
-          stroke="white"
-          strokeWidth="1.3"
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity="0.7"
-        />
-
-        <circle cx="22" cy="12" r="1.5" fill="white" opacity="0.4" />
+        {/* Code bracket < / > on right page */}
+        <path d="M21 17 L23 19 L21 21" stroke="white" strokeWidth="1" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
+        <path d="M15 17 L13 19 L15 21" stroke="white" strokeWidth="1" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
       </svg>
 
       {!iconOnly && (
-        <span
-          className={cn(
-            'font-bold bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent',
-            fontSize
-          )}
-        >
-          EduPlatform
-        </span>
+        <div className="flex flex-col leading-tight">
+          <span className={cn('font-extrabold tracking-wide', fontSize)}>
+            <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">
+              EDUPLATFORM
+            </span>
+          </span>
+          <span className={cn('font-medium text-muted-foreground tracking-wider', subSize)}>
+            SOFTWARE SERVICES
+          </span>
+        </div>
       )}
     </div>
   );

@@ -45,6 +45,7 @@ export interface Grade {
 
 export interface Student {
   id: string;
+  indexNumber?: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -64,6 +65,8 @@ export type StaffType = 'teaching' | 'non-teaching' | 'headteacher' | 'admin' | 
 
 export interface Staff {
   id: string;
+  schoolId?: string;
+  indexNumber?: string;
   name: string;
   email: string;
   phone: string;
@@ -192,6 +195,13 @@ export const SIDEBAR_ITEMS = [
   { id: 'staff', label: 'Staff', icon: 'UserCog', href: '/staff' },
   { id: 'academics', label: 'Academics', icon: 'GraduationCap', href: '/academics' },
   { id: 'attendance', label: 'Attendance', icon: 'ClipboardCheck', href: '/attendance' },
+  { id: 'exams', label: 'Exams', icon: 'FileCheck', href: '/exams' },
+  { id: 'library', label: 'Library', icon: 'Book', href: '/library' },
+  { id: 'hostel', label: 'Hostel', icon: 'Building2', href: '/hostel' },
+  { id: 'behavior', label: 'Behavior', icon: 'Shield', href: '/behavior' },
+  { id: 'inventory', label: 'Inventory', icon: 'Package', href: '/inventory' },
+  { id: 'lesson-plans', label: 'Lesson Plans', icon: 'Notebook', href: '/lesson-plans' },
+  { id: 'alumni', label: 'Alumni', icon: 'UserCheck', href: '/alumni' },
   { id: 'tasks', label: 'Tasks', icon: 'ListChecks', href: '/tasks' },
   { id: 'transport', label: 'Transport', icon: 'Bus', href: '/transport' },
   { id: 'finance', label: 'Finance', icon: 'CreditCard', href: '/finance' },

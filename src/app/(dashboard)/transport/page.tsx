@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,9 +8,22 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
-import { Plus, Bus, MapPin, Phone, Users } from 'lucide-react';
+import { Plus, Bus, MapPin, Phone, Users, Clock, CheckCircle, ArrowRight, MapPin as PinArrive } from 'lucide-react';
 import { useTransportStore } from '@/stores/transport';
 import { useStaffStore } from '@/stores/staff';
+import { api } from '@/lib/api';
+
+interface DriverTrip {
+  id: string;
+  driver: { id: string; name: string; indexNumber: string };
+  route: { id: string; name: string };
+  checkInTime: string | null;
+  departureTime: string | null;
+  arrivalTime: string | null;
+  completedAt: string | null;
+  status: string;
+  date: string;
+}
 
 const statusConfig = {
   active: { label: 'Active', className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300' },
@@ -27,6 +40,26 @@ export default function TransportPage() {
   const [driverId, setDriverId] = useState('');
   const [capacity, setCapacity] = useState('30');
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
+  const [trips, setTrips] = useState<DriverTrip[]>([]);
+  const [tripLoading, setTripLoading] = useState(false);
+
+  useEffect(() => {
+    fetchTrips();
+  }, []);
+
+  const fetchTrips = async () => {
+    setTripLoading(true);
+    try {
+      const data = await api.get<DriverTrip[]>('/transport/driver-trips');
+      setTrips(data);
+    } catch { /* ignore */ }
+    setTripLoading(false);
+  };
+
+  const updateTrip = async (id: string, action: 'depart' | 'arrive' | 'complete') => {
+    await api.put(`/transport/driver-trip/${id}/${action}`, {});
+    fetchTrips();
+  };
 
   const teachingStaff = staff.filter((s) => s.staffType === 'teaching' && s.status === 'active');
 
@@ -192,6 +225,75 @@ export default function TransportPage() {
             </Card>
           );
         })}
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, delay: 0.3 }}
+        className="space-y-4"
+      >
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <Clock size={18} className="text-primary" /> Today's Driver Trips
+          </h2>
+          <Button variant="outline" size="sm" onClick={fetchTrips} disabled={tripLoading}>
+            Refresh
+          </Button>
+        </div>
+        {tripLoading ? (
+          <p className="text-sm text-muted-foreground">Loading trips...</p>
+        ) : trips.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No trips today. Drivers can check in via the terminal.</p>
+        ) : (
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {trips.map((trip) => {
+              const statusColors: Record<string, string> = {
+                checked_in: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+                departed: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
+                arrived: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300',
+                completed: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
+              };
+              return (
+                <Card key={trip.id} className="border-border/50 shadow-sm">
+                  <CardContent className="p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{trip.driver.name}</p>
+                        <p className="text-xs text-muted-foreground">{trip.driver.indexNumber} — {trip.route.name}</p>
+                      </div>
+                      <Badge variant="secondary" className={statusColors[trip.status] || ''}>
+                        {trip.status.replace('_', ' ')}
+                      </Badge>
+                    </div>
+                    <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
+                      {trip.checkInTime && <span>Check-in: {new Date(trip.checkInTime).toLocaleTimeString()}</span>}
+                      {trip.departureTime && <span>Departed: {new Date(trip.departureTime).toLocaleTimeString()}</span>}
+                      {trip.arrivalTime && <span>Arrived: {new Date(trip.arrivalTime).toLocaleTimeString()}</span>}
+                    </div>
+                    <div className="flex gap-2">
+                      {trip.status === 'checked_in' && (
+                        <Button size="sm" variant="outline" className="text-xs" onClick={() => updateTrip(trip.id, 'depart')}>
+                          <ArrowRight size={14} className="mr-1" /> Depart
+                        </Button>
+                      )}
+                      {trip.status === 'departed' && (
+                        <Button size="sm" variant="outline" className="text-xs" onClick={() => updateTrip(trip.id, 'arrive')}>
+                          <PinArrive size={14} className="mr-1" /> Arrive
+                        </Button>
+                      )}
+                      {trip.status === 'arrived' && (
+                        <Button size="sm" variant="outline" className="text-xs" onClick={() => updateTrip(trip.id, 'complete')}>
+                          <CheckCircle size={14} className="mr-1" /> Complete
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </motion.div>
     </div>
   );

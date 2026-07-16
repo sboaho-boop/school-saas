@@ -9,8 +9,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "EduPlatform - School Management SaaS",
+  title: "EDUPLATFORM SOFTWARE SERVICES - School Management SaaS",
   description: "A modern, cloud-based school management platform built for Africa and beyond.",
+  icons: [{ rel: 'icon', url: '/favicon.svg' }],
 };
 
 export default function RootLayout({

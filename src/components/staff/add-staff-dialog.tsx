@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useStaffStore } from '@/stores/staff';
 import { useTransportStore } from '@/stores/transport';
+import { useAuthStore } from '@/stores/auth';
 import { api } from '@/lib/api';
 import { Plus, X, CheckCircle2, Copy } from 'lucide-react';
 import type { StaffType } from '@/types';
@@ -31,6 +32,7 @@ const SUBJECT_OPTIONS = [
 export function AddStaffDialog() {
   const addStaff = useStaffStore((s) => s.addStaff);
   const routes = useTransportStore((s) => s.routes);
+  const currentUser = useAuthStore((s) => s.currentUser);
   const [open, setOpen] = useState(false);
   const [campuses, setCampuses] = useState<any[]>([]);
   const [name, setName] = useState('');
@@ -40,6 +42,26 @@ export function AddStaffDialog() {
   const [department, setDepartment] = useState('');
   const [staffType, setStaffType] = useState<StaffType>('teaching');
   const [campusId, setCampusId] = useState('');
+
+  const isAdmin = currentUser?.staffType === 'admin';
+  const isHeadteacher = currentUser?.staffType === 'headteacher';
+
+  // Admin can only create headteacher; headteacher cannot create headteacher or admin
+  const allowedStaffTypes = isAdmin
+    ? [{ value: 'headteacher' as StaffType, label: 'Headteacher / Principal' }]
+    : isHeadteacher
+    ? [
+        { value: 'teaching' as StaffType, label: 'Teaching Staff' },
+        { value: 'non-teaching' as StaffType, label: 'Non-Teaching Staff' },
+        { value: 'accountant' as StaffType, label: 'Accountant' },
+      ]
+    : [
+        { value: 'teaching' as StaffType, label: 'Teaching Staff' },
+        { value: 'non-teaching' as StaffType, label: 'Non-Teaching Staff' },
+        { value: 'headteacher' as StaffType, label: 'Headteacher / Principal' },
+        { value: 'admin' as StaffType, label: 'Admin' },
+        { value: 'accountant' as StaffType, label: 'Accountant' },
+      ];
   const [assignedClass, setAssignedClass] = useState('');
   const [assignedSubjects, setAssignedSubjects] = useState<string[]>([]);
   const [subjectInput, setSubjectInput] = useState('');
@@ -90,12 +112,22 @@ export function AddStaffDialog() {
 
   const handleClose = () => { resetForm(); setOpen(false); };
 
+  const openDialog = (o: boolean) => {
+    if (o) {
+      // Set default staff type based on role
+      if (isAdmin) setStaffType('headteacher');
+    }
+    if (!o) handleClose();
+    setOpen(o);
+  };
+
   const copyCode = () => { if (verification?.otp) navigator.clipboard.writeText(verification.otp); };
+  const copyPassword = () => { if (verification?.tempPassword) navigator.clipboard.writeText(verification.tempPassword); };
 
   const activeRoutes = routes.filter((r) => r.status === 'active');
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) handleClose(); setOpen(o); }}>
+    <Dialog open={open} onOpenChange={openDialog}>
       <DialogTrigger render={<Button size="sm"><Plus size={16} className="mr-2" /> Add Staff</Button>} />
       <DialogContent className="sm:max-w-lg">
         {verification ? (
@@ -115,6 +147,12 @@ export function AddStaffDialog() {
                 <button onClick={copyCode} className="text-xs text-indigo-500 hover:text-indigo-700 inline-flex items-center gap-1"><Copy size={12} /> Copy</button>
                 <p className="text-xs text-muted-foreground">Expires at {new Date(verification.expiresAt).toLocaleTimeString()}</p>
               </div>
+              <div className="rounded-lg bg-amber-500/10 border border-amber-200 p-4 text-center space-y-2">
+                <p className="text-xs text-muted-foreground">Temporary Password</p>
+                <p className="text-lg font-mono font-bold tracking-wider text-amber-600">{verification.tempPassword}</p>
+                <button onClick={copyPassword} className="text-xs text-amber-500 hover:text-amber-700 inline-flex items-center gap-1"><Copy size={12} /> Copy</button>
+                <p className="text-xs text-muted-foreground">Share this with the staff member. They will use it to log in after verifying.</p>
+              </div>
               {!verification.sentVia?.email && !verification.sentVia?.sms && (
                 <p className="text-xs text-amber-600 text-center">No email/SMS configured. Share this code with the staff member.</p>
               )}
@@ -129,7 +167,11 @@ export function AddStaffDialog() {
           <form onSubmit={handleSubmit}>
             <DialogHeader>
               <DialogTitle>Add Staff Member</DialogTitle>
-              <DialogDescription>Fill in the details below. An account will be created with a verification code.</DialogDescription>
+              <DialogDescription>
+                {isAdmin
+                  ? 'As Admin, you can create the Headteacher. The Headteacher will manage all other staff.'
+                  : 'Fill in the details below. An account will be created with a verification code.'}
+              </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
@@ -153,11 +195,9 @@ export function AddStaffDialog() {
                     <SelectValue placeholder="Select staff type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="teaching">Teaching Staff</SelectItem>
-                    <SelectItem value="non-teaching">Non-Teaching Staff</SelectItem>
-                    <SelectItem value="headteacher">Headteacher / Principal</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="accountant">Accountant</SelectItem>
+                    {allowedStaffTypes.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

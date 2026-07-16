@@ -21,6 +21,7 @@ const services = [
   { id: 'fees', label: 'School Fees', icon: School, color: 'bg-rose-500 hover:bg-rose-600', textColor: 'text-white' },
   { id: 'marks', label: 'Mark Entry', icon: PenTool, color: 'bg-indigo-500 hover:bg-indigo-600', textColor: 'text-white' },
   { id: 'staff-checkin', label: 'Staff Check-In', icon: UserCheck, color: 'bg-amber-500 hover:bg-amber-600', textColor: 'text-white' },
+  { id: 'driver-checkin', label: 'Driver Check-In', icon: Bus, color: 'bg-teal-500 hover:bg-teal-600', textColor: 'text-white' },
 ];
 
 export default function TerminalPage() {
@@ -305,6 +306,12 @@ export default function TerminalPage() {
         setUid('');
         return;
       }
+      if (service === 'driver-checkin') {
+        const res = await api.post<{ driver: string; route: string; trip: { status: string } }>('/transport/driver-checkin', { cardUid });
+        setResult({ ok: true, message: `${res.driver} checked in — Route: ${res.route}` });
+        setUid('');
+        return;
+      }
       const isPayment = service !== 'attendance';
       const res = await tapCard(cardUid, service, isPayment ? parseFloat(amount) || 0 : 0, 'tablet-01');
       if (res.pinRequired) {
@@ -363,7 +370,7 @@ export default function TerminalPage() {
   }
 
   const svc = services.find((s) => s.id === service);
-  const isPayment = service !== 'attendance' && service !== 'marks' && service !== 'staff-checkin';
+  const isPayment = service !== 'attendance' && service !== 'marks' && service !== 'staff-checkin' && service !== 'driver-checkin';
 
   if (service === 'issue' && mode === 'issue') {
     return (

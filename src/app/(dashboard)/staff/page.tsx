@@ -170,6 +170,7 @@ export default function StaffPage() {
                         <div>
                           <p className="font-medium">{member.name}</p>
                           <p className="text-sm text-muted-foreground">{member.role}</p>
+                          {member.indexNumber && <p className="text-xs font-mono text-muted-foreground/60 mt-0.5">{member.indexNumber}</p>}
                         </div>
                       </div>
                       <DropdownMenu>

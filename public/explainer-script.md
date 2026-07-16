@@ -1,4 +1,4 @@
-# EduPlatform — Animated Explainer Video
+# EDUPLATFORM SOFTWARE SERVICES — Animated Explainer Video
 
 **Target audience:** School owners, headteachers, school administrators in Africa
 **Tone:** Professional, warm, solution-oriented
@@ -20,7 +20,7 @@
 
 | Time | Visual | Narration | On-Screen Text |
 |------|--------|-----------|----------------|
-| 0:20 | Screen wipes to reveal a clean, modern interface. The word **EduPlatform** fades in with a glowing effect. Icons orbit around it: student, staff, wallet, QR, chart. | *"Introducing EduPlatform — the all-in-one school management system designed for African schools."* | **EduPlatform** |
+| 0:20 | Screen wipes to reveal a clean, modern interface. The word **EDUPLATFORM SOFTWARE SERVICES** fades in with a glowing effect. Icons orbit around it: student, staff, wallet, QR, chart. | *"Introducing EDUPLATFORM SOFTWARE SERVICES — the all-in-one school management system designed for African schools."* | **EDUPLATFORM SOFTWARE SERVICES** |
 | 0:30 | Split into 3 quick cuts: (1) headteacher on laptop seeing dashboard, (2) teacher on tablet taking attendance, (3) parent on phone checking child's progress | *"From the headteacher's office to the classroom to the parent at home — everything connected in real time."* | **All in one place** |
 
 ---
@@ -67,7 +67,7 @@
 
 | Time | Visual | Narration | On-Screen Text |
 |------|--------|-----------|----------------|
-| 1:45 | Animated classroom. Teacher clicks "Print QR Sheets" on a laptop. Printer hums, sheets come out with QR codes next to each student name. | *"Exam grading used to take days. With EduPlatform, print QR-coded answer sheets — each student has their own code."* | **QR Answer Sheets** |
+| 1:45 | Animated classroom. Teacher clicks "Print QR Sheets" on a laptop. Printer hums, sheets come out with QR codes next to each student name. | *"Exam grading used to take days. With EDUPLATFORM SOFTWARE SERVICES, print QR-coded answer sheets — each student has their own code."* | **QR Answer Sheets** |
 | 1:53 | Teacher scans a QR with phone. Score input appears. She types "85" and saves. Next student auto-loads. | *"Scan with any phone, enter the score, and save. The system auto-advances to the next student. No manual data entry."* | **Scan → Score → Save** |
 
 ---
@@ -94,9 +94,9 @@
 
 | Time | Visual | Narration | On-Screen Text |
 |------|--------|-----------|----------------|
-| 2:25 | Three plan cards float in: Free, Professional, Enterprise. "Get Started" button pulses on the Free card. | *"EduPlatform scales with you. Start free with up to 30 students and 10 staff. Upgrade as you grow."* | **Start Free** |
+| 2:25 | Three plan cards float in: Free, Professional, Enterprise. "Get Started" button pulses on the Free card. | *"EDUPLATFORM SOFTWARE SERVICES scales with you. Start free with up to 30 students and 10 staff. Upgrade as you grow."* | **Start Free** |
 | 2:32 | Contact section appears: WhatsApp icon + phone icon. | *"Questions? We're one WhatsApp away."* | **Talk to us** |
-| 2:37 | EduPlatform logo center screen. Below it: URL, WhatsApp number, tagline. Fade to warm gradient. | *"EduPlatform — school management, made simple."* | **eduplatform.vercel.app** |
+| 2:37 | EDUPLATFORM SOFTWARE SERVICES logo center screen. Below it: URL, WhatsApp number, tagline. Fade to warm gradient. | *"EDUPLATFORM SOFTWARE SERVICES — school management, made simple."* | **eduplatform.vercel.app** |
 
 ---
 
@@ -104,7 +104,7 @@
 
 | Time | Visual | Audio |
 |------|--------|-------|
-| 2:45 | EduPlatform logo + tagline: "Built for Africa. Ready for the World." + CTA buttons: Get Started / Watch Demo | Music crescendo, fade out |
+| 2:45 | EDUPLATFORM SOFTWARE SERVICES logo + tagline: "Built for Africa. Ready for the World." + CTA buttons: Get Started / Watch Demo | Music crescendo, fade out |
 
 ---
 

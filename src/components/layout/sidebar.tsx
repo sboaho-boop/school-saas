@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { useThemeStore } from '@/stores/theme';
+import { Logo } from '@/components/logo';
 import {
   LayoutDashboard,
   Users,
@@ -24,6 +25,17 @@ import {
   Shield,
   Scan,
   Package,
+  BookOpen,
+  Building2,
+  Box,
+  AlertTriangle,
+  UserCircle,
+  FileText,
+  Pencil,
+  Calendar,
+  CalendarDays,
+  MessageSquareText,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -47,6 +59,17 @@ const iconMap = {
   Shield,
   Scan,
   Package,
+  Calendar,
+  CalendarDays,
+  MessageSquareText,
+  BookOpen,
+  Building2,
+  Box,
+  AlertTriangle,
+  UserCircle,
+  FileText,
+  Pencil,
+  Sparkles,
 };
 
 interface SidebarItem {
@@ -68,10 +91,22 @@ const sidebarItems: SidebarItem[] = [
   { id: 'transport', label: 'Transport', icon: 'Bus', href: '/transport' },
   { id: 'finance', label: 'Finance', icon: 'CreditCard', href: '/finance' },
   { id: 'communication', label: 'Communication', icon: 'MessageSquare', href: '/communication' },
+  { id: 'conferences', label: 'Conferences', icon: 'Calendar', href: '/conferences' },
+  { id: 'calendar', label: 'Calendar', icon: 'CalendarDays', href: '/calendar' },
   { id: 'reports', label: 'Reports', icon: 'BarChart3', href: '/reports' },
   { id: 'audit-logs', label: 'Audit Logs', icon: 'Shield', href: '/audit-logs' },
   { id: 'terminal', label: 'Terminal', icon: 'Scan', href: '/terminal' },
   { id: 'orders', label: 'Fulfillment', icon: 'Package', href: '/orders/admin' },
+  { id: 'library', label: 'Library', icon: 'BookOpen', href: '/library' },
+  { id: 'hostel', label: 'Hostel', icon: 'Building2', href: '/hostel' },
+  { id: 'inventory', label: 'Inventory', icon: 'Box', href: '/inventory' },
+  { id: 'behavior', label: 'Behavior', icon: 'AlertTriangle', href: '/behavior' },
+  { id: 'alumni', label: 'Alumni', icon: 'UserCircle', href: '/alumni' },
+  { id: 'assignments', label: 'Assignments', icon: 'FileText', href: '/assignments' },
+  { id: 'exams', label: 'Exams', icon: 'Pencil', href: '/exams' },
+  { id: 'lesson-plans', label: 'Lesson Plans', icon: 'GraduationCap', href: '/lesson-plans' },
+  { id: 'feedback', label: 'Send Feedback', icon: 'MessageSquareText', href: '/feedback' },
+  { id: 'ai-tutor', label: 'AI Tutor', icon: 'Sparkles', href: '/ai-tutor' },
   { id: 'settings', label: 'Settings', icon: 'Settings', href: '/settings' },
 ];
 
@@ -83,7 +118,7 @@ export function SidebarNavContent({ collapsed = false }: { collapsed?: boolean }
   const visibleItems = sidebarItems.filter((item) => allowedIds.includes(item.id));
 
   return (
-    <nav className="flex-1 space-y-1 px-2 py-4">
+    <nav className="flex-1 space-y-1 px-2 py-4 overflow-y-auto">
       {visibleItems.map((item) => {
         const Icon = iconMap[item.icon];
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -118,12 +153,12 @@ export function Sidebar() {
         collapsed ? 'w-[70px]' : 'w-64'
       )}
     >
-      <div className="flex h-full flex-col">
-        <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
-          {!collapsed && (
-            <span className="text-lg font-bold text-sidebar-foreground">
-              {theme.schoolName}
-            </span>
+      <div className="flex h-full flex-col overflow-hidden">
+        <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-3">
+          {!collapsed ? (
+            <Logo size="sm" />
+          ) : (
+            <Logo iconOnly size="sm" />
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}

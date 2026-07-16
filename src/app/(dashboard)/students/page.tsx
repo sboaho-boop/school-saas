@@ -159,6 +159,7 @@ export default function StudentsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Student</TableHead>
+                  <TableHead>Index No.</TableHead>
                   <TableHead>Class</TableHead>
                   <TableHead>Gender</TableHead>
                   <TableHead>Parent Contact</TableHead>
@@ -181,6 +182,7 @@ export default function StudentsPage() {
                         </div>
                       </div>
                     </TableCell>
+                    <TableCell><span className="font-mono text-xs">{student.indexNumber || '-'}</span></TableCell>
                     <TableCell>{student.className}</TableCell>
                     <TableCell className="capitalize">{student.gender}</TableCell>
                     <TableCell>
@@ -248,6 +250,7 @@ export default function StudentsPage() {
                     <div>
                       <p className="font-semibold">{selectedStudent.firstName} {selectedStudent.lastName}</p>
                       <p className="text-xs text-muted-foreground">{selectedStudent.className} · {selectedStudent.email}</p>
+                      {selectedStudent.indexNumber && <p className="text-xs font-mono text-muted-foreground/60">{selectedStudent.indexNumber}</p>}
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
@@ -270,7 +273,7 @@ export default function StudentsPage() {
                       <div className="space-y-1"><Label className="text-xs">Parent Phone</Label><Input size={1} className="h-8 text-sm" value={editForm.parentPhone} onChange={(e) => setEditForm({ ...editForm, parentPhone: e.target.value })} /></div>
                       <div className="space-y-1"><Label className="text-xs">Parent Email</Label><Input size={1} className="h-8 text-sm" value={editForm.parentEmail} onChange={(e) => setEditForm({ ...editForm, parentEmail: e.target.value })} /></div>
                       <div className="space-y-1"><Label className="text-xs">Status</Label>
-                        <Select value={editForm.status} onValueChange={(v) => setEditForm({ ...editForm, status: v })}>
+                        <Select value={editForm.status} onValueChange={(v) => setEditForm({ ...editForm, status: v ?? '' })}>
                           <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="active">Active</SelectItem>
