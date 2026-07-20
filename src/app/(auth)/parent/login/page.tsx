@@ -8,7 +8,8 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, setToken } from '@/lib/api';
-import { Eye, EyeOff, GraduationCap, Lock } from 'lucide-react';
+import { Logo } from '@/components/logo';
+import { Eye, EyeOff, Lock } from 'lucide-react';
 
 export default function ParentLoginPage() {
   const router = useRouter();
@@ -60,8 +61,8 @@ export default function ParentLoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10">
-            <GraduationCap size={28} className="text-primary" />
+          <div className="mx-auto mb-4 flex items-center justify-center">
+            <Logo />
           </div>
           <h1 className="text-2xl font-bold">Parent Portal</h1>
           <p className="text-muted-foreground text-sm mt-1">Sign in to monitor your child&apos;s progress</p>
