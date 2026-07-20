@@ -11,13 +11,13 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "EDUPLATFORM SOFTWARE SERVICES - School Management SaaS",
   description: "A modern, cloud-based school management platform built for Africa and beyond.",
-  icons: [{ rel: 'icon', url: '/favicon.svg' }, { rel: 'apple-touch-icon', url: '/favicon.svg' }],
+  icons: [{ rel: 'icon', url: '/favicon.png' }, { rel: 'apple-touch-icon', url: '/favicon.png' }],
   openGraph: {
     title: 'EDUPLATFORM SOFTWARE SERVICES',
     description: 'School management software for Africa and beyond.',
     url: 'https://school-saas-fawn.vercel.app',
     siteName: 'EDUPLATFORM SOFTWARE SERVICES',
-    images: [{ url: 'https://school-saas-fawn.vercel.app/brand-logo.svg', width: 200, height: 60 }],
+    images: [{ url: 'https://school-saas-fawn.vercel.app/brand-logo.png', width: 200, height: 60 }],
     locale: 'en_US',
     type: 'website',
   },
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'EDUPLATFORM SOFTWARE SERVICES',
     description: 'School management software for Africa and beyond.',
-    images: ['https://school-saas-fawn.vercel.app/brand-logo.svg'],
+    images: ['https://school-saas-fawn.vercel.app/brand-logo.png'],
   },
 };
 
