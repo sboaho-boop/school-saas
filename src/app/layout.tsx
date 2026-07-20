@@ -11,7 +11,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "EDUPLATFORM SOFTWARE SERVICES - School Management SaaS",
   description: "A modern, cloud-based school management platform built for Africa and beyond.",
-  icons: [{ rel: 'icon', url: '/favicon.png' }, { rel: 'apple-touch-icon', url: '/favicon.png' }],
+  icons: [
+    { rel: 'icon', url: '/favicon.png', sizes: '64x64' },
+    { rel: 'icon', url: '/favicon-192.png', sizes: '192x192' },
+    { rel: 'apple-touch-icon', url: '/favicon-192.png' },
+  ],
   openGraph: {
     title: 'EDUPLATFORM SOFTWARE SERVICES',
     description: 'School management software for Africa and beyond.',
