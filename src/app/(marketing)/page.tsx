@@ -847,8 +847,8 @@ export default function HomePage() {
                 <a href="https://wa.me/447735310744" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-emerald-500 transition-colors">
                   <MessageCircle size={14} /> WhatsApp: +44 7735 310744
                 </a>
-                <a href="tel:+233502262294" className="flex items-center gap-2 hover:text-sky-500 transition-colors">
-                  <Phone size={14} /> Call: 050 226 2294
+                <a href="tel:+233556674353" className="flex items-center gap-2 hover:text-sky-500 transition-colors">
+                  <Phone size={14} /> Call: 055 667 4353
                 </a>
                 <a href="mailto:sboaho@gmail.com" className="flex items-center gap-2 hover:text-indigo-500 transition-colors">
                   <Mail size={14} /> sboaho@gmail.com
