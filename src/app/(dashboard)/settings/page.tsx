@@ -19,7 +19,7 @@ import { useThemeStore } from '@/stores/theme';
 import { useBillingStore } from '@/stores/billing';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { Building, Palette, Globe, Bell, Shield, CreditCard, Check, Sparkles, XCircle, Smartphone, QrCode, KeyRound, Download, Trash2, FileText } from 'lucide-react';
+import { Building, Palette, Globe, Bell, Shield, CreditCard, Check, Sparkles, XCircle, Smartphone, QrCode, KeyRound, Download, Trash2, FileText, Wallet, Eye, EyeOff } from 'lucide-react';
 import { api, getToken } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
 
@@ -60,6 +60,18 @@ export default function SettingsPage() {
 
   const [globalLoading, setGlobalLoading] = useState(false);
 
+  const [hubtel, setHubtel] = useState({
+    hubtelClientId: '',
+    hubtelClientSecret: '',
+    hubtelMerchantAccount: '',
+    hubtelSmsClientId: '',
+    hubtelSmsClientSecret: '',
+  });
+  const [showHubtelSecret, setShowHubtelSecret] = useState(false);
+  const [hubtelMsg, setHubtelMsg] = useState('');
+  const [hubtelError, setHubtelError] = useState('');
+  const [hubtelLoading, setHubtelLoading] = useState(false);
+
   useEffect(() => {
     fetchSubscription();
     fetchPlans();
@@ -69,6 +81,9 @@ export default function SettingsPage() {
     api.get<{ id: string; email: string; name: string; phone: string; twoFactorEnabled: boolean }>('/auth/me').then((r) => {
       setPhone(r.phone || '');
       setTwoFactorEnabled(r.twoFactorEnabled);
+    }).catch(() => {});
+    api.get<{ credentials: typeof hubtel }>('/school/hubtel').then((r) => {
+      if (r.credentials) setHubtel(r.credentials);
     }).catch(() => {});
   }, [fetchSubscription, fetchPlans]);
 
@@ -129,6 +144,19 @@ export default function SettingsPage() {
     setGlobalLoading(false);
   };
 
+  const saveHubtel = async () => {
+    setHubtelLoading(true);
+    setHubtelMsg('');
+    setHubtelError('');
+    try {
+      await api.put('/school/hubtel', hubtel);
+      setHubtelMsg('Hubtel credentials saved successfully');
+    } catch (err: any) {
+      setHubtelError(err.message);
+    }
+    setHubtelLoading(false);
+  };
+
   return (
     <div className="space-y-6">
       <motion.div
@@ -157,6 +185,10 @@ export default function SettingsPage() {
           <TabsTrigger value="notifications">
             <Bell size={16} className="mr-2" />
             Notifications
+          </TabsTrigger>
+          <TabsTrigger value="payments">
+            <Wallet size={16} className="mr-2" />
+            Payments
           </TabsTrigger>
           <TabsTrigger value="security">
             <Shield size={16} className="mr-2" />
@@ -385,6 +417,49 @@ export default function SettingsPage() {
               </Button>
               {twoFactorMsg && <p className="text-sm text-emerald-600">{twoFactorMsg}</p>}
               {twoFactorError && <p className="text-sm text-red-500">{twoFactorError}</p>}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="payments" className="mt-6 space-y-4">
+          <Card className="border-border/50 shadow-sm">
+            <CardHeader>
+              <CardTitle>Hubtel Payment Gateway</CardTitle>
+              <CardDescription>Connect your Hubtel merchant account to accept payments from parents. Parents can pay school fees, top up wallets, and more via mobile money, card, or GHQR.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="hubtelClientId">Hubtel Client ID</Label>
+                <Input id="hubtelClientId" value={hubtel.hubtelClientId} onChange={(e) => setHubtel({ ...hubtel, hubtelClientId: e.target.value })} placeholder="Your Hubtel client ID" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="hubtelClientSecret">Hubtel Client Secret</Label>
+                <div className="relative">
+                  <Input id="hubtelClientSecret" type={showHubtelSecret ? 'text' : 'password'} value={hubtel.hubtelClientSecret} onChange={(e) => setHubtel({ ...hubtel, hubtelClientSecret: e.target.value })} placeholder="Your Hubtel client secret" />
+                  <button type="button" onClick={() => setShowHubtelSecret(!showHubtelSecret)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                    {showHubtelSecret ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="hubtelMerchantAccount">Merchant Account Number</Label>
+                <Input id="hubtelMerchantAccount" value={hubtel.hubtelMerchantAccount} onChange={(e) => setHubtel({ ...hubtel, hubtelMerchantAccount: e.target.value })} placeholder="Your Hubtel merchant account number" />
+              </div>
+              <Separator />
+              <p className="text-sm font-medium text-muted-foreground">SMS Credentials (for sending payment alerts to parents)</p>
+              <div className="space-y-2">
+                <Label htmlFor="hubtelSmsClientId">SMS Client ID</Label>
+                <Input id="hubtelSmsClientId" value={hubtel.hubtelSmsClientId} onChange={(e) => setHubtel({ ...hubtel, hubtelSmsClientId: e.target.value })} placeholder="Hubtel SMS client ID" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="hubtelSmsClientSecret">SMS Client Secret</Label>
+                <Input id="hubtelSmsClientSecret" type="password" value={hubtel.hubtelSmsClientSecret} onChange={(e) => setHubtel({ ...hubtel, hubtelSmsClientSecret: e.target.value })} placeholder="Hubtel SMS client secret" />
+              </div>
+              <Button onClick={saveHubtel} disabled={hubtelLoading}>
+                {hubtelLoading ? 'Saving...' : 'Save Hubtel Credentials'}
+              </Button>
+              {hubtelMsg && <p className="text-sm text-emerald-600">{hubtelMsg}</p>}
+              {hubtelError && <p className="text-sm text-red-500">{hubtelError}</p>}
             </CardContent>
           </Card>
         </TabsContent>
