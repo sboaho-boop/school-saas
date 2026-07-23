@@ -64,6 +64,7 @@ export default function SettingsPage() {
     hubtelClientId: '',
     hubtelClientSecret: '',
     hubtelMerchantAccount: '',
+    hubtelDisbursementAccount: '',
     hubtelSmsClientId: '',
     hubtelSmsClientSecret: '',
   });
@@ -442,8 +443,12 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="hubtelMerchantAccount">Merchant Account Number</Label>
-                <Input id="hubtelMerchantAccount" value={hubtel.hubtelMerchantAccount} onChange={(e) => setHubtel({ ...hubtel, hubtelMerchantAccount: e.target.value })} placeholder="Your Hubtel merchant account number" />
+                <Label htmlFor="hubtelMerchantAccount">Merchant Account Number (Collection)</Label>
+                <Input id="hubtelMerchantAccount" value={hubtel.hubtelMerchantAccount} onChange={(e) => setHubtel({ ...hubtel, hubtelMerchantAccount: e.target.value })} placeholder="Your Hubtel collection account number" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="hubtelDisbursementAccount">Disbursement Account Number (for withdrawals & staff payments)</Label>
+                <Input id="hubtelDisbursementAccount" value={hubtel.hubtelDisbursementAccount} onChange={(e) => setHubtel({ ...hubtel, hubtelDisbursementAccount: e.target.value })} placeholder="Your Hubtel disbursement account number" />
               </div>
               <Separator />
               <p className="text-sm font-medium text-muted-foreground">SMS Credentials (for sending payment alerts to parents)</p>
