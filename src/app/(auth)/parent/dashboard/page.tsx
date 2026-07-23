@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, getToken, setToken } from '@/lib/api';
-import { GraduationCap, Wallet, ArrowLeft, LogOut, Check, X, Clock, AlertCircle, Eye, Plus, Lock, Settings, KeyRound, Smartphone, CreditCard, ExternalLink, Loader2 } from 'lucide-react';
+import { GraduationCap, Wallet, ArrowLeft, LogOut, Check, X, Clock, AlertCircle, Eye, Plus, Lock, Settings, KeyRound, Smartphone, Loader2 } from 'lucide-react';
 
 interface ChildSummary {
   id: string;
@@ -29,7 +29,8 @@ export default function ParentDashboardPage() {
   const [children, setChildren] = useState<ChildSummary[]>([]);
   const [selected, setSelected] = useState<ChildSummary | null>(null);
   const [topUpAmount, setTopUpAmount] = useState('');
-  const [topUpMethod, setTopUpMethod] = useState<'momo' | 'card' | null>(null);
+  const [topUpPhone, setTopUpPhone] = useState('');
+  const [topUpChannel, setTopUpChannel] = useState<'mtn-gh' | 'vodafone-gh' | 'tigo-gh' | null>(null);
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
   const [initiating, setInitiating] = useState(false);
   const [topUpMsg, setTopUpMsg] = useState('');
@@ -46,17 +47,6 @@ export default function ParentDashboardPage() {
     const token = getToken();
     if (!token) { router.push('/parent/login'); return; }
 
-    const params = new URLSearchParams(window.location.search);
-    const topupStatus = params.get('topup');
-    if (topupStatus === 'success') {
-      setTopUpMsg('Payment successful! Wallet will be credited shortly. Please refresh to see updated balance.');
-    } else if (topupStatus === 'cancelled') {
-      setTopUpMsg('Payment was cancelled.');
-    }
-    if (topupStatus) {
-      window.history.replaceState({}, '', '/parent/dashboard');
-    }
-
     api.get<ChildSummary[]>('/parent/children').then((data) => {
       setChildren(data);
       setLoading(false);
@@ -69,13 +59,21 @@ export default function ParentDashboardPage() {
   };
 
   const initiateTopUp = async () => {
-    if (!selected || !topUpAmount || !topUpMethod) return;
+    if (!selected || !topUpAmount || !topUpChannel || !topUpPhone) return;
     setInitiating(true);
     setTopUpMsg('');
     try {
-      const res = await api.post<{ checkoutUrl: string; reference: string }>('/parent/wallet/initiate-topup', { studentId: selected.id, amount: parseFloat(topUpAmount), method: topUpMethod });
-      setTopUpMsg('Redirecting to payment...');
-      window.location.href = res.checkoutUrl;
+      const res = await api.post<{ message: string; reference: string; transactionId?: string }>('/parent/wallet/initiate-topup', {
+        studentId: selected.id,
+        amount: parseFloat(topUpAmount),
+        phone: topUpPhone,
+        channel: topUpChannel,
+      });
+      setTopUpMsg(res.message || 'Payment prompt sent! Check your phone and approve.');
+      setShowPaymentOptions(false);
+      setTopUpAmount('');
+      setTopUpPhone('');
+      setTopUpChannel(null);
     } catch (err: any) {
       setTopUpMsg(err.message || 'Failed to initiate payment');
     } finally {
@@ -170,18 +168,39 @@ export default function ParentDashboardPage() {
                     {topUpMsg && <p className={`text-xs ${topUpMsg.includes('failed') || topUpMsg.includes('Error') ? 'text-red-500' : topUpMsg.includes('Redirecting') ? 'text-blue-500' : 'text-emerald-600'}`}>{topUpMsg}</p>}
                     {showPaymentOptions && (
                       <div className="p-3 rounded-lg border border-border/50 space-y-2">
-                        <p className="text-xs font-medium text-muted-foreground">Choose payment method</p>
+                        <p className="text-xs font-medium text-muted-foreground">Mobile Money Payment</p>
+                        <Input
+                          type="tel"
+                          placeholder="Your mobile money number (e.g. 0241234567)"
+                          value={topUpPhone}
+                          onChange={(e) => setTopUpPhone(e.target.value)}
+                          className="font-mono"
+                        />
                         <div className="flex gap-2">
-                          <Button size="sm" variant={topUpMethod === 'momo' ? 'default' : 'outline'} className="flex-1" onClick={() => { setTopUpMethod('momo'); initiateTopUp(); }}>
-                            {initiating && topUpMethod === 'momo' ? <Loader2 size={14} className="mr-1 animate-spin" /> : <Smartphone size={14} className="mr-1" />}
-                            Mobile Money
-                          </Button>
-                          <Button size="sm" variant={topUpMethod === 'card' ? 'default' : 'outline'} className="flex-1" onClick={() => { setTopUpMethod('card'); initiateTopUp(); }}>
-                            {initiating && topUpMethod === 'card' ? <Loader2 size={14} className="mr-1 animate-spin" /> : <CreditCard size={14} className="mr-1" />}
-                            Card / Bank
-                          </Button>
+                          {[
+                            { id: 'mtn-gh' as const, label: 'MTN', color: 'text-yellow-600' },
+                            { id: 'vodafone-gh' as const, label: 'Vodafone', color: 'text-red-600' },
+                            { id: 'tigo-gh' as const, label: 'AirtelTigo', color: 'text-blue-600' },
+                          ].map((ch) => (
+                            <Button
+                              key={ch.id}
+                              size="sm"
+                              variant={topUpChannel === ch.id ? 'default' : 'outline'}
+                              className={`flex-1 ${topUpChannel === ch.id ? '' : ch.color}`}
+                              onClick={() => { setTopUpChannel(ch.id); }}
+                            >
+                              {ch.label}
+                            </Button>
+                          ))}
                         </div>
-                        {initiating && <p className="text-xs text-blue-500 flex items-center gap-1"><Loader2 size={12} className="animate-spin" />Creating checkout...</p>}
+                        <Button
+                          className="w-full"
+                          onClick={initiateTopUp}
+                          disabled={!topUpPhone || !topUpChannel || initiating}
+                        >
+                          {initiating ? <Loader2 size={14} className="mr-1 animate-spin" /> : <Smartphone size={14} className="mr-1" />}
+                          {initiating ? 'Sending prompt...' : 'Pay with Mobile Money'}
+                        </Button>
                       </div>
                     )}
                   </div>
