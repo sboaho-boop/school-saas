@@ -31,9 +31,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <MessageCircle size={22} />
         </a>
         <a
-          href="tel:+233502262294"
+          href="tel:+233556674353"
           className="flex size-12 items-center justify-center rounded-full bg-sky-500 text-white shadow-lg shadow-sky-500/30 hover:bg-sky-600 transition-all hover:scale-110"
-          title="Call: 050 226 2294"
+          title="Call: 055 667 4353"
         >
           <Phone size={22} />
         </a>

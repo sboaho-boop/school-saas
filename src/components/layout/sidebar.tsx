@@ -184,11 +184,11 @@ export function Sidebar() {
                 WhatsApp: +44 7735 310744
               </a>
               <a
-                href="tel:+233502262294"
+                href="tel:+233556674353"
                 className="flex items-center gap-2 text-xs text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors"
               >
                 <Phone size={14} className="text-sky-400" />
-                Call: 050 226 2294
+                Call: 055 667 4353
               </a>
               <a
                 href="mailto:sboaho@gmail.com"

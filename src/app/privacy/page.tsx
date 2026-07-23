@@ -137,7 +137,7 @@ export default function PrivacyPage() {
             <div className="mt-2 bg-muted p-4 rounded-lg space-y-1">
               <p><strong>EDUPLATFORM SOFTWARE SERVICES</strong></p>
               <p>Email: <a href="mailto:sboaho@gmail.com" className="text-primary hover:underline">sboaho@gmail.com</a></p>
-              <p>Phone: <a href="tel:+233502262294" className="text-primary hover:underline">050 226 2294</a></p>
+              <p>Phone: <a href="tel:+233556674353" className="text-primary hover:underline">055 667 4353</a></p>
               <p>WhatsApp: <a href="https://wa.me/447735310744" className="text-primary hover:underline">+44 7735 310744</a></p>
               <p>Location: Accra, Ghana</p>
             </div>
