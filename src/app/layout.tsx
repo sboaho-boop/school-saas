@@ -19,9 +19,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'EDUPLATFORM SOFTWARE SERVICES',
     description: 'School management software for Africa and beyond.',
-    url: 'https://school-saas-fawn.vercel.app',
+    url: 'https://eduplatformsoftware.com',
     siteName: 'EDUPLATFORM SOFTWARE SERVICES',
-    images: [{ url: 'https://school-saas-fawn.vercel.app/brand-logo.png', width: 200, height: 60 }],
+    images: [{ url: 'https://eduplatformsoftware.com/brand-logo.png', width: 200, height: 60 }],
     locale: 'en_US',
     type: 'website',
   },
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'EDUPLATFORM SOFTWARE SERVICES',
     description: 'School management software for Africa and beyond.',
-    images: ['https://school-saas-fawn.vercel.app/brand-logo.png'],
+    images: ['https://eduplatformsoftware.com/brand-logo.png'],
   },
 };
 

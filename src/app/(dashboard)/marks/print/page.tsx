@@ -37,7 +37,7 @@ export default function PrintMarksPage() {
   const activeTerm = terms.find((t) => t.isActive);
   const termId = selectedTerm || activeTerm?.id || '';
 
-  const BASE = typeof window !== 'undefined' ? window.location.origin : 'https://school-saas-fawn.vercel.app';
+  const BASE = typeof window !== 'undefined' ? window.location.origin : 'https://eduplatformsoftware.com';
   const classStudents = students.filter((s) => s.classId === selectedClass);
 
   return (
