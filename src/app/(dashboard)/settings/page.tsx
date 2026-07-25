@@ -19,7 +19,7 @@ import { useThemeStore } from '@/stores/theme';
 import { useBillingStore } from '@/stores/billing';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { Building, Palette, Globe, Bell, Shield, CreditCard, Check, Sparkles, XCircle, Smartphone, QrCode, KeyRound, Download, Trash2, FileText, Wallet, Eye, EyeOff } from 'lucide-react';
+import { Building, Palette, Globe, Bell, Shield, CreditCard, Check, Sparkles, XCircle, Smartphone, QrCode, KeyRound, Download, Trash2, FileText, Wallet, Eye, EyeOff, Nfc, ShoppingCart, Zap } from 'lucide-react';
 import { api, getToken } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
 
@@ -202,6 +202,10 @@ export default function SettingsPage() {
           <TabsTrigger value="privacy">
             <Shield size={16} className="mr-2" />
             Data & Privacy
+          </TabsTrigger>
+          <TabsTrigger value="nfc-cards">
+            <Nfc size={16} className="mr-2" />
+            NFC Cards
           </TabsTrigger>
         </TabsList>
 
@@ -796,6 +800,135 @@ export default function SettingsPage() {
 
               {twoFactorMsg && <p className="text-sm text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 px-3 py-2 rounded-md">{twoFactorMsg}</p>}
               {twoFactorError && <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/50 px-3 py-2 rounded-md">{twoFactorError}</p>}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="nfc-cards" className="mt-6 space-y-4">
+          <Card className="border-border/50 shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Nfc size={20} className="text-primary" />
+                NFC Card Guide
+              </CardTitle>
+              <CardDescription>What you need to set up NFC card tap for attendance, wallet payments, and student/staff identification.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
+                <p className="text-sm font-medium text-primary mb-1">Important</p>
+                <p className="text-sm text-muted-foreground">
+                  This system uses <strong>NFC cards (13.56 MHz)</strong>. Do NOT buy cheap 125 kHz RFID cards — they will not work with phones or tablets.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold">What to Buy</h3>
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div className="rounded-lg border border-border/50 p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Nfc size={16} className="text-emerald-500" />
+                      NTAG213 NFC Cards
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      For students. Blank cards that get programmed with a unique ID. Buy in bulk — cheaper per card.
+                    </p>
+                    <p className="text-xs font-medium">~GH₵ 3–8 each</p>
+                    <p className="text-xs text-muted-foreground">Search: &quot;NTAG213 NFC card bulk&quot;</p>
+                  </div>
+                  <div className="rounded-lg border border-border/50 p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Nfc size={16} className="text-blue-500" />
+                      NFC Wristbands
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      For younger students (KG–Primary). Harder to lose, comfortable to wear daily.
+                    </p>
+                    <p className="text-xs font-medium">~GH₵ 5–12 each</p>
+                    <p className="text-xs text-muted-foreground">Search: &quot;NTAG213 NFC wristband bulk&quot;</p>
+                  </div>
+                  <div className="rounded-lg border border-border/50 p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Nfc size={16} className="text-violet-500" />
+                      NFC Key Fobs
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      For staff. Attach to lanyard or keyring. Professional look.
+                    </p>
+                    <p className="text-xs font-medium">~GH₵ 8–15 each</p>
+                    <p className="text-xs text-muted-foreground">Search: &quot;NTAG213 NFC key fob&quot;</p>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold">USB NFC Writer (One-time Purchase)</h3>
+                <div className="rounded-lg border border-border/50 p-4 space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Zap size={16} className="text-amber-500" />
+                    ACR122U USB NFC Reader/Writer
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Connects to your computer via USB. Used to write the generated card ID onto blank NFC cards. Only the school admin needs one.
+                  </p>
+                  <p className="text-xs font-medium">~GH₵ 150–300 (one-time)</p>
+                  <p className="text-xs text-muted-foreground">Search: &quot;ACR122U NFC reader writer&quot; on Jumia Ghana or Amazon</p>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold">Where to Buy in Ghana</h3>
+                <div className="grid gap-2 md:grid-cols-2">
+                  <div className="flex items-start gap-2 text-sm">
+                    <ShoppingCart size={14} className="text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-medium">Jumia Ghana</p>
+                      <p className="text-xs text-muted-foreground">Search &quot;NFC card&quot; or &quot;NFC wristband&quot; — fastest delivery</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2 text-sm">
+                    <ShoppingCart size={14} className="text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-medium">AliExpress</p>
+                      <p className="text-xs text-muted-foreground">Cheapest for bulk orders (50+ cards). Ships in 15-30 days</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2 text-sm">
+                    <ShoppingCart size={14} className="text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-medium">Local Printing Shops</p>
+                      <p className="text-xs text-muted-foreground">Some print custom NFC cards with school logos — ask around Accra/Kumasi</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2 text-sm">
+                    <ShoppingCart size={14} className="text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-medium">Amazon (via freight forwarder)</p>
+                      <p className="text-xs text-muted-foreground">Best quality. Use GhanaShip or ShopToGhana to receive</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold">How It Works</h3>
+                <ol className="text-sm text-muted-foreground space-y-2 list-decimal pl-4">
+                  <li><strong>Generate card ID</strong> — In the wallet page, click &quot;Generate Card&quot; for a student. The system creates a unique ID like <code className="bg-muted px-1 rounded">EDU-A3F8K2M1</code></li>
+                  <li><strong>Write to card</strong> — Connect the ACR122U to your computer, open the NFC writer app, and tap the blank card to write the ID onto it</li>
+                  <li><strong>Issue the card</strong> — Hand the card to the student. Their ID is now linked to their wallet in the system</li>
+                  <li><strong>Tap to use</strong> — At the terminal, the student taps their card on the admin&apos;s phone for attendance, wallet top-up, or payments</li>
+                </ol>
+              </div>
+
+              <div className="p-4 rounded-lg bg-muted/50 text-sm text-muted-foreground">
+                <p className="font-medium text-foreground mb-1">Need help?</p>
+                <p>Contact us at <strong>055 667 4353</strong> or <strong>sboaho@gmail.com</strong> for card setup assistance.</p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
