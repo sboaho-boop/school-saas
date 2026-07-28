@@ -47,7 +47,7 @@ export default function MarksPage() {
 
   const isTeaching = currentUser?.staffType === 'teaching';
   const availableClasses = isTeaching
-    ? classes.filter((c) => c.name === currentUser?.assignedClass)
+    ? classes.filter((c) => currentUser?.assignedClasses?.includes(c.name))
     : classes;
 
   useEffect(() => {

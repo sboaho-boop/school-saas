@@ -16,7 +16,7 @@ interface ImportDialogProps {
 
 const TEMPLATES = {
   students: 'firstName,lastName,email,className,dateOfBirth,gender,parentName,parentPhone,parentEmail,enrollmentDate,status\nJohn,Doe,john@example.com,Grade 1 - Section A,2018-05-12,male,John Parent,0712345678,parent@example.com,2026-01-15,active',
-  staff: 'name,email,phone,role,department,staffType,assignedClass,hireDate\nJane Teacher,jane@school.com,0712345678,Class Teacher,Academics,teaching,Grade 1 - Section A,2025-01-01',
+  staff: 'name,email,phone,role,department,staffType,assignedClasses,hireDate\nJane Teacher,jane@school.com,0712345678,Class Teacher,Academics,teaching,"[""Basic 1A"",""Basic 1B""]",2025-01-01',
   marks: 'studentId,subjectId,score,grade,remarks,classId,termId\n<student-id>,<subject-id>,85,A,Good work,<class-id>,<term-id>',
 };
 

@@ -56,7 +56,8 @@ export default function StaffPage() {
   const [genMsg, setGenMsg] = useState<Record<string, string>>({});
   const [wristbandInput, setWristbandInput] = useState<Record<string, string>>({});
   const [editingStaffId, setEditingStaffId] = useState<string | null>(null);
-  const [editClass, setEditClass] = useState('');
+  const [editClasses, setEditClasses] = useState<string[]>([]);
+  const [editClassInput, setEditClassInput] = useState('');
   const [editSubjects, setEditSubjects] = useState<string[]>([]);
   const [editSubjectInput, setEditSubjectInput] = useState('');
   const [savingEdit, setSavingEdit] = useState(false);
@@ -219,8 +220,9 @@ export default function StaffPage() {
                           {member.staffType === 'teaching' && (
                             <DropdownMenuItem onClick={() => {
                               setEditingStaffId(member.id);
-                              setEditClass(member.assignedClass || '');
+                              setEditClasses([...(member.assignedClasses || [])]);
                               setEditSubjects([...(member.assignedSubjects || [])]);
+                              setEditClassInput('');
                               setEditSubjectInput('');
                             }}>
                               <Pencil size={14} className="mr-2" />
@@ -238,10 +240,14 @@ export default function StaffPage() {
                         {member.status}
                       </Badge>
                     </div>
-                    {member.staffType === 'teaching' && member.assignedClass && (
-                      <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
-                        <Users size={14} />
-                        <span>Class: <strong>{member.assignedClass}</strong></span>
+                    {member.staffType === 'teaching' && member.assignedClasses && member.assignedClasses.length > 0 && (
+                      <div className="mt-3 flex items-start gap-2 text-sm text-muted-foreground">
+                        <Users size={14} className="mt-0.5" />
+                        <div className="flex flex-wrap gap-1">
+                          {member.assignedClasses.map((cls) => (
+                            <Badge key={cls} variant="outline" className="text-xs">{cls}</Badge>
+                          ))}
+                        </div>
                       </div>
                     )}
                     {member.staffType === 'teaching' && member.assignedSubjects && member.assignedSubjects.length > 0 && (
@@ -308,13 +314,25 @@ export default function StaffPage() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Assigned Class</Label>
-              <Select value={editClass} onValueChange={(v) => v && setEditClass(v)}>
-                <SelectTrigger><SelectValue placeholder="Select class" /></SelectTrigger>
+              <Label>Assigned Classes</Label>
+              <Select value={editClassInput} onValueChange={(v) => { if (v && !editClasses.includes(v)) setEditClasses([...editClasses, v]); setEditClassInput(''); }}>
+                <SelectTrigger><SelectValue placeholder="Add a class" /></SelectTrigger>
                 <SelectContent>
-                  {CLASS_OPTIONS.map((cls) => <SelectItem key={cls} value={cls}>{cls}</SelectItem>)}
+                  {CLASS_OPTIONS.filter((c) => !editClasses.includes(c)).map((cls) => (
+                    <SelectItem key={cls} value={cls}>{cls}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              {editClasses.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {editClasses.map((cls) => (
+                    <span key={cls} className="inline-flex items-center gap-1 rounded-md bg-primary/10 text-primary text-xs px-2 py-1">
+                      {cls}
+                      <button type="button" onClick={() => setEditClasses(editClasses.filter((c) => c !== cls))}><X size={12} /></button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Assigned Subjects</Label>
@@ -344,7 +362,7 @@ export default function StaffPage() {
               if (!editingStaffId) return;
               setSavingEdit(true);
               try {
-                await api.put(`/staff/${editingStaffId}`, { assignedClass: editClass, assignedSubjects: editSubjects });
+                await api.put(`/staff/${editingStaffId}`, { assignedClasses: editClasses, assignedSubjects: editSubjects });
                 useStaffStore.getState().fetchStaff();
                 setEditingStaffId(null);
               } catch {}

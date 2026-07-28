@@ -195,9 +195,9 @@ export default function StudentsPage() {
         </div>
       </motion.div>
 
-      {currentUser?.staffType === 'teaching' && currentUser?.assignedClass && (
+      {currentUser?.staffType === 'teaching' && currentUser?.assignedClasses && currentUser.assignedClasses.length > 0 && (
         <div className="flex items-center gap-2 rounded-lg bg-primary/5 border border-primary/20 px-4 py-3 text-sm text-primary">
-          <Eye size={16} />You are viewing students in <strong>{currentUser.assignedClass}</strong> — only students assigned to your class are shown.
+          <Eye size={16} />You are viewing students in <strong>{currentUser.assignedClasses.join(', ')}</strong> — only students assigned to your classes are shown.
         </div>
       )}
 

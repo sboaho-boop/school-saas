@@ -125,7 +125,7 @@ export default function TransportPage() {
                     >
                       <option value="">Unassigned</option>
                       {teachingStaff.map((s) => (
-                        <option key={s.id} value={s.id}>{s.name} — {s.assignedClass || s.role}</option>
+                        <option key={s.id} value={s.id}>{s.name} — {(s.assignedClasses && s.assignedClasses.length > 0) ? s.assignedClasses.join(', ') : s.role}</option>
                       ))}
                     </select>
                   </div>

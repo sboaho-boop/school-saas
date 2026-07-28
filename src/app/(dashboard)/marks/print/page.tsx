@@ -29,7 +29,7 @@ export default function PrintMarksPage() {
 
   const isTeaching = currentUser?.staffType === 'teaching';
   const availableClasses = isTeaching
-    ? classes.filter((c) => c.name === currentUser?.assignedClass)
+    ? classes.filter((c) => currentUser?.assignedClasses?.includes(c.name))
     : classes;
 
   useEffect(() => { fetchClasses(); fetchSubjects(); fetchStudents(); fetchTerms(); }, [fetchClasses, fetchSubjects, fetchStudents, fetchTerms]);

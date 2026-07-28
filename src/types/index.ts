@@ -75,7 +75,7 @@ export interface Staff {
   staffType: StaffType;
   campusId?: string;
   campusName?: string;
-  assignedClass?: string;
+  assignedClasses?: string[];
   assignedSubjects?: string[];
   assignedRouteId?: string;
   assignedRouteName?: string;

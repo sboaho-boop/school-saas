@@ -22,8 +22,8 @@ export function TeachingDashboard() {
   const students = useStudentStore((s) => s.students);
   const tasks = useTaskStore((s) => s.tasks);
 
-  const myClass = user?.assignedClass || '';
-  const myStudents = students.filter((s) => s.className === myClass);
+  const myClasses = user?.assignedClasses || [];
+  const myStudents = students.filter((s) => myClasses.includes(s.className || ''));
   const myTasks = tasks.filter((t) => t.assignedTo === user?.name && t.status !== 'completed');
 
   return (
@@ -31,7 +31,7 @@ export function TeachingDashboard() {
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="flex items-center justify-between rounded-xl bg-gradient-to-r from-blue-500/10 via-primary/10 to-indigo-500/10 p-6">
         <div>
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">My Dashboard</h1>
-          <p className="text-muted-foreground">{myClass ? `Class: ${myClass}` : 'Welcome, Teacher'}</p>
+          <p className="text-muted-foreground">{myClasses.length > 0 ? `Classes: ${myClasses.join(', ')}` : 'Welcome, Teacher'}</p>
         </div>
         <Button variant="outline" size="sm"><Download size={16} className="mr-2" />Export</Button>
       </motion.div>
@@ -85,7 +85,7 @@ export function TeachingDashboard() {
             ) : (
               <div className="text-center py-8">
                 <Users size={32} className="mx-auto text-muted-foreground/40 mb-2" />
-                <p className="text-sm text-muted-foreground">{myClass ? 'No students in this class yet' : 'No class assigned. Ask your admin to assign you a class.'}</p>
+                <p className="text-sm text-muted-foreground">{myClasses.length > 0 ? 'No students in these classes yet' : 'No classes assigned. Ask your admin to assign you classes.'}</p>
               </div>
             )}
           </CardContent>

@@ -62,7 +62,8 @@ export function AddStaffDialog() {
         { value: 'admin' as StaffType, label: 'Admin' },
         { value: 'accountant' as StaffType, label: 'Accountant' },
       ];
-  const [assignedClass, setAssignedClass] = useState('');
+  const [assignedClasses, setAssignedClasses] = useState<string[]>([]);
+  const [classInput, setClassInput] = useState('');
   const [assignedSubjects, setAssignedSubjects] = useState<string[]>([]);
   const [subjectInput, setSubjectInput] = useState('');
   const [assignedRouteId, setAssignedRouteId] = useState('');
@@ -72,6 +73,12 @@ export function AddStaffDialog() {
   useEffect(() => {
     if (open) api.get<any[]>('/campus').then(setCampuses).catch(() => {});
   }, [open]);
+
+  const addClass = (cls: string) => {
+    if (cls && !assignedClasses.includes(cls)) setAssignedClasses([...assignedClasses, cls]);
+    setClassInput('');
+  };
+  const removeClass = (cls: string) => setAssignedClasses(assignedClasses.filter((c) => c !== cls));
 
   const addSubject = (subject: string) => {
     if (subject && !assignedSubjects.includes(subject)) {
@@ -92,7 +99,7 @@ export function AddStaffDialog() {
       const result = await addStaff({
         name, email, phone, role, department, staffType, status,
         campusId: campusId || undefined,
-        assignedClass: staffType === 'teaching' ? assignedClass : undefined,
+        assignedClasses: staffType === 'teaching' ? assignedClasses : undefined,
         assignedSubjects: staffType === 'teaching' ? assignedSubjects : undefined,
         assignedRouteId: assignedRouteId || undefined,
         assignedRouteName: route?.name,
@@ -105,7 +112,7 @@ export function AddStaffDialog() {
 
   const resetForm = () => {
     setName(''); setEmail(''); setPhone(''); setRole(''); setDepartment('');
-    setStaffType('teaching'); setCampusId(''); setAssignedClass(''); setAssignedSubjects([]);
+    setStaffType('teaching'); setCampusId(''); setAssignedClasses([]); setClassInput(''); setAssignedSubjects([]);
     setSubjectInput(''); setAssignedRouteId(''); setStatus('active');
     setVerification(null);
   };
@@ -228,15 +235,29 @@ export function AddStaffDialog() {
               {staffType === 'teaching' && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="assignedClass">Assigned Class</Label>
-                    <Select value={assignedClass} onValueChange={(v) => v && setAssignedClass(v)}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select class" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CLASS_OPTIONS.map((cls) => <SelectItem key={cls} value={cls}>{cls}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <Label>Assigned Classes</Label>
+                    <div className="flex gap-2">
+                      <Select value={classInput} onValueChange={(v) => { if (v) addClass(v); }}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Add a class" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CLASS_OPTIONS.filter((c) => !assignedClasses.includes(c)).map((cls) => (
+                            <SelectItem key={cls} value={cls}>{cls}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {assignedClasses.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {assignedClasses.map((cls) => (
+                          <span key={cls} className="inline-flex items-center gap-1 rounded-md bg-primary/10 text-primary text-xs px-2 py-1">
+                            {cls}
+                            <button type="button" onClick={() => removeClass(cls)} className="hover:text-destructive"><X size={12} /></button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label>Assigned Subjects</Label>

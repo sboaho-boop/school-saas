@@ -23,7 +23,7 @@ export default function AttendancePage() {
 
   const isTeaching = currentUser?.staffType === 'teaching';
   const classOptions = isTeaching
-    ? classes.filter((c) => c.name === currentUser?.assignedClass).map((c) => ({ id: c.id, name: c.name }))
+    ? classes.filter((c) => currentUser?.assignedClasses?.includes(c.name)).map((c) => ({ id: c.id, name: c.name }))
     : classes.map((c) => ({ id: c.id, name: c.name }));
 
   useEffect(() => {
