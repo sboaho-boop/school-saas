@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Users, ClipboardCheck, BookOpen, ListChecks, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useStudentStore } from '@/stores/students';
@@ -61,7 +62,34 @@ export function TeachingDashboard() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <AttendanceChart />
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base font-medium flex items-center gap-2"><Users size={16} /> My Students</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {myStudents.length > 0 ? (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {myStudents.map((s) => (
+                  <div key={s.id} className="flex items-center gap-3 rounded-lg border border-border/50 p-3 hover:bg-muted/50 transition-colors">
+                    <Avatar className="size-9">
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs">{s.firstName?.[0]}{s.lastName?.[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{s.firstName} {s.lastName}</p>
+                      <p className="text-xs text-muted-foreground">{s.indexNumber}</p>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{s.className}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Users size={32} className="mx-auto text-muted-foreground/40 mb-2" />
+                <p className="text-sm text-muted-foreground">{myClass ? 'No students in this class yet' : 'No class assigned. Ask your admin to assign you a class.'}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle className="text-base font-medium">My Tasks</CardTitle>
@@ -82,6 +110,8 @@ export function TeachingDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <AttendanceChart />
     </div>
   );
 }

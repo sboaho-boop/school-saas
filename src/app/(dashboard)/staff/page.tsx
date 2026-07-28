@@ -8,16 +8,34 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
-import { Search, Download, MoreHorizontal, BookOpen, Users, ListChecks, Bus, School, CreditCard, Hand } from 'lucide-react';
+import { Search, Download, MoreHorizontal, BookOpen, Users, ListChecks, Bus, School, CreditCard, Hand, Pencil, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useStaffStore } from '@/stores/staff';
 import { useAuthStore } from '@/stores/auth';
 import { api } from '@/lib/api';
+import { Label } from '@/components/ui/label';
 import { AddStaffDialog } from '@/components/staff/add-staff-dialog';
 import { ImportDialog } from '@/components/import-dialog';
 import { NewTaskDialog } from '@/components/tasks/new-task-dialog';
 import type { StaffType } from '@/types';
+
+const CLASS_OPTIONS = [
+  'Basic 1A', 'Basic 1B', 'Basic 2A', 'Basic 2B',
+  'Basic 3A', 'Basic 3B', 'Basic 4A', 'Basic 4B',
+  'Basic 5A', 'Basic 5B', 'Basic 6A', 'Basic 6B',
+  'JHS 1A', 'JHS 1B', 'JHS 2A', 'JHS 2B',
+  'JHS 3A', 'JHS 3B', 'SHS 1A', 'SHS 1B',
+  'SHS 2A', 'SHS 2B', 'SHS 3A', 'SHS 3B',
+];
+
+const SUBJECT_OPTIONS = [
+  'Mathematics', 'English', 'Science', 'Physics', 'Chemistry', 'Biology',
+  'History', 'Geography', 'Literature', 'Algebra', 'Geometry',
+  'French', 'Swahili', 'Arabic', 'ICT', 'Physical Education',
+  'Art', 'Music', 'Social Studies', 'Religious Studies',
+];
 
 const staffTypeConfig: Record<StaffType, { label: string; className: string }> = {
   teaching: { label: 'Teaching', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' },
@@ -37,6 +55,11 @@ export default function StaffPage() {
   const [taskAssignee, setTaskAssignee] = useState<string | null>(null);
   const [genMsg, setGenMsg] = useState<Record<string, string>>({});
   const [wristbandInput, setWristbandInput] = useState<Record<string, string>>({});
+  const [editingStaffId, setEditingStaffId] = useState<string | null>(null);
+  const [editClass, setEditClass] = useState('');
+  const [editSubjects, setEditSubjects] = useState<string[]>([]);
+  const [editSubjectInput, setEditSubjectInput] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => {
     import('@/lib/api').then(({ api }) => api.get<any[]>('/campus').then(setCampuses).catch(() => {}));
@@ -193,6 +216,17 @@ export default function StaffPage() {
                             <Hand size={14} className="mr-2" />
                             Link Wristband
                           </DropdownMenuItem>
+                          {member.staffType === 'teaching' && (
+                            <DropdownMenuItem onClick={() => {
+                              setEditingStaffId(member.id);
+                              setEditClass(member.assignedClass || '');
+                              setEditSubjects([...(member.assignedSubjects || [])]);
+                              setEditSubjectInput('');
+                            }}>
+                              <Pencil size={14} className="mr-2" />
+                              Edit Class/Subjects
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
@@ -265,6 +299,60 @@ export default function StaffPage() {
           </motion.div>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={!!editingStaffId} onOpenChange={(o) => { if (!o) setEditingStaffId(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Class & Subjects</DialogTitle>
+            <DialogDescription>Update the assigned class and subjects for this teacher.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Assigned Class</Label>
+              <Select value={editClass} onValueChange={(v) => v && setEditClass(v)}>
+                <SelectTrigger><SelectValue placeholder="Select class" /></SelectTrigger>
+                <SelectContent>
+                  {CLASS_OPTIONS.map((cls) => <SelectItem key={cls} value={cls}>{cls}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Assigned Subjects</Label>
+              <Select value={editSubjectInput} onValueChange={(v) => { if (v && !editSubjects.includes(v)) setEditSubjects([...editSubjects, v]); setEditSubjectInput(''); }}>
+                <SelectTrigger><SelectValue placeholder="Add a subject" /></SelectTrigger>
+                <SelectContent>
+                  {SUBJECT_OPTIONS.filter((s) => !editSubjects.includes(s)).map((sub) => (
+                    <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {editSubjects.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {editSubjects.map((sub) => (
+                    <span key={sub} className="inline-flex items-center gap-1 rounded-md bg-primary/10 text-primary text-xs px-2 py-1">
+                      {sub}
+                      <button type="button" onClick={() => setEditSubjects(editSubjects.filter((s) => s !== sub))}><X size={12} /></button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingStaffId(null)}>Cancel</Button>
+            <Button onClick={async () => {
+              if (!editingStaffId) return;
+              setSavingEdit(true);
+              try {
+                await api.put(`/staff/${editingStaffId}`, { assignedClass: editClass, assignedSubjects: editSubjects });
+                useStaffStore.getState().fetchStaff();
+                setEditingStaffId(null);
+              } catch {}
+              setSavingEdit(false);
+            }} disabled={savingEdit}>{savingEdit ? 'Saving...' : 'Save Changes'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {taskAssignee && (
         <NewTaskDialog
