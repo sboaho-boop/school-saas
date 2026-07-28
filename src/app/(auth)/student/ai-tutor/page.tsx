@@ -15,7 +15,7 @@ interface ChatMessage {
   content: string;
 }
 
-const WELCOME_MESSAGE = "Hi there! I'm Nova, your AI study companion 🎉\n\nI can help you with:\n• Mathematics 📐 — step-by-step working\n• English 📖 — grammar, spelling, reading\n• Science 🔬 — explained with everyday examples\n• Social Studies 🌍 — Ghanaian history and culture\n• Homework help 📝 — I'll guide you, not give answers\n• Ghanaian languages 🗣️ — Twi, Ga, Ewe, Fante, Dagbani\n\nWhat would you like to learn today?";
+const WELCOME_MESSAGE = "Hi there! I'm Teacher Kofi, your AI study companion 🎉\n\nI can help you with:\n• Mathematics 📐 — step-by-step working\n• English 📖 — grammar, spelling, reading\n• Science 🔬 — explained with everyday examples\n• Social Studies 🌍 — Ghanaian history and culture\n• Homework help 📝 — I'll guide you, not give answers\n• Ghanaian languages 🗣️ — Twi, Ga, Ewe, Fante, Dagbani\n\nWhat would you like to learn today?";
 
 export default function StudentAITutorPage() {
   const router = useRouter();
@@ -76,7 +76,7 @@ export default function StudentAITutorPage() {
         <div className="max-w-4xl mx-auto flex items-center justify-between px-4 h-14">
           <div className="flex items-center gap-2">
             <Logo iconOnly size="sm" />
-            <span className="font-semibold">Nova AI Tutor</span>
+            <span className="font-semibold">Teacher Kofi</span>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => router.push('/student/dashboard')}>
@@ -144,7 +144,7 @@ export default function StudentAITutorPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask Nova anything..."
+                placeholder="Ask Teacher Kofi anything..."
                 disabled={loading}
                 className="flex-1"
               />
@@ -156,7 +156,7 @@ export default function StudentAITutorPage() {
               </Button>
             </div>
             <p className="text-[10px] text-muted-foreground mt-2 text-center">
-              Nova understands English, Twi, Ga, Ewe, Fante, and Dagbani. Responses are AI-generated — verify important information.
+              Teacher Kofi understands English, Twi, Ga, Ewe, Fante, and Dagbani. Responses are AI-generated — verify important information.
             </p>
           </div>
         </Card>

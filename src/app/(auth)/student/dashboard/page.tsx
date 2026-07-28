@@ -219,7 +219,7 @@ export default function StudentDashboardPage() {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => router.push('/student/ai-tutor')}>
-              <Sparkles size={14} className="mr-1 text-violet-500" />Ask Nova
+              <Sparkles size={14} className="mr-1 text-violet-500" />Ask Teacher Kofi
             </Button>
             <Button variant="ghost" size="sm" onClick={handleLogout}><LogOut size={14} className="mr-1" />Sign Out</Button>
           </div>
