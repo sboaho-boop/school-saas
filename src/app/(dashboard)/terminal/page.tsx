@@ -625,7 +625,7 @@ export default function TerminalPage() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">
-                  Select {encodeType === 'student' ? 'Student' : 'Staff'} (without card)
+                  Select {encodeType === 'student' ? 'Student' : 'Staff'}
                 </label>
                 <select
                   value={encodeTarget}
@@ -634,15 +634,23 @@ export default function TerminalPage() {
                 >
                   <option value="">Select {encodeType}...</option>
                   {encodeType === 'student'
-                    ? unlinked.map((s) => (
-                        <option key={s.id} value={s.id}>{s.firstName} {s.lastName} — {s.className}</option>
-                      ))
-                    : unlinkedStaff.map((s) => (
-                        <option key={s.id} value={s.id}>{s.name} — {s.role}</option>
+                    ? students.map((s) => {
+                        const wallet = wallets.find((w) => w.studentId === s.id);
+                        const hasCard = wallet?.cardUid;
+                        return (
+                          <option key={s.id} value={s.id}>
+                            {s.firstName} {s.lastName} — {s.className}{hasCard ? ' (has card)' : ' (no card)'}
+                          </option>
+                        );
+                      })
+                    : staff.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name} — {s.role}{s.cardUid ? ' (has card)' : ' (no card)'}
+                        </option>
                       ))
                   }
-                  {encodeType === 'student' && unlinked.length === 0 && <option disabled>All students have cards</option>}
-                  {encodeType === 'staff' && unlinkedStaff.length === 0 && <option disabled>All staff have cards</option>}
+                  {encodeType === 'student' && students.length === 0 && <option disabled>No students found</option>}
+                  {encodeType === 'staff' && staff.length === 0 && <option disabled>No staff found</option>}
                 </select>
               </div>
 
