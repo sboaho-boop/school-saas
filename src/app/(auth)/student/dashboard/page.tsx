@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, getToken, setToken, API_URL } from '@/lib/api';
-import { GraduationCap, Wallet, Check, X, Clock, AlertCircle, Eye, LogOut, Send, Plus, FileText, BookOpen, Calendar, Bell, Upload, File, Image, Loader2 } from 'lucide-react';
+import { GraduationCap, Wallet, Check, X, Clock, AlertCircle, Eye, LogOut, Send, Plus, FileText, BookOpen, Calendar, Bell, Upload, File, Image, Loader2, User, BarChart3, Percent, Trophy, Users } from 'lucide-react';
 
 const DAY_LABELS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
@@ -222,9 +222,30 @@ export default function StudentDashboardPage() {
       </header>
 
       <main className="max-w-4xl mx-auto p-4 space-y-4">
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-xl font-bold">{data?.name}</h1>
-          <p className="text-sm text-muted-foreground">{data?.className}</p>
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-4">
+          <div className="shrink-0">
+            {data?.photoUrl ? (
+              <img src={data.photoUrl} alt={data.name} className="w-16 h-16 rounded-full object-cover border-2 border-border" />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-border">
+                <User size={28} className="text-muted-foreground" />
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-bold truncate">{data?.name}</h1>
+            <p className="text-sm text-muted-foreground">{data?.className}</p>
+            {data?.indexNumber && <p className="text-xs text-muted-foreground font-mono">{data.indexNumber}</p>}
+            {data?.classTeacher && <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5"><Users size={11} />Class Teacher: {data.classTeacher}</p>}
+          </div>
+          <div className="shrink-0 text-right">
+            {data?.avgScore !== null && data?.avgScore !== undefined && (
+              <div className="text-sm">
+                <p className="text-xs text-muted-foreground">Average</p>
+                <p className={`text-xl font-bold ${data.avgScore >= 80 ? 'text-emerald-500' : data.avgScore >= 60 ? 'text-amber-500' : 'text-red-500'}`}>{data.avgScore}%</p>
+              </div>
+            )}
+          </div>
         </motion.div>
 
         <TimetableSection />
@@ -259,6 +280,14 @@ export default function StudentDashboardPage() {
           <Card className="border-border/50 shadow-sm">
             <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Eye size={16} />Attendance</CardTitle></CardHeader>
             <CardContent>
+              {data?.attendanceStats && (
+                <div className="flex gap-3 mb-3 text-xs">
+                  <span className="text-emerald-600 flex items-center gap-1"><Check size={12} />{data.attendanceStats.present}</span>
+                  <span className="text-red-600 flex items-center gap-1"><X size={12} />{data.attendanceStats.absent}</span>
+                  <span className="text-amber-600 flex items-center gap-1"><Clock size={12} />{data.attendanceStats.late}</span>
+                  <span className="text-muted-foreground">of {data.attendanceStats.total} days</span>
+                </div>
+              )}
               <div className="space-y-1">
                 {data.attendance.slice(0, 10).map((a: any) => (
                   <div key={a.id} className="flex justify-between text-sm py-1 border-b border-border/30">
@@ -273,13 +302,16 @@ export default function StudentDashboardPage() {
 
         {data?.grades && data.grades.length > 0 && (
           <Card className="border-border/50 shadow-sm">
-            <CardHeader><CardTitle className="text-sm">Marks</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-sm flex items-center gap-2"><BarChart3 size={16} />Marks</CardTitle></CardHeader>
             <CardContent>
               <div className="space-y-1">
                 {data.grades.map((g: any) => (
                   <div key={g.id} className="flex justify-between text-sm py-1 border-b border-border/30">
-                    <span>Score: {g.score}</span>
-                    <span className="font-bold">{g.grade && `(${g.grade})`}</span>
+                    <div>
+                      <span className="font-medium">{g.subjectName}</span>
+                      <span className="text-muted-foreground ml-2">{g.score}%</span>
+                    </div>
+                    <span className={`font-bold ${g.score >= 80 ? 'text-emerald-500' : g.score >= 60 ? 'text-amber-500' : 'text-red-500'}`}>{g.grade}</span>
                   </div>
                 ))}
               </div>
