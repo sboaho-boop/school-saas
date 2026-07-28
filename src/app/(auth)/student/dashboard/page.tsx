@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, getToken, setToken, API_URL } from '@/lib/api';
-import { GraduationCap, Wallet, Check, X, Clock, AlertCircle, Eye, LogOut, Send, Plus, FileText, BookOpen, Calendar, Bell, Upload, File, Image, Loader2, User, BarChart3, Percent, Trophy, Users } from 'lucide-react';
+import { GraduationCap, Wallet, Check, X, Clock, AlertCircle, Eye, LogOut, Send, Plus, FileText, BookOpen, Calendar, Bell, Upload, File, Image, Loader2, User, BarChart3, Percent, Trophy, Users, Bot, Sparkles } from 'lucide-react';
 
 const DAY_LABELS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
@@ -217,7 +217,12 @@ export default function StudentDashboardPage() {
             <Logo iconOnly size="sm" />
             <span className="font-semibold">Student Portal</span>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout}><LogOut size={14} className="mr-1" />Sign Out</Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => router.push('/student/ai-tutor')}>
+              <Sparkles size={14} className="mr-1 text-violet-500" />Ask Nova
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleLogout}><LogOut size={14} className="mr-1" />Sign Out</Button>
+          </div>
         </div>
       </header>
 
