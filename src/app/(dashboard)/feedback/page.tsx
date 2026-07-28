@@ -1,14 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
-import { MessageSquareText, Send, CheckCircle } from 'lucide-react';
+import { MessageSquareText, Send, CheckCircle, History, ChevronDown, ChevronUp } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
+
+interface FeedbackItem {
+  id: string; subject: string; message: string; status: string;
+  reply: string | null; repliedAt: string | null; createdAt: string;
+  assignedTo: { name: string } | null;
+}
 
 export default function FeedbackPage() {
   const user = useAuthStore((s) => s.currentUser);
@@ -17,6 +24,22 @@ export default function FeedbackPage() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
+  const [history, setHistory] = useState<FeedbackItem[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const userEmail = user?.email || (typeof window !== 'undefined' ? localStorage.getItem('edu_email') : null);
+
+  const fetchHistory = async () => {
+    if (!userEmail) return;
+    setLoadingHistory(true);
+    try {
+      const items = await api.get<FeedbackItem[]>(`/super/feedback/mine?email=${encodeURIComponent(userEmail)}`);
+      setHistory(items);
+    } catch { /* ignore */ }
+    setLoadingHistory(false);
+  };
+
+  useEffect(() => { if (showHistory) fetchHistory(); }, [showHistory]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +51,7 @@ export default function FeedbackPage() {
         userId: user?.id || '',
         userName: user?.name || '',
         userEmail: user?.email || '',
-        schoolName: '', // will be filled by school lookup
+        schoolName: '',
         subject,
         message,
       });
@@ -58,7 +81,7 @@ export default function FeedbackPage() {
           <CardContent className="p-8 text-center space-y-4">
             <CheckCircle size={48} className="mx-auto text-emerald-500" />
             <h2 className="text-xl font-semibold">Feedback Sent!</h2>
-            <p className="text-muted-foreground">Thank you. The admin team will review and respond.</p>
+            <p className="text-muted-foreground">Thank you. The admin team will review and respond. You'll get an email when they reply.</p>
             <Button variant="outline" onClick={() => setSent(false)}>Send Another</Button>
           </CardContent>
         </Card>
@@ -91,6 +114,48 @@ export default function FeedbackPage() {
           </CardContent>
         </Card>
       )}
+
+      <div className="border-t pt-4">
+        <button
+          onClick={() => setShowHistory(!showHistory)}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors w-full text-left"
+        >
+          <History size={16} />
+          <span>Your previous feedback ({history.length})</span>
+          {showHistory ? <ChevronUp size={16} className="ml-auto" /> : <ChevronDown size={16} className="ml-auto" />}
+        </button>
+
+        {showHistory && (
+          <div className="mt-3 space-y-3">
+            {loadingHistory ? (
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            ) : history.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No previous feedback.</p>
+            ) : (
+              history.map((fb) => (
+                <Card key={fb.id} className="border-border/50 shadow-sm">
+                  <CardContent className="p-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm">{fb.subject}</span>
+                        <Badge variant={fb.status === 'open' ? 'default' : fb.status === 'resolved' ? 'secondary' : 'outline'} className="text-[10px]">{fb.status}</Badge>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">{new Date(fb.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <p className="text-sm whitespace-pre-wrap text-muted-foreground">{fb.message}</p>
+                    {fb.reply && (
+                      <div className="rounded-md bg-primary/5 p-3 text-sm space-y-1 border-l-2 border-primary">
+                        <p className="text-xs font-medium text-primary">Reply from {fb.assignedTo?.name || 'Admin'}{fb.repliedAt ? ` (${new Date(fb.repliedAt).toLocaleDateString()})` : ''}</p>
+                        <p className="text-sm">{fb.reply}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
