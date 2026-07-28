@@ -8,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useState, useCallback, useEffect } from 'react';
 import { useWalletStore } from '@/stores/wallet';
 import { useStudentStore } from '@/stores/students';
+import { useStaffStore } from '@/stores/staff';
 import { useAcademicsStore } from '@/stores/academics';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Scan, Check, X, CreditCard, Bus, UtensilsCrossed, Printer, School, ArrowLeft, KeyRound, SmartphoneNfc, Usb, PenTool, BookOpen, Save, IdCard, UserCheck } from 'lucide-react';
+import { Scan, Check, X, CreditCard, Bus, UtensilsCrossed, Printer, School, ArrowLeft, KeyRound, SmartphoneNfc, Usb, PenTool, BookOpen, Save, IdCard, UserCheck, Users } from 'lucide-react';
 import { api } from '@/lib/api';
 
 const services = [
@@ -27,6 +28,7 @@ const services = [
 export default function TerminalPage() {
   const { tapCard, tapConfirm, generateCard, wallets, fetchWallets } = useWalletStore();
   const { students, fetchStudents } = useStudentStore();
+  const { staff, fetchStaff } = useStaffStore();
   const [service, setService] = useState('');
   const [uid, setUid] = useState('');
   const [amount, setAmount] = useState('');
@@ -52,8 +54,9 @@ export default function TerminalPage() {
   const [markComps, setMarkComps] = useState<Record<string, string>>({});
   const [markResult, setMarkResult] = useState('');
 
-  useEffect(() => { fetchSubjects(); fetchTerms(); fetchWallets(); fetchStudents(); }, [fetchSubjects, fetchTerms, fetchWallets, fetchStudents]);
+  useEffect(() => { fetchSubjects(); fetchTerms(); fetchWallets(); fetchStudents(); fetchStaff(); }, [fetchSubjects, fetchTerms, fetchWallets, fetchStudents, fetchStaff]);
   const unlinked = students.filter((s) => !wallets.find((w) => w.studentId === s.id));
+  const unlinkedStaff = staff.filter((s) => !s.cardUid);
 
   const handleUidForMarks = useCallback(async (cardUid: string) => {
     // Find student by card UID via wallet
@@ -560,6 +563,34 @@ export default function TerminalPage() {
     );
   }
 
+  const [encodeType, setEncodeType] = useState<'student' | 'staff'>('student');
+  const [encodeTarget, setEncodeTarget] = useState('');
+  const [encodeGeneratedUid, setEncodeGeneratedUid] = useState('');
+  const [encodeLoading, setEncodeLoading] = useState(false);
+
+  const handleEncodeGenerate = async () => {
+    if (!encodeTarget) return;
+    setEncodeLoading(true);
+    setEncodeResult('');
+    try {
+      let cardUid = '';
+      if (encodeType === 'student') {
+        const res = await generateCard(encodeTarget);
+        cardUid = res.cardUid;
+      } else {
+        const res = await api.post<{ cardUid: string }>('/staff/generate-card', { staffId: encodeTarget });
+        cardUid = res.cardUid;
+      }
+      setEncodeGeneratedUid(cardUid);
+      setEncodeUid(cardUid);
+    } catch (err: any) {
+      setEncodeResult('error: ' + err.message);
+    }
+    setEncodeLoading(false);
+    fetchWallets();
+    fetchStaff();
+  };
+
   if (mode === 'encode') {
     return (
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-6">
@@ -572,18 +603,73 @@ export default function TerminalPage() {
               </div>
             </div>
 
+            <div className="flex gap-2">
+              <Button
+                variant={encodeType === 'student' ? 'default' : 'outline'}
+                size="sm"
+                className="flex-1"
+                onClick={() => { setEncodeType('student'); setEncodeTarget(''); setEncodeGeneratedUid(''); setEncodeUid(''); setEncodeResult(''); }}
+              >
+                <IdCard size={14} className="mr-1" /> Student
+              </Button>
+              <Button
+                variant={encodeType === 'staff' ? 'default' : 'outline'}
+                size="sm"
+                className="flex-1"
+                onClick={() => { setEncodeType('staff'); setEncodeTarget(''); setEncodeGeneratedUid(''); setEncodeUid(''); setEncodeResult(''); }}
+              >
+                <Users size={14} className="mr-1" /> Staff
+              </Button>
+            </div>
+
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Card UID to write</label>
+                <label className="text-sm font-medium">
+                  Select {encodeType === 'student' ? 'Student' : 'Staff'} (without card)
+                </label>
+                <select
+                  value={encodeTarget}
+                  onChange={(e) => { setEncodeTarget(e.target.value); setEncodeGeneratedUid(''); setEncodeResult(''); }}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">Select {encodeType}...</option>
+                  {encodeType === 'student'
+                    ? unlinked.map((s) => (
+                        <option key={s.id} value={s.id}>{s.firstName} {s.lastName} — {s.className}</option>
+                      ))
+                    : unlinkedStaff.map((s) => (
+                        <option key={s.id} value={s.id}>{s.name} — {s.role}</option>
+                      ))
+                  }
+                  {encodeType === 'student' && unlinked.length === 0 && <option disabled>All students have cards</option>}
+                  {encodeType === 'staff' && unlinkedStaff.length === 0 && <option disabled>All staff have cards</option>}
+                </select>
+              </div>
+
+              <Button
+                onClick={handleEncodeGenerate}
+                disabled={!encodeTarget || encodeLoading}
+                className="w-full gap-2"
+              >
+                {encodeLoading ? 'Generating...' : 'Generate Card UID'}
+              </Button>
+
+              {encodeGeneratedUid && (
+                <div className="rounded-lg bg-emerald-500/10 p-3 text-center space-y-1">
+                  <p className="text-xs text-muted-foreground">Generated & Linked:</p>
+                  <p className="font-mono font-bold text-lg tracking-wider text-emerald-600">{encodeGeneratedUid}</p>
+                  <p className="text-xs text-muted-foreground">Now connect USB reader and write to card below.</p>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Or enter a card UID manually</label>
                 <Input
                   placeholder="EDU-A7F3B2C9"
                   value={encodeUid}
                   onChange={(e) => setEncodeUid(e.target.value.toUpperCase().replace(/[^EDU0-9A-F-]/g, '').slice(0, 14))}
                   className="text-center text-lg font-mono"
                 />
-                <p className="text-xs text-muted-foreground text-center">
-                  Enter the EDU-XXXXX UID generated from the Wallet page
-                </p>
               </div>
 
               <div className="flex gap-2 items-center justify-center">
@@ -611,7 +697,7 @@ export default function TerminalPage() {
                 <div className="text-center text-amber-500 text-sm animate-pulse">Writing to card, hold tag on reader...</div>
               )}
               {encodeResult === 'done' && (
-                <div className="text-center text-emerald-500 text-sm">Card written successfully!</div>
+                <div className="text-center text-emerald-500 text-sm">Card written successfully! Ready to tap.</div>
               )}
               {encodeResult && encodeResult !== 'writing...' && encodeResult !== 'done' && (
                 <div className="text-center text-red-500 text-sm">{encodeResult}</div>
