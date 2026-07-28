@@ -54,6 +54,11 @@ export default function TerminalPage() {
   const [markComps, setMarkComps] = useState<Record<string, string>>({});
   const [markResult, setMarkResult] = useState('');
 
+  const [encodeType, setEncodeType] = useState<'student' | 'staff'>('student');
+  const [encodeTarget, setEncodeTarget] = useState('');
+  const [encodeGeneratedUid, setEncodeGeneratedUid] = useState('');
+  const [encodeLoading, setEncodeLoading] = useState(false);
+
   useEffect(() => { fetchSubjects(); fetchTerms(); fetchWallets(); fetchStudents(); fetchStaff(); }, [fetchSubjects, fetchTerms, fetchWallets, fetchStudents, fetchStaff]);
   const unlinked = students.filter((s) => !wallets.find((w) => w.studentId === s.id));
   const unlinkedStaff = staff.filter((s) => !s.cardUid);
@@ -562,11 +567,6 @@ export default function TerminalPage() {
       </div>
     );
   }
-
-  const [encodeType, setEncodeType] = useState<'student' | 'staff'>('student');
-  const [encodeTarget, setEncodeTarget] = useState('');
-  const [encodeGeneratedUid, setEncodeGeneratedUid] = useState('');
-  const [encodeLoading, setEncodeLoading] = useState(false);
 
   const handleEncodeGenerate = async () => {
     if (!encodeTarget) return;
