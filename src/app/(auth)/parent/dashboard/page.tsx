@@ -284,7 +284,7 @@ export default function ParentDashboardPage() {
                   <div className="space-y-1">
                     {selected.grades.slice(0, 10).map((g: any) => (
                       <div key={g.id} className="flex justify-between text-sm py-1 border-b border-border/30">
-                        <span>Subject: {g.subjectId?.slice(0, 8)}...</span>
+                        <span>{g.subject?.name || g.subjectId?.slice(0, 8)}</span>
                         <span className="font-bold">{g.score} {g.grade && `(${g.grade})`}</span>
                       </div>
                     ))}
