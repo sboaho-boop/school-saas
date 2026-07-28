@@ -50,6 +50,7 @@ export default function SuperAdminDashboard() {
     setAdminLoading(false);
   };
 
+  useEffect(() => { fetchFeedback(); fetchAdmins(); }, []);
   useEffect(() => { if (tab === 'feedback') fetchFeedback(); if (tab === 'admins') fetchAdmins(); }, [tab]);
 
   const handleReply = async () => {
