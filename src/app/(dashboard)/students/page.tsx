@@ -9,11 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
-import { Search, Filter, Download, X, Eye, FileText, DollarSign, ClipboardCheck, GraduationCap, Wallet, Clock, ChevronDown, ChevronUp, Pencil, Save } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Search, Filter, Download, X, Eye, FileText, DollarSign, ClipboardCheck, GraduationCap, Wallet, Clock, ChevronDown, ChevronUp, Pencil, Save, Camera, Upload } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { useStudentStore } from '@/stores/students';
 import { useAuthStore } from '@/stores/auth';
-import { api } from '@/lib/api';
+import { api, getToken } from '@/lib/api';
 import { AddStudentDialog } from '@/components/students/add-student-dialog';
 import { ImportDialog } from '@/components/import-dialog';
 
@@ -47,8 +47,83 @@ export default function StudentsPage() {
   const [showReports, setShowReports] = useState(false);
   const [studentReports, setStudentReports] = useState<any[]>([]);
   const [reportsLoading, setReportsLoading] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isAdminOrHead = currentUser?.staffType === 'headteacher' || currentUser?.staffType === 'admin';
+
+  const startCamera = async () => {
+    setShowCamera(true);
+    setTimeout(async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        if (videoRef.current) videoRef.current.srcObject = stream;
+      } catch {
+        setShowCamera(false);
+      }
+    }, 100);
+  };
+
+  const stopCamera = () => {
+    if (videoRef.current?.srcObject) {
+      (videoRef.current.srcObject as MediaStream).getTracks().forEach(t => t.stop());
+      videoRef.current.srcObject = null;
+    }
+    setShowCamera(false);
+  };
+
+  const capturePhoto = async () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d')?.drawImage(video, 0, 0);
+    canvas.toBlob(async (blob) => {
+      if (!blob) return;
+      stopCamera();
+      await uploadPhotoBlob(blob);
+    }, 'image/jpeg', 0.8);
+  };
+
+  const handleFilePick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    uploadPhotoBlob(file);
+    e.target.value = '';
+  };
+
+  const uploadPhotoBlob = async (blob: Blob) => {
+    setUploadingPhoto(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', blob, 'photo.jpg');
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${getToken()}` },
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.url) {
+        setEditForm((prev: any) => ({ ...prev, photoUrl: data.url }));
+        handleEditWithPhoto(data.url);
+      }
+    } catch {}
+    setUploadingPhoto(false);
+  };
+
+  const handleEditWithPhoto = async (photoUrl: string) => {
+    setSaving(true);
+    try {
+      const updated = await api.put(`/students/${selectedStudent.id}`, { ...editForm, photoUrl });
+      setSelectedStudent(updated);
+      useStudentStore.getState().updateStudent(selectedStudent.id, updated);
+    } catch {}
+    setSaving(false);
+  };
 
   useEffect(() => { fetchStudents(); }, [fetchStudents]);
 
@@ -266,6 +341,41 @@ export default function StudentsPage() {
                 {/* EDIT FORM */}
                 {editing && (
                   <div className="p-4 border-b border-border/50 space-y-3 bg-muted/30">
+                    {/* Photo section */}
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <Avatar className="size-14">
+                          {editForm.photoUrl ? (
+                            <img src={editForm.photoUrl} alt="" className="size-full object-cover rounded-full" />
+                          ) : (
+                            <AvatarFallback className="bg-primary/10 text-primary text-sm">{editForm.firstName?.[0]}{editForm.lastName?.[0]}</AvatarFallback>
+                          )}
+                        </Avatar>
+                        {uploadingPhoto && <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full"><div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" /></div>}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" onClick={startCamera} disabled={uploadingPhoto}>
+                          <Camera size={14} className="mr-1" /> Capture
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploadingPhoto}>
+                          <Upload size={14} className="mr-1" /> Upload
+                        </Button>
+                        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFilePick} />
+                      </div>
+                    </div>
+
+                    {/* Camera preview */}
+                    {showCamera && (
+                      <div className="relative rounded-lg overflow-hidden bg-black">
+                        <video ref={videoRef} autoPlay playsInline className="w-full h-48 object-cover" />
+                        <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-2">
+                          <Button size="sm" onClick={capturePhoto}><Camera size={14} className="mr-1" /> Capture</Button>
+                          <Button size="sm" variant="secondary" onClick={stopCamera}>Cancel</Button>
+                        </div>
+                      </div>
+                    )}
+                    <canvas ref={canvasRef} className="hidden" />
+
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1"><Label className="text-xs">First Name</Label><Input size={1} className="h-8 text-sm" value={editForm.firstName} onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })} /></div>
                       <div className="space-y-1"><Label className="text-xs">Last Name</Label><Input size={1} className="h-8 text-sm" value={editForm.lastName} onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })} /></div>
