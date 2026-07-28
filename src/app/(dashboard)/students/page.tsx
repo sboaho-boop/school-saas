@@ -118,7 +118,7 @@ export default function StudentsPage() {
   const handleEditWithPhoto = async (photoUrl: string) => {
     setSaving(true);
     try {
-      const updated = await api.put(`/students/${selectedStudent.id}`, { ...editForm, photoUrl });
+      const updated: any = await api.put(`/students/${selectedStudent.id}`, { ...editForm, photoUrl });
       setSelectedStudent(updated);
       useStudentStore.getState().updateStudent(selectedStudent.id, updated);
     } catch {}
