@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { useAcademicsStore } from '@/stores/academics';
+import { useI18n } from '@/stores/locale';
 import { api } from '@/lib/api';
 import { FileCheck, Plus, Eye, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react';
 
@@ -49,6 +50,7 @@ interface Exam {
 export default function ExamsPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
   const { classes, subjects, fetchClasses, fetchSubjects } = useAcademicsStore();
+  const { t } = useI18n();
   const [exams, setExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -126,7 +128,7 @@ export default function ExamsPage() {
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between rounded-xl bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Exams</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{t('pages.exams')}</h1>
           <p className="text-muted-foreground">Create and manage school examinations.</p>
         </div>
         {isTeaching && (

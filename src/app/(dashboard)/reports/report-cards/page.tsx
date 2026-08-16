@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useAcademicsStore } from '@/stores/academics';
 import { useStudentStore } from '@/stores/students';
+import { useI18n } from '@/stores/locale';
 import { api } from '@/lib/api';
 import { Printer, ChevronLeft } from 'lucide-react';
 
@@ -46,6 +47,7 @@ export default function ReportCardsPage() {
   const fetchTerms = useAcademicsStore((s) => s.fetchTerms);
   const students = useStudentStore((s) => s.students);
   const fetchStudents = useStudentStore((s) => s.fetchStudents);
+  const { t } = useI18n();
 
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedTerm, setSelectedTerm] = useState('');
@@ -155,7 +157,7 @@ export default function ReportCardsPage() {
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="flex items-center justify-between rounded-xl bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Report Cards</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{t('pages.reportCards')}</h1>
           <p className="text-muted-foreground">Select a class, term, and student to view their report card.</p>
         </div>
       </motion.div>

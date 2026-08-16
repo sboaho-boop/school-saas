@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
+import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import { useRef } from 'react';
@@ -313,6 +314,7 @@ export default function HomePage() {
             <Link href="/login" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Login</Link>
             <Link href="/parent/login" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Parents</Link>
             <Link href="/student/login" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Students</Link>
+            <LanguageSwitcher />
             <Link href="/register">
               <Button size="sm" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-500/20">
                 Sign Up Free

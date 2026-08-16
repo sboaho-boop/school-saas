@@ -10,12 +10,14 @@ import { useEffect, useState } from 'react';
 import { useAttendanceStore, type AttendanceRecord } from '@/stores/attendance';
 import { useAcademicsStore } from '@/stores/academics';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from '@/stores/locale';
 
 export default function AttendancePage() {
   const currentUser = useAuthStore((s) => s.currentUser);
   const { records, markAttendance, markAll, fetchRecords, loading } = useAttendanceStore();
   const classes = useAcademicsStore((s) => s.classes);
   const fetchClasses = useAcademicsStore((s) => s.fetchClasses);
+  const { t } = useI18n();
   const [selectedClass, setSelectedClass] = useState('');
   const today = new Date().toISOString().split('T')[0];
 
@@ -48,7 +50,7 @@ export default function AttendancePage() {
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="flex items-center justify-between rounded-xl bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Attendance</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{t('pages.attendance')}</h1>
           <p className="text-muted-foreground">Mark and track student attendance.</p>
         </div>
       </motion.div>

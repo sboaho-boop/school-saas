@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useStaffStore } from '@/stores/staff';
 import { useTransportStore } from '@/stores/transport';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from '@/stores/locale';
 import { api } from '@/lib/api';
 import { Plus, X, CheckCircle2, Copy } from 'lucide-react';
 import type { StaffType } from '@/types';
@@ -31,6 +32,7 @@ const SUBJECT_OPTIONS = [
 
 export function AddStaffDialog() {
   const addStaff = useStaffStore((s) => s.addStaff);
+  const { t } = useI18n();
   const routes = useTransportStore((s) => s.routes);
   const currentUser = useAuthStore((s) => s.currentUser);
   const [open, setOpen] = useState(false);
@@ -135,7 +137,7 @@ export function AddStaffDialog() {
 
   return (
     <Dialog open={open} onOpenChange={openDialog}>
-      <DialogTrigger render={<Button size="sm"><Plus size={16} className="mr-2" /> Add Staff</Button>} />
+      <DialogTrigger render={<Button size="sm"><Plus size={16} className="mr-2" /> {t('common.add')}</Button>} />
       <DialogContent className="sm:max-w-lg">
         {verification ? (
           <>
@@ -313,7 +315,7 @@ export function AddStaffDialog() {
             </div>
             <DialogFooter>
               <DialogClose render={<Button variant="outline" type="button">Cancel</Button>} />
-              <Button type="submit">Add Staff</Button>
+              <Button type="submit">{t('common.save')}</Button>
             </DialogFooter>
           </form>
         )}

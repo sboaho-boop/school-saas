@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Search, User, Globe, LogOut, Menu } from 'lucide-react';
+import { Bell, Search, User, LogOut, Menu } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +15,9 @@ import { Badge } from '@/components/ui/badge';
 import { useNotificationStore } from '@/stores/notifications';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeStore } from '@/stores/theme';
+import { useI18n } from '@/stores/locale';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
+import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import { SidebarNavContent } from '@/components/layout/sidebar';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -29,17 +31,18 @@ const notificationIcons: Record<string, string> = {
 };
 
 const roleLabels: Record<string, string> = {
-  headteacher: 'Head Teacher',
-  admin: 'Administrator',
-  accountant: 'Accountant',
-  teaching: 'Teacher',
-  'non-teaching': 'Staff',
+  headteacher: 'roles.headteacher',
+  admin: 'roles.admin',
+  accountant: 'roles.accountant',
+  teaching: 'roles.teacher',
+  'non-teaching': 'roles.staff',
 };
 
 export function Header() {
   const { notifications, unreadCount, markAsRead } = useNotificationStore();
   const user = useAuthStore((s) => s.currentUser);
   const { theme } = useThemeStore();
+  const { t } = useI18n();
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/50 bg-gradient-to-r from-background to-muted/80 px-3 sm:px-6 backdrop-blur-sm">
@@ -59,28 +62,14 @@ export function Header() {
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search..."
+            placeholder={t('header.search')}
             className="h-10 w-full rounded-lg border border-border bg-muted/50 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-all"
           />
         </div>
       </div>
 
       <div className="flex items-center gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger className="rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
-            <Globe size={20} />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuGroup>
-              <DropdownMenuLabel>Language</DropdownMenuLabel>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>English</DropdownMenuItem>
-            <DropdownMenuItem>Français</DropdownMenuItem>
-            <DropdownMenuItem>Kiswahili</DropdownMenuItem>
-            <DropdownMenuItem>العربية</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <LanguageSwitcher />
 
         <ThemeToggle />
 
@@ -98,7 +87,7 @@ export function Header() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-80">
             <DropdownMenuGroup>
-              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('header.notifications')}</DropdownMenuLabel>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <div className="max-h-80 overflow-auto">
@@ -131,22 +120,22 @@ export function Header() {
               <User size={16} />
             </div>
             <div className="hidden text-left md:block">
-              <p className="text-sm font-medium">{user?.name || 'User'}</p>
-              <p className="text-xs text-muted-foreground">{user ? roleLabels[user.staffType] || user.role : ''}</p>
+              <p className="text-sm font-medium">{user?.name || t('header.user')}</p>
+              <p className="text-xs text-muted-foreground">{user ? t(roleLabels[user.staffType] || '') : ''}</p>
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuGroup>
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('header.myAccount')}</DropdownMenuLabel>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>Billing</DropdownMenuItem>
+            <DropdownMenuItem>{t('header.profile')}</DropdownMenuItem>
+            <DropdownMenuItem>{t('header.settings')}</DropdownMenuItem>
+            <DropdownMenuItem>{t('header.billing')}</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => { useAuthStore.getState().logout(); window.location.href = '/login'; }}>
               <LogOut size={14} className="mr-2" />
-              Log out
+              {t('header.logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

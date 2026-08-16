@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
 import { api } from '@/lib/api';
+import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import { CheckCircle } from 'lucide-react';
 
 function ResetForm() {
@@ -38,6 +39,9 @@ function ResetForm() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+      <div className="absolute right-6 top-6 z-10">
+        <LanguageSwitcher />
+      </div>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}

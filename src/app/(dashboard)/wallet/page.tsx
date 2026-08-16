@@ -10,12 +10,14 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useWalletStore } from '@/stores/wallet';
 import { useStudentStore } from '@/stores/students';
+import { useI18n } from '@/stores/locale';
 import { Wallet, CreditCard, Plus, Snowflake, Unlock, Search, WandSparkles, Printer, ShoppingBag, Circle, KeyRound, Hand } from 'lucide-react';
 import Link from 'next/link';
 
 export default function WalletPage() {
   const { wallets, loading, fetchWallets, topUp, freezeCard, unfreezeCard, linkCard, linkWristband, generateCard, setPin, setDailyLimit } = useWalletStore();
   const { students, fetchStudents } = useStudentStore();
+  const { t } = useI18n();
   const [search, setSearch] = useState('');
   const [topUpStudent, setTopUpStudent] = useState('');
   const [topUpAmount, setTopUpAmount] = useState('');
@@ -85,7 +87,7 @@ export default function WalletPage() {
         className="flex items-center justify-between rounded-xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 p-6"
       >
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">Student Wallets</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">{t('pages.wallet')}</h1>
           <p className="text-muted-foreground">Manage card balances, top-ups, and NFC cards.</p>
         </div>
         <div className="flex gap-2">

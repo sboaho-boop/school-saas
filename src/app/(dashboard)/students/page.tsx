@@ -13,6 +13,7 @@ import { Search, Filter, Download, X, Eye, FileText, DollarSign, ClipboardCheck,
 import { useState, useEffect, useRef } from 'react';
 import { useStudentStore } from '@/stores/students';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from '@/stores/locale';
 import { api, getToken } from '@/lib/api';
 import { AddStudentDialog } from '@/components/students/add-student-dialog';
 import { ImportDialog } from '@/components/import-dialog';
@@ -34,6 +35,7 @@ interface StudentHistory {
 export default function StudentsPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
   const { students, fetchStudents, updateStudent } = useStudentStore();
+  const { t } = useI18n();
   const [searchTerm, setSearchTerm] = useState('');
   const [classFilter, setClassFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -186,12 +188,12 @@ export default function StudentsPage() {
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between rounded-xl bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Students</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{t('pages.students')}</h1>
           <p className="text-muted-foreground">Manage all enrolled students. Click a student to view full history.</p>
         </div>
         <div className="flex gap-2">
           {isAdminOrHead && <><AddStudentDialog /><ImportDialog resource="students" onSuccess={() => window.location.reload()} /></>}
-          <Button variant="outline" size="sm"><Download size={16} className="mr-2" />Export</Button>
+          <Button variant="outline" size="sm"><Download size={16} className="mr-2" />{t('common.export')}</Button>
         </div>
       </motion.div>
 
@@ -206,22 +208,22 @@ export default function StudentsPage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Search students..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+              <Input placeholder={`${t('common.search')} ${t('common.students').toLowerCase()}...`} className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
             <Select value={classFilter} onValueChange={(v) => v && setClassFilter(v)}>
-              <SelectTrigger className="w-[180px]"><SelectValue placeholder="All Classes" /></SelectTrigger>
-              <SelectContent><SelectItem value="all">All Classes</SelectItem>{classes.map((cls) => <SelectItem key={cls} value={cls}>{cls}</SelectItem>)}</SelectContent>
+              <SelectTrigger className="w-[180px]"><SelectValue placeholder={t('common.all')} /></SelectTrigger>
+              <SelectContent><SelectItem value="all">{t('common.all')}</SelectItem>{classes.map((cls) => <SelectItem key={cls} value={cls}>{cls}</SelectItem>)}</SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={(v) => v && setStatusFilter(v)}>
-              <SelectTrigger className="w-[150px]"><SelectValue placeholder="All Status" /></SelectTrigger>
+              <SelectTrigger className="w-[150px]"><SelectValue placeholder={t('common.all')} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="graduated">Graduated</SelectItem>
+                <SelectItem value="all">{t('common.all')}</SelectItem>
+                <SelectItem value="active">{t('common.active')}</SelectItem>
+                <SelectItem value="inactive">{t('common.inactive')}</SelectItem>
+                <SelectItem value="graduated">{t('common.graduated')}</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="sm"><Filter size={16} className="mr-2" />More Filters</Button>
+            <Button variant="outline" size="sm"><Filter size={16} className="mr-2" />{t('common.moreFilters')}</Button>
           </div>
         </CardContent>
       </Card>

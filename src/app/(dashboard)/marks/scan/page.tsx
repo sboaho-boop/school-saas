@@ -7,11 +7,13 @@ import { motion } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import { useMarksStore } from '@/stores/marks';
+import { useI18n } from '@/stores/locale';
 import { Check, Scan } from 'lucide-react';
 
 function ScanContent() {
   const searchParams = useSearchParams();
   const { saveGrade } = useMarksStore();
+  const { t } = useI18n();
 
   const studentId = searchParams.get('studentId') || '';
   const subjectId = searchParams.get('subjectId') || '';
@@ -52,7 +54,7 @@ function ScanContent() {
         <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10">
           <Scan size={28} className="text-primary" />
         </div>
-        <h1 className="text-2xl font-bold">Enter Score</h1>
+        <h1 className="text-2xl font-bold">{t('pages.enterScore')}</h1>
         <p className="text-muted-foreground text-sm mt-1">Scan QR from answer sheet or enter details manually.</p>
       </motion.div>
 

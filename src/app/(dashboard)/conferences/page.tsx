@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { Calendar, Clock, Users, Plus, User, ChevronDown, ChevronUp } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from '@/stores/locale';
 
 interface ConferenceSlot {
   id: string;
@@ -36,6 +37,7 @@ interface ConferenceBooking {
 
 export default function ConferencesPage() {
   const user = useAuthStore((s) => s.currentUser);
+  const { t } = useI18n();
   const [slots, setSlots] = useState<ConferenceSlot[]>([]);
   const [mySlots, setMySlots] = useState<ConferenceSlot[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,7 +87,7 @@ export default function ConferencesPage() {
         className="flex items-center justify-between rounded-xl bg-gradient-to-r from-blue-500/10 via-primary/10 to-indigo-500/10 p-6"
       >
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Parent-Teacher Conferences</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{t('pages.conferences')}</h1>
           <p className="text-muted-foreground">Schedule and manage parent-teacher meeting slots.</p>
         </div>
         {isTeaching && (

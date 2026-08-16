@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useState } from 'react';
 import { api } from '@/lib/api';
+import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
@@ -33,6 +34,9 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+      <div className="absolute right-6 top-6 z-10">
+        <LanguageSwitcher />
+      </div>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}

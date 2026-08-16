@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useState } from 'react';
 import { Upload, FileDown, Check, AlertCircle, Loader2 } from 'lucide-react';
 import { useImportStore } from '@/stores/import';
+import { useI18n } from '@/stores/locale';
 
 interface ImportDialogProps {
   resource: 'students' | 'staff' | 'marks';
@@ -21,6 +22,7 @@ const TEMPLATES = {
 };
 
 export function ImportDialog({ resource, onSuccess, children }: ImportDialogProps) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [csvText, setCsvText] = useState('');
   const { importStudents, importStaff, importMarks, importing, result, error, clearResult } = useImportStore();
@@ -55,7 +57,7 @@ export function ImportDialog({ resource, onSuccess, children }: ImportDialogProp
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); else setOpen(true); }}>
       <DialogTrigger>
-        {children || <Button variant="outline" size="sm"><Upload size={16} className="mr-2" />Import CSV</Button>}
+        {children || <Button variant="outline" size="sm"><Upload size={16} className="mr-2" />{t('common.import')}</Button>}
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
@@ -105,7 +107,7 @@ export function ImportDialog({ resource, onSuccess, children }: ImportDialogProp
             </Button>
             <Button onClick={handleImport} disabled={importing || !csvText.trim()}>
               {importing ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Upload size={16} className="mr-2" />}
-              {importing ? 'Importing...' : 'Import'}
+              {importing ? t('common.loading') : t('common.import')}
             </Button>
           </div>
         </div>

@@ -11,12 +11,14 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/stores/auth';
 import { useAcademicsStore } from '@/stores/academics';
+import { useI18n } from '@/stores/locale';
 import { api } from '@/lib/api';
 import { Plus, BookOpen, Eye, ArrowLeft, CheckCircle, Clock, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function AssignmentsPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
   const { classes, fetchClasses } = useAcademicsStore();
+  const { t } = useI18n();
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -55,7 +57,7 @@ export default function AssignmentsPage() {
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between rounded-xl bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Assignments</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{t('pages.assignments')}</h1>
           <p className="text-muted-foreground">Create and manage homework and assignments.</p>
         </div>
         {isTeaching && <Button onClick={() => setShowCreate(!showCreate)} className="gap-2"><Plus size={16} />New Assignment</Button>}

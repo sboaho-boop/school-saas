@@ -8,11 +8,13 @@ import { useAcademicsStore } from '@/stores/academics';
 import { useStudentStore } from '@/stores/students';
 import { Printer, Download } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from '@/stores/locale';
 
 const QR_API = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=';
 
 export default function PrintMarksPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
+  const { t } = useI18n();
   const classes = useAcademicsStore((s) => s.classes);
   const fetchClasses = useAcademicsStore((s) => s.fetchClasses);
   const subjects = useAcademicsStore((s) => s.subjects);
@@ -43,7 +45,7 @@ export default function PrintMarksPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Print QR Answer Sheets</h1>
+        <h1 className="text-2xl font-bold">{t('pages.printQrAnswerSheets')}</h1>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => window.print()}>
             <Printer size={16} className="mr-2" />Print

@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, setToken } from '@/lib/api';
 import { Logo } from '@/components/logo';
+import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import { Eye, EyeOff, Lock } from 'lucide-react';
 
 export default function ParentLoginPage() {
@@ -59,6 +60,9 @@ export default function ParentLoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4">
+      <div className="absolute right-6 top-6 z-10">
+        <LanguageSwitcher />
+      </div>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="mx-auto mb-4 flex items-center justify-center">

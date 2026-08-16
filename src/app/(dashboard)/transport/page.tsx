@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { Plus, Bus, MapPin, Phone, Users, Clock, CheckCircle, ArrowRight, MapPin as PinArrive } from 'lucide-react';
 import { useTransportStore } from '@/stores/transport';
 import { useStaffStore } from '@/stores/staff';
+import { useI18n } from '@/stores/locale';
 import { api } from '@/lib/api';
 
 interface DriverTrip {
@@ -33,6 +34,7 @@ const statusConfig = {
 export default function TransportPage() {
   const { routes, addRoute } = useTransportStore();
   const staff = useStaffStore((s) => s.staff);
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -90,7 +92,7 @@ export default function TransportPage() {
         className="flex items-center justify-between rounded-xl bg-gradient-to-r from-amber-500/10 via-primary/10 to-orange-500/10 p-6"
       >
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">Transport</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">{t('pages.transport')}</h1>
           <p className="text-muted-foreground">Manage school bus routes and driver assignments.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>

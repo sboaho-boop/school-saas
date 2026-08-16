@@ -6,6 +6,7 @@ import { useSuperAdminStore } from '@/stores/super-admin';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Logo } from '@/components/logo';
+import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import Link from 'next/link';
 
 export default function SuperAdminLoginPage() {
@@ -28,6 +29,9 @@ export default function SuperAdminLoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 p-6">
+      <div className="absolute right-6 top-6 z-10">
+        <LanguageSwitcher />
+      </div>
       <div className="w-full max-w-sm">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl shadow-2xl">
           <div className="mb-6 text-center">

@@ -14,6 +14,7 @@ import { Search, Download, MoreHorizontal, BookOpen, Users, ListChecks, Bus, Sch
 import { useState, useEffect } from 'react';
 import { useStaffStore } from '@/stores/staff';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from '@/stores/locale';
 import { api } from '@/lib/api';
 import { Label } from '@/components/ui/label';
 import { AddStaffDialog } from '@/components/staff/add-staff-dialog';
@@ -48,6 +49,7 @@ const staffTypeConfig: Record<StaffType, { label: string; className: string }> =
 export default function StaffPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
   const staff = useStaffStore((s) => s.staff);
+  const { t } = useI18n();
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<StaffType | 'all'>('all');
   const [campusFilter, setCampusFilter] = useState<string>('all');
@@ -118,12 +120,12 @@ export default function StaffPage() {
         className="flex items-center justify-between rounded-xl bg-gradient-to-r from-violet-500/10 via-primary/10 to-fuchsia-500/10 p-6"
       >
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">Staff</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">{t('pages.staff')}</h1>
           <p className="text-muted-foreground">Manage your teaching and non-teaching staff.</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
-            <Download size={16} className="mr-2" /> Export
+            <Download size={16} className="mr-2" /> {t('common.export')}
           </Button>
           {currentUser?.staffType === 'headteacher' || currentUser?.staffType === 'admin' ? (
             <><AddStaffDialog /><ImportDialog resource="staff" onSuccess={() => window.location.reload()} /></>
@@ -155,7 +157,7 @@ export default function StaffPage() {
                   <div className="relative flex-1 max-w-md">
                     <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                      placeholder="Search staff..."
+                      placeholder={`${t('common.search')} staff...`}
                       className="pl-10"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}

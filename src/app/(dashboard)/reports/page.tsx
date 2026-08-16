@@ -14,6 +14,7 @@ import { useStaffStore } from '@/stores/staff';
 import { useFinanceStore } from '@/stores/finance';
 import { useAttendanceStore } from '@/stores/attendance';
 import { useAcademicsStore } from '@/stores/academics';
+import { useI18n } from '@/stores/locale';
 import { api } from '@/lib/api';
 import Link from 'next/link';
 import {
@@ -29,6 +30,7 @@ export default function ReportsPage() {
   const { records: feeRecords, fetchRecords } = useFinanceStore();
   const { records: attRecords, fetchRecords: fetchAttendance } = useAttendanceStore();
   const { classes, fetchClasses } = useAcademicsStore();
+  const { t } = useI18n();
   const [tab, setTab] = useState('overview');
   const [selectedClass, setSelectedClass] = useState('');
   const [feesClass, setFeesClass] = useState('');
@@ -97,7 +99,7 @@ export default function ReportsPage() {
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between rounded-xl bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6 print:hidden">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Reports</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{t('pages.reports')}</h1>
           <p className="text-muted-foreground">Generate, view, and print school reports.</p>
         </div>
       </motion.div>

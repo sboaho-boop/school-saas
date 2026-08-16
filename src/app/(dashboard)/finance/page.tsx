@@ -18,6 +18,7 @@ import { useState, useMemo } from 'react';
 import { Download, TrendingUp, TrendingDown, CreditCard, DollarSign, UserCheck, AlertTriangle } from 'lucide-react';
 import { useFinanceStore } from '@/stores/finance';
 import { useStaffStore } from '@/stores/staff';
+import { useI18n } from '@/stores/locale';
 import { RecordPaymentDialog } from '@/components/finance/record-payment-dialog';
 
 const statusConfig = {
@@ -31,6 +32,7 @@ export default function FinancePage() {
   const records = useFinanceStore((s) => s.records);
   const staff = useStaffStore((s) => s.staff);
   const accountants = useMemo(() => staff.filter((m) => m.staffType === 'accountant' && m.status === 'active'), [staff]);
+  const { t } = useI18n();
   const [filter, setFilter] = useState<'all' | 'paid' | 'partial' | 'unpaid' | 'overdue'>('all');
 
   const filteredRecords = filter === 'all' ? records : records.filter((r) => r.status === filter);
@@ -60,12 +62,12 @@ export default function FinancePage() {
         className="flex items-center justify-between rounded-xl bg-gradient-to-r from-emerald-500/10 via-primary/10 to-cyan-500/10 p-6"
       >
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">Finance</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">{t('pages.finance')}</h1>
           <p className="text-muted-foreground">Track fee payments and outstanding balances.</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
-            <Download size={16} className="mr-2" /> Export
+            <Download size={16} className="mr-2" /> {t('common.export')}
           </Button>
           <RecordPaymentDialog />
         </div>

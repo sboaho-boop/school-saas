@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { Shield, Plus, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import { useI18n } from '@/stores/locale';
 
 interface Incident {
   id: string;
@@ -40,6 +41,7 @@ const filterOptions = [
 ] as const;
 
 export default function BehaviorPage() {
+  const { t } = useI18n();
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [filter, setFilter] = useState('open');
   const [showForm, setShowForm] = useState(false);
@@ -97,7 +99,7 @@ export default function BehaviorPage() {
         className="flex items-center justify-between rounded-xl bg-gradient-to-r from-amber-500/10 via-primary/10 to-emerald-500/10 p-6"
       >
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-emerald-600 bg-clip-text text-transparent">Behavior</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-emerald-600 bg-clip-text text-transparent">{t('pages.behavior')}</h1>
           <p className="text-muted-foreground">Track and manage student incidents.</p>
         </div>
         <Button

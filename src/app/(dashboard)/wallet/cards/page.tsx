@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { api, getToken } from '@/lib/api';
+import { useI18n } from '@/stores/locale';
 import { Button } from '@/components/ui/button';
 import { Printer, Download } from 'lucide-react';
 
@@ -14,6 +15,7 @@ interface StudentCard {
 }
 
 export default function CardsPage() {
+  const { t } = useI18n();
   const [cards, setCards] = useState<StudentCard[]>([]);
   const [schoolName, setSchoolName] = useState('');
   const [loading, setLoading] = useState(true);
@@ -66,7 +68,7 @@ export default function CardsPage() {
     <div>
       <div className="no-print flex items-center justify-between p-6">
         <div>
-          <h1 className="text-2xl font-bold">Student ID Cards</h1>
+          <h1 className="text-2xl font-bold">{t('pages.studentIdCards')}</h1>
           <p className="text-muted-foreground">{cards.length} card{cards.length !== 1 ? 's' : ''} ready to print</p>
         </div>
         <Button variant="outline" size="sm" onClick={downloadZpl}>

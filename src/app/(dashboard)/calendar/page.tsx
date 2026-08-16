@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { Plus, Calendar, Clock, Trash2, Edit3 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from '@/stores/locale';
 
 interface CalendarEvent {
   id: string;
@@ -37,6 +38,7 @@ const typeColors: Record<string, string> = {
 
 export default function CalendarPage() {
   const user = useAuthStore((s) => s.currentUser);
+  const { t } = useI18n();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -116,7 +118,7 @@ export default function CalendarPage() {
         className="flex items-center justify-between rounded-xl bg-gradient-to-r from-green-500/10 via-primary/10 to-teal-500/10 p-6"
       >
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">School Calendar</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">{t('pages.calendar')}</h1>
           <p className="text-muted-foreground">Manage events, holidays, exams, and deadlines.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>

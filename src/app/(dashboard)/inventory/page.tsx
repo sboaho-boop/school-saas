@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import { Package, Plus, ArrowRightLeft, CheckCircle, XCircle, Edit } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import { useI18n } from '@/stores/locale';
 
 interface InventoryItem {
   id: string;
@@ -48,6 +49,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function InventoryPage() {
+  const { t } = useI18n();
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
@@ -145,7 +147,7 @@ export default function InventoryPage() {
         className="flex items-center justify-between rounded-xl bg-gradient-to-r from-violet-500/10 via-primary/10 to-purple-500/10 p-6"
       >
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">Inventory</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">{t('pages.inventory')}</h1>
           <p className="text-muted-foreground">Manage school assets and track assignments.</p>
         </div>
         <Button size="sm" className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-md shadow-primary/20" onClick={() => { resetForm(); setShowForm(!showForm); }}>

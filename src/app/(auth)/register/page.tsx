@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/auth';
+import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import { api } from '@/lib/api';
 import { ArrowRight, ArrowLeft, Building, Palette, UserCheck, Shield, CheckCircle2, Copy } from 'lucide-react';
 
@@ -71,6 +72,9 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 bg-gradient-to-br from-accent/5 via-background to-primary/5">
+      <div className="absolute right-6 top-6 z-10">
+        <LanguageSwitcher />
+      </div>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}

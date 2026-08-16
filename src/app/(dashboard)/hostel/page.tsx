@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { motion } from 'framer-motion';
 import { Building2, Plus, DoorOpen, Bed, UserCheck } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useI18n } from '@/stores/locale';
 
 interface Allocation {
   id: string;
@@ -38,6 +39,7 @@ interface Hostel {
 }
 
 export default function HostelPage() {
+  const { t } = useI18n();
   const [hostels, setHostels] = useState<Hostel[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -109,7 +111,7 @@ export default function HostelPage() {
         className="flex items-center justify-between rounded-xl bg-gradient-to-r from-emerald-500/10 via-primary/10 to-teal-500/10 p-6"
       >
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Hostel Management</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">{t('pages.hostel')}</h1>
           <p className="text-muted-foreground">Manage hostels, rooms, and bed allocations.</p>
         </div>
         <div className="flex gap-2">

@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useOrdersStore, type CardOrder } from '@/stores/orders';
+import { useI18n } from '@/stores/locale';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +20,7 @@ const statusColors: Record<string, string> = {
 
 export default function OrdersPage() {
   const { orders, loading, fetchOrders, deleteOrder, updateStatus } = useOrdersStore();
+  const { t } = useI18n();
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
@@ -26,7 +28,7 @@ export default function OrdersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between rounded-xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 p-6">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Card Orders</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">{t('pages.cardOrders')}</h1>
           <p className="text-muted-foreground">Order printed NFC cards for your students.</p>
         </div>
         <Link href="/wallet/orders/new">

@@ -11,6 +11,7 @@ import { motion } from 'framer-motion';
 import { Book, Plus, ArrowLeftRight, CheckCircle, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import { useI18n } from '@/stores/locale';
 
 interface BookType {
   id: string;
@@ -36,6 +37,7 @@ interface LoanType {
 }
 
 export default function LibraryPage() {
+  const { t } = useI18n();
   const [books, setBooks] = useState<BookType[]>([]);
   const [loans, setLoans] = useState<LoanType[]>([]);
   const [activeTab, setActiveTab] = useState('books');
@@ -154,7 +156,7 @@ export default function LibraryPage() {
         className="flex items-center justify-between rounded-xl bg-gradient-to-r from-cyan-500/10 via-primary/10 to-sky-500/10 p-6"
       >
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-sky-600 bg-clip-text text-transparent">Library</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-sky-600 bg-clip-text text-transparent">{t('pages.library')}</h1>
           <p className="text-muted-foreground">Manage books and track loans.</p>
         </div>
       </motion.div>
@@ -168,7 +170,7 @@ export default function LibraryPage() {
         <TabsContent value="books" className="mt-6 space-y-4">
           <div className="flex justify-end">
             <Button size="sm" className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-md shadow-primary/20" onClick={() => { resetBookForm(); setShowBookForm(!showBookForm); }}>
-              <Plus size={16} className="mr-2" /> Add Book
+              <Plus size={16} className="mr-2" /> {t('common.add')}
             </Button>
           </div>
 
@@ -208,7 +210,7 @@ export default function LibraryPage() {
                     </div>
                     <div className="sm:col-span-2 flex justify-end gap-2 pt-2">
                       <Button type="button" variant="outline" size="sm" onClick={() => { resetBookForm(); setShowBookForm(false); }}>Cancel</Button>
-                      <Button type="submit" size="sm" disabled={bookSubmitting}>{bookSubmitting ? 'Saving...' : editingBook ? 'Update Book' : 'Add Book'}</Button>
+                      <Button type="submit" size="sm" disabled={bookSubmitting}>{bookSubmitting ? t('common.saving') : editingBook ? 'Update Book' : t('common.add')}</Button>
                     </div>
                   </form>
                 </CardContent>

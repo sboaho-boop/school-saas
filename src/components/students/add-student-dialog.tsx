@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useStudentStore } from '@/stores/students';
+import { useI18n } from '@/stores/locale';
 import { Plus } from 'lucide-react';
 
 const CLASS_OPTIONS = [
@@ -20,6 +21,7 @@ const CLASS_OPTIONS = [
 
 export function AddStudentDialog() {
   const addStudent = useStudentStore((s) => s.addStudent);
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -65,7 +67,7 @@ export function AddStudentDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button size="sm"><Plus size={16} className="mr-2" /> Add Student</Button>} />
+      <DialogTrigger render={<Button size="sm"><Plus size={16} className="mr-2" /> {t('common.add')}</Button>} />
       <DialogContent className="sm:max-w-lg">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
@@ -140,7 +142,7 @@ export function AddStudentDialog() {
           </div>
           <DialogFooter>
             <DialogClose render={<Button variant="outline">Cancel</Button>} />
-            <Button type="submit">Add Student</Button>
+            <Button type="submit">{t('common.save')}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

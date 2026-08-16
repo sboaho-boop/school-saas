@@ -11,6 +11,7 @@ import { useAcademicsStore } from '@/stores/academics';
 import { useStudentStore } from '@/stores/students';
 import { useMarksStore, COMPONENT_NAMES, COMPONENT_LABELS, COMPONENT_MAX, Grade } from '@/stores/marks';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from '@/stores/locale';
 import { ImportDialog } from '@/components/import-dialog';
 import Link from 'next/link';
 import { Save, Printer, FileText } from 'lucide-react';
@@ -39,6 +40,7 @@ export default function MarksPage() {
   const students = useStudentStore((s) => s.students);
   const fetchStudents = useStudentStore((s) => s.fetchStudents);
   const { grades, fetchGrades, saveGrade, loading } = useMarksStore();
+  const { t } = useI18n();
 
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
@@ -112,7 +114,7 @@ export default function MarksPage() {
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="flex items-center justify-between rounded-xl bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Continuous Assessment</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{t('pages.marks')}</h1>
           <p className="text-muted-foreground">Enter component scores. Total and grade auto-calculate.</p>
         </div>
         <div className="flex gap-2">

@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import { useI18n } from '@/stores/locale';
 import { Search, Shield } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
@@ -20,6 +21,7 @@ interface AuditEntry {
 }
 
 export default function AuditLogsPage() {
+  const { t } = useI18n();
   const [logs, setLogs] = useState<AuditEntry[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -49,7 +51,7 @@ export default function AuditLogsPage() {
         className="flex items-center justify-between rounded-xl bg-gradient-to-r from-rose-500/10 via-orange-500/10 to-amber-500/10 p-6"
       >
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-amber-600 bg-clip-text text-transparent">Audit Logs</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-amber-600 bg-clip-text text-transparent">{t('pages.auditLogs')}</h1>
           <p className="text-muted-foreground">Track who changed what in the system.</p>
         </div>
         <Shield size={20} className="text-rose-500" />

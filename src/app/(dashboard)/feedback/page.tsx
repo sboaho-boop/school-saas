@@ -10,6 +10,7 @@ import { motion } from 'framer-motion';
 import { MessageSquareText, Send, CheckCircle, History, ChevronDown, ChevronUp } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from '@/stores/locale';
 
 interface FeedbackItem {
   id: string; subject: string; message: string; status: string;
@@ -19,6 +20,7 @@ interface FeedbackItem {
 
 export default function FeedbackPage() {
   const user = useAuthStore((s) => s.currentUser);
+  const { t } = useI18n();
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -72,7 +74,7 @@ export default function FeedbackPage() {
         className="rounded-xl bg-gradient-to-r from-purple-500/10 via-primary/10 to-pink-500/10 p-6 text-center"
       >
         <MessageSquareText size={40} className="mx-auto mb-3 text-primary" />
-        <h1 className="text-2xl font-bold">Send Feedback</h1>
+        <h1 className="text-2xl font-bold">{t('pages.feedback')}</h1>
         <p className="text-muted-foreground">Report an issue, suggest a feature, or send a message to the platform administrators.</p>
       </motion.div>
 

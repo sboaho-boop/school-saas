@@ -41,6 +41,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { useAuthStore, ROLE_NAV_ITEMS } from '@/stores/auth';
+import { useI18n } from '@/stores/locale';
 
 const iconMap = {
   LayoutDashboard,
@@ -74,45 +75,46 @@ const iconMap = {
 
 interface SidebarItem {
   id: string;
-  label: string;
+  labelKey: string;
   icon: keyof typeof iconMap;
   href: string;
 }
 
 const sidebarItems: SidebarItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard', href: '/dashboard' },
-  { id: 'students', label: 'Students', icon: 'Users', href: '/students' },
-  { id: 'staff', label: 'Staff', icon: 'UserCog', href: '/staff' },
-  { id: 'academics', label: 'Academics', icon: 'GraduationCap', href: '/academics' },
-  { id: 'attendance', label: 'Attendance', icon: 'ClipboardCheck', href: '/attendance' },
-  { id: 'marks', label: 'Marks', icon: 'ClipboardList', href: '/marks' },
-  { id: 'wallet', label: 'Wallet', icon: 'Wallet', href: '/wallet' },
-  { id: 'tasks', label: 'Tasks', icon: 'ListChecks', href: '/tasks' },
-  { id: 'transport', label: 'Transport', icon: 'Bus', href: '/transport' },
-  { id: 'finance', label: 'Finance', icon: 'CreditCard', href: '/finance' },
-  { id: 'communication', label: 'Communication', icon: 'MessageSquare', href: '/communication' },
-  { id: 'conferences', label: 'Conferences', icon: 'Calendar', href: '/conferences' },
-  { id: 'calendar', label: 'Calendar', icon: 'CalendarDays', href: '/calendar' },
-  { id: 'reports', label: 'Reports', icon: 'BarChart3', href: '/reports' },
-  { id: 'audit-logs', label: 'Audit Logs', icon: 'Shield', href: '/audit-logs' },
-  { id: 'terminal', label: 'Terminal', icon: 'Scan', href: '/terminal' },
-  { id: 'orders', label: 'Fulfillment', icon: 'Package', href: '/orders/admin' },
-  { id: 'library', label: 'Library', icon: 'BookOpen', href: '/library' },
-  { id: 'hostel', label: 'Hostel', icon: 'Building2', href: '/hostel' },
-  { id: 'inventory', label: 'Inventory', icon: 'Box', href: '/inventory' },
-  { id: 'behavior', label: 'Behavior', icon: 'AlertTriangle', href: '/behavior' },
-  { id: 'alumni', label: 'Alumni', icon: 'UserCircle', href: '/alumni' },
-  { id: 'assignments', label: 'Assignments', icon: 'FileText', href: '/assignments' },
-  { id: 'exams', label: 'Exams', icon: 'Pencil', href: '/exams' },
-  { id: 'lesson-plans', label: 'Lesson Plans', icon: 'GraduationCap', href: '/lesson-plans' },
-  { id: 'feedback', label: 'Send Feedback', icon: 'MessageSquareText', href: '/feedback' },
-  { id: 'ai-tutor', label: 'AI Tutor', icon: 'Sparkles', href: '/ai-tutor' },
-  { id: 'settings', label: 'Settings', icon: 'Settings', href: '/settings' },
+  { id: 'dashboard', labelKey: 'nav.dashboard', icon: 'LayoutDashboard', href: '/dashboard' },
+  { id: 'students', labelKey: 'nav.students', icon: 'Users', href: '/students' },
+  { id: 'staff', labelKey: 'nav.staff', icon: 'UserCog', href: '/staff' },
+  { id: 'academics', labelKey: 'nav.academics', icon: 'GraduationCap', href: '/academics' },
+  { id: 'attendance', labelKey: 'nav.attendance', icon: 'ClipboardCheck', href: '/attendance' },
+  { id: 'marks', labelKey: 'nav.marks', icon: 'ClipboardList', href: '/marks' },
+  { id: 'wallet', labelKey: 'nav.wallet', icon: 'Wallet', href: '/wallet' },
+  { id: 'tasks', labelKey: 'nav.tasks', icon: 'ListChecks', href: '/tasks' },
+  { id: 'transport', labelKey: 'nav.transport', icon: 'Bus', href: '/transport' },
+  { id: 'finance', labelKey: 'nav.finance', icon: 'CreditCard', href: '/finance' },
+  { id: 'communication', labelKey: 'nav.communication', icon: 'MessageSquare', href: '/communication' },
+  { id: 'conferences', labelKey: 'nav.conferences', icon: 'Calendar', href: '/conferences' },
+  { id: 'calendar', labelKey: 'nav.calendar', icon: 'CalendarDays', href: '/calendar' },
+  { id: 'reports', labelKey: 'nav.reports', icon: 'BarChart3', href: '/reports' },
+  { id: 'audit-logs', labelKey: 'nav.auditLogs', icon: 'Shield', href: '/audit-logs' },
+  { id: 'terminal', labelKey: 'nav.terminal', icon: 'Scan', href: '/terminal' },
+  { id: 'orders', labelKey: 'nav.fulfillment', icon: 'Package', href: '/orders/admin' },
+  { id: 'library', labelKey: 'nav.library', icon: 'BookOpen', href: '/library' },
+  { id: 'hostel', labelKey: 'nav.hostel', icon: 'Building2', href: '/hostel' },
+  { id: 'inventory', labelKey: 'nav.inventory', icon: 'Box', href: '/inventory' },
+  { id: 'behavior', labelKey: 'nav.behavior', icon: 'AlertTriangle', href: '/behavior' },
+  { id: 'alumni', labelKey: 'nav.alumni', icon: 'UserCircle', href: '/alumni' },
+  { id: 'assignments', labelKey: 'nav.assignments', icon: 'FileText', href: '/assignments' },
+  { id: 'exams', labelKey: 'nav.exams', icon: 'Pencil', href: '/exams' },
+  { id: 'lesson-plans', labelKey: 'nav.lessonPlans', icon: 'GraduationCap', href: '/lesson-plans' },
+  { id: 'feedback', labelKey: 'nav.feedback', icon: 'MessageSquareText', href: '/feedback' },
+  { id: 'ai-tutor', labelKey: 'nav.aiTutor', icon: 'Sparkles', href: '/ai-tutor' },
+  { id: 'settings', labelKey: 'nav.settings', icon: 'Settings', href: '/settings' },
 ];
 
 export function SidebarNavContent({ collapsed = false }: { collapsed?: boolean }) {
   const pathname = usePathname();
   const user = useAuthStore((s) => s.currentUser);
+  const { t } = useI18n();
 
   const allowedIds = user ? ROLE_NAV_ITEMS[user.staffType] : sidebarItems.map((i) => i.id);
   const visibleItems = sidebarItems.filter((item) => allowedIds.includes(item.id));
@@ -134,7 +136,7 @@ export function SidebarNavContent({ collapsed = false }: { collapsed?: boolean }
             )}
           >
             <Icon size={20} className={cn("shrink-0", isActive ? "text-primary-foreground" : "text-sidebar-foreground/50")} />
-            {!collapsed && <span>{item.label}</span>}
+            {!collapsed && <span>{t(item.labelKey)}</span>}
           </Link>
         );
       })}
@@ -145,6 +147,7 @@ export function SidebarNavContent({ collapsed = false }: { collapsed?: boolean }
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const { theme } = useThemeStore();
+  const { t } = useI18n();
 
   return (
     <aside
@@ -173,7 +176,7 @@ export function Sidebar() {
         {!collapsed && (
           <div className="border-t border-sidebar-border p-4">
             <div className="rounded-lg bg-gradient-to-br from-sidebar-accent/50 to-sidebar-accent/20 p-3 space-y-2">
-              <p className="text-xs font-medium text-sidebar-foreground">Contact Support</p>
+              <p className="text-xs font-medium text-sidebar-foreground">{t('header.contactSupport')}</p>
               <a
                 href="https://wa.me/447735310744"
                 target="_blank"

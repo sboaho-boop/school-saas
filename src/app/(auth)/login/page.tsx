@@ -11,10 +11,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useRef } from 'react';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from '@/stores/locale';
+import { LanguageSwitcher } from '@/components/layout/language-switcher';
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, verifyOtp, loading, error, require2fa, cancel2fa } = useAuthStore();
+  const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -77,9 +80,9 @@ export default function LoginPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Shield size={20} className="text-primary" />
-                <CardTitle>Two-Factor Authentication</CardTitle>
+                <CardTitle>{t('auth.twoFactor')}</CardTitle>
               </div>
-              <CardDescription>Enter the 6-digit code from your authenticator app</CardDescription>
+              <CardDescription>{t('auth.enterOtp')}</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleOtpSubmit} className="space-y-6">
@@ -101,10 +104,10 @@ export default function LoginPage() {
                   ))}
                 </div>
                 <Button type="submit" disabled={loading || otp.join('').length !== 6} className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-md shadow-primary/20">
-                  {loading ? 'Verifying...' : 'Verify & Sign In'}
+                  {loading ? t('auth.verifying') : t('auth.verifyAndSignIn')}
                 </Button>
                 <button type="button" onClick={handleCancel2fa} className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Back to login
+                  {t('auth.backToLogin')}
                 </button>
               </form>
             </CardContent>
@@ -116,6 +119,9 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+      <div className="absolute right-6 top-6 z-10">
+        <LanguageSwitcher />
+      </div>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -124,20 +130,20 @@ export default function LoginPage() {
       >
         <div className="mb-8 text-center">
           <Logo className="justify-center" />
-          <p className="mt-2 text-muted-foreground">Sign in to your school workspace</p>
+          <p className="mt-2 text-muted-foreground">{t('auth.signInToWorkspace')}</p>
         </div>
 
         <Card className="border-border/50 shadow-lg shadow-primary/5">
           <div className="h-1.5 rounded-t-xl bg-gradient-to-r from-primary via-accent to-secondary" />
           <CardHeader>
-            <CardTitle>Welcome back</CardTitle>
-            <CardDescription>Enter your credentials to continue</CardDescription>
+            <CardTitle>{t('auth.welcomeBack')}</CardTitle>
+            <CardDescription>{t('auth.enterCredentials')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && <p className="text-sm text-red-500 bg-red-50 dark:bg-red-950/50 px-3 py-2 rounded-md">{error}</p>}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('auth.email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -149,37 +155,37 @@ export default function LoginPage() {
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t('auth.password')}</Label>
                   <Link
                     href="/forgot-password"
                     className="text-xs text-muted-foreground hover:text-foreground"
                   >
-                    Forgot password?
+                    {t('auth.forgotPassword')}
                   </Link>
                 </div>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t('auth.enterPassword')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
               <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-md shadow-primary/20">
-                {loading ? 'Signing in...' : 'Sign In'}
+                {loading ? t('auth.signingIn') : t('auth.signIn')}
               </Button>
             </form>
 
             <div className="mt-4 text-xs text-muted-foreground space-y-1">
-              <p className="font-medium">Demo accounts (password: <code className="bg-muted px-1 rounded">password123</code>):</p>
+              <p className="font-medium">{t('auth.demoAccounts')} <code className="bg-muted px-1 rounded">password123</code>):</p>
               <p>headteacher@school.com · admin@school.com · accountant@school.com</p>
               <p>teacher1@school.com · teacher2@school.com · nont@school.com</p>
             </div>
             <div className="mt-4 text-center text-sm">
-              <span className="text-muted-foreground">Don&apos;t have an account? </span>
+              <span className="text-muted-foreground">{t('auth.noAccount')} </span>
               <Link href="/register" className="font-medium text-primary hover:underline">
-                Register your school
+                {t('auth.registerSchool')}
               </Link>
             </div>
           </CardContent>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useStudentStore } from '@/stores/students';
 import { useWalletStore } from '@/stores/wallet';
 import { useOrdersStore } from '@/stores/orders';
+import { useI18n } from '@/stores/locale';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,7 @@ export default function NewOrderPage() {
   const { students, fetchStudents } = useStudentStore();
   const { wallets, fetchWallets } = useWalletStore();
   const { createOrder } = useOrdersStore();
+  const { t } = useI18n();
   const [selected, setSelected] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -47,7 +49,7 @@ export default function NewOrderPage() {
           <Button variant="ghost" size="icon"><ArrowLeft size={18} /></Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold">New Card Order</h1>
+          <h1 className="text-2xl font-bold">{t('pages.newCardOrder')}</h1>
           <p className="text-muted-foreground">Select students who need NFC cards printed.</p>
         </div>
       </div>

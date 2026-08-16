@@ -10,6 +10,7 @@ import { useWalletStore } from '@/stores/wallet';
 import { useStudentStore } from '@/stores/students';
 import { useStaffStore } from '@/stores/staff';
 import { useAcademicsStore } from '@/stores/academics';
+import { useI18n } from '@/stores/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Scan, Check, X, CreditCard, Bus, UtensilsCrossed, Printer, School, ArrowLeft, KeyRound, SmartphoneNfc, Usb, PenTool, BookOpen, Save, IdCard, UserCheck, Users } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -29,6 +30,7 @@ export default function TerminalPage() {
   const { tapCard, tapConfirm, generateCard, wallets, fetchWallets } = useWalletStore();
   const { students, fetchStudents } = useStudentStore();
   const { staff, fetchStaff } = useStaffStore();
+  const { t } = useI18n();
   const [service, setService] = useState('');
   const [uid, setUid] = useState('');
   const [amount, setAmount] = useState('');
@@ -346,7 +348,7 @@ export default function TerminalPage() {
       <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center p-6">
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center mb-8">
           <Scan size={48} className="mx-auto text-primary mb-3" />
-          <h1 className="text-2xl font-bold">Tap Terminal</h1>
+          <h1 className="text-2xl font-bold">{t('pages.terminal')}</h1>
           <p className="text-muted-foreground">Select a service to begin</p>
         </motion.div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-lg w-full">

@@ -22,6 +22,7 @@ import { useEffect, useState } from 'react';
 import { Building, Palette, Globe, Bell, Shield, CreditCard, Check, Sparkles, XCircle, Smartphone, QrCode, KeyRound, Download, Trash2, FileText, Wallet, Eye, EyeOff, Nfc, ShoppingCart, Zap } from 'lucide-react';
 import { api, getToken } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from '@/stores/locale';
 
 const SMS_EVENT_LABELS: Record<string, string> = {
   registration_confirmation: 'Registration confirmation',
@@ -44,6 +45,7 @@ const DEFAULT_SMS_PREFS: Record<string, boolean> = {
 export default function SettingsPage() {
   const { theme, setSchoolName, setPrimaryColor, setTheme } = useThemeStore();
   const { subscription, plans, loading, fetchSubscription, fetchPlans, upgradePlan, cancelSubscription } = useBillingStore();
+  const { t } = useI18n();
 
   const [phone, setPhone] = useState('');
   const [smsPrefs, setSmsPrefs] = useState<Record<string, boolean>>(DEFAULT_SMS_PREFS);
@@ -67,6 +69,7 @@ export default function SettingsPage() {
     hubtelDisbursementAccount: '',
     hubtelSmsClientId: '',
     hubtelSmsClientSecret: '',
+    smsSenderId: '',
   });
   const [showHubtelSecret, setShowHubtelSecret] = useState(false);
   const [hubtelMsg, setHubtelMsg] = useState('');
@@ -165,7 +168,7 @@ export default function SettingsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <h1 className="text-2xl font-bold">Settings</h1>
+        <h1 className="text-2xl font-bold">{t('pages.settings')}</h1>
         <p className="text-muted-foreground">Manage your school settings and preferences.</p>
       </motion.div>
 
@@ -463,6 +466,11 @@ export default function SettingsPage() {
               <div className="space-y-2">
                 <Label htmlFor="hubtelSmsClientSecret">SMS Client Secret</Label>
                 <Input id="hubtelSmsClientSecret" type="password" value={hubtel.hubtelSmsClientSecret} onChange={(e) => setHubtel({ ...hubtel, hubtelSmsClientSecret: e.target.value })} placeholder="Hubtel SMS client secret" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="smsSenderId">SMS Sender ID</Label>
+                <Input id="smsSenderId" value={hubtel.smsSenderId} onChange={(e) => setHubtel({ ...hubtel, smsSenderId: e.target.value })} placeholder="e.g. KATECOURT" />
+                <p className="text-xs text-muted-foreground">This appears as the sender name on recipient phones. Must be registered with Hubtel.</p>
               </div>
               <Button onClick={saveHubtel} disabled={hubtelLoading}>
                 {hubtelLoading ? 'Saving...' : 'Save Hubtel Credentials'}

@@ -12,12 +12,14 @@ import { Plus, GraduationCap, BookOpen, Calendar, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useAcademicsStore } from '@/stores/academics';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from '@/stores/locale';
 
 const sections = ['Kindergarten', 'Lower Primary', 'Upper Primary', 'Junior High', 'Senior High'];
 
 export default function AcademicsPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
   const { classes, subjects, terms, addClass, removeClass, addSubject, removeSubject, setActiveTerm } = useAcademicsStore();
+  const { t } = useI18n();
   const [classOpen, setClassOpen] = useState(false);
   const [subjectOpen, setSubjectOpen] = useState(false);
   const [newClassName, setNewClassName] = useState('');
@@ -46,7 +48,7 @@ export default function AcademicsPage() {
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="flex items-center justify-between rounded-xl bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Academics</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{t('pages.academics')}</h1>
           <p className="text-muted-foreground">Manage classes, subjects, and grading.</p>
         </div>
         <div className="flex gap-2">

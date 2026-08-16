@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import { Notebook, Plus, CheckCircle, Clock, FileText } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
+import { useI18n } from '@/stores/locale';
 
 interface LessonPlan {
   id: string;
@@ -36,6 +37,7 @@ const emptyForm = {
 };
 
 export default function LessonPlansPage() {
+  const { t } = useI18n();
   const [plans, setPlans] = useState<LessonPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -100,7 +102,7 @@ export default function LessonPlansPage() {
         className="flex items-center justify-between rounded-xl bg-gradient-to-r from-amber-500/10 via-primary/10 to-orange-500/10 p-6"
       >
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">Lesson Plans</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">{t('pages.lessonPlans')}</h1>
           <p className="text-muted-foreground">Create and manage lesson plans.</p>
         </div>
         <Button

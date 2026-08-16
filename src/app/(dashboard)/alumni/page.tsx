@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import { UserCheck, Plus, GraduationCap, Briefcase } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
+import { useI18n } from '@/stores/locale';
 
 interface Alumni {
   id: string;
@@ -21,6 +22,7 @@ interface Alumni {
 }
 
 export default function AlumniPage() {
+  const { t } = useI18n();
   const [alumni, setAlumni] = useState<Alumni[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -57,7 +59,7 @@ export default function AlumniPage() {
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between rounded-xl bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Alumni</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{t('pages.alumni')}</h1>
           <p className="text-muted-foreground">Manage school alumni and their current occupations.</p>
         </div>
         <Button onClick={() => setShowForm(!showForm)} size="sm"><Plus size={16} className="mr-2" />Add Alumni</Button>

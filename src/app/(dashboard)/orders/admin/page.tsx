@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useOrdersStore, type CardOrder } from '@/stores/orders';
+import { useI18n } from '@/stores/locale';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +26,7 @@ const statusButtons = [
 
 export default function AdminOrdersPage() {
   const { allOrders, loading, fetchAllOrders, updateStatus } = useOrdersStore();
+  const { t } = useI18n();
 
   useEffect(() => { fetchAllOrders(); }, [fetchAllOrders]);
 
@@ -39,7 +41,7 @@ export default function AdminOrdersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Fulfillment Dashboard</h1>
+          <h1 className="text-2xl font-bold">{t('pages.fulfillment')}</h1>
           <p className="text-muted-foreground">Manage card printing orders across all schools.</p>
         </div>
         <Button variant="outline" size="sm" onClick={fetchAllOrders}>

@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import { Calendar, MoreHorizontal, MessageSquare, Paperclip, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useTaskStore } from '@/stores/tasks';
+import { useI18n } from '@/stores/locale';
 import { NewTaskDialog } from '@/components/tasks/new-task-dialog';
 import type { Task } from '@/types';
 
@@ -97,6 +98,7 @@ function TaskCard({ task }: { task: Task }) {
 
 export default function TasksPage() {
   const tasks = useTaskStore((s) => s.tasks);
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState('all');
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
 
@@ -121,11 +123,11 @@ export default function TasksPage() {
         className="flex items-center justify-between rounded-xl bg-gradient-to-r from-rose-500/10 via-primary/10 to-pink-500/10 p-6"
       >
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">Tasks</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">{t('pages.tasks')}</h1>
           <p className="text-muted-foreground">Assign and track school tasks.</p>
         </div>
         <Button size="sm" className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-md shadow-primary/20" onClick={() => setTaskDialogOpen(true)}>
-          <Plus size={16} className="mr-2" /> New Task
+          <Plus size={16} className="mr-2" /> {t('common.add')}
         </Button>
         <NewTaskDialog open={taskDialogOpen} onOpenChange={setTaskDialogOpen} />
       </motion.div>
