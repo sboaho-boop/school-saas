@@ -311,6 +311,7 @@ export default function HomePage() {
             <Link href="#features" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Features</Link>
             <Link href="#pricing" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Pricing</Link>
             <Link href="#testimonials" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Testimonials</Link>
+            <Link href="/download" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors flex items-center gap-1"><Smartphone className="h-3.5 w-3.5" />Download App</Link>
             <Link href="/login" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Login</Link>
             <Link href="/parent/login" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Parents</Link>
             <Link href="/student/login" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Students</Link>
@@ -337,6 +338,7 @@ export default function HomePage() {
             <Link href="#features" className="block text-sm text-muted-foreground py-2" onClick={() => setMobileMenu(false)}>Features</Link>
             <Link href="#pricing" className="block text-sm text-muted-foreground py-2" onClick={() => setMobileMenu(false)}>Pricing</Link>
             <Link href="#testimonials" className="block text-sm text-muted-foreground py-2" onClick={() => setMobileMenu(false)}>Testimonials</Link>
+            <Link href="/download" className="block text-sm text-muted-foreground py-2" onClick={() => setMobileMenu(false)}>Download App</Link>
             <Link href="/login" className="block text-sm text-muted-foreground py-2" onClick={() => setMobileMenu(false)}>Login</Link>
             <Link href="/register" onClick={() => setMobileMenu(false)}>
               <Button className="w-full bg-indigo-600 text-white mt-2">Sign Up Free</Button>
@@ -391,6 +393,12 @@ export default function HomePage() {
                       <Button size="lg" className="bg-white text-gray-900 hover:bg-white/90 font-semibold shadow-xl shadow-white/20 text-base px-8">
                         Get Started Free
                         <ArrowRight size={18} className="ml-2" />
+                      </Button>
+                    </Link>
+                    <Link href="/download">
+                      <Button size="lg" variant="outline" className="bg-white/10 text-white border border-white/20 hover:bg-white/20 backdrop-blur-sm text-base px-6">
+                        <Smartphone size={18} className="mr-2" />
+                        Download App
                       </Button>
                     </Link>
                     <Button size="lg" variant="outline" className="bg-white/10 text-white border border-white/20 hover:bg-white/20 backdrop-blur-sm text-base px-6" onClick={() => setShowVideo(true)}>
