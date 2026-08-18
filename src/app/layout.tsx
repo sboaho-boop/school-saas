@@ -11,9 +11,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "EDUPLATFORM SOFTWARE SERVICES - School Management SaaS",
   description: "A modern, cloud-based school management platform built for Africa and beyond.",
+  manifest: '/manifest.json',
   icons: [
     { rel: 'icon', url: '/favicon.png', sizes: '64x64' },
     { rel: 'icon', url: '/favicon-192.png', sizes: '192x192' },
+    { rel: 'icon', url: '/favicon-512.png', sizes: '512x512' },
     { rel: 'apple-touch-icon', url: '/favicon-192.png' },
   ],
   openGraph: {
@@ -41,6 +43,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} antialiased`} suppressHydrationWarning>
       <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="EduPlatform" />
+        <meta name="theme-color" content="#2563eb" />
         <script dangerouslySetInnerHTML={{
           __html: `
             (function() {
@@ -50,6 +56,11 @@ export default function RootLayout({
                   document.documentElement.classList.add('dark');
                 }
               } catch(e) {}
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').catch(function() {});
+                });
+              }
             })();
           `
         }} />
