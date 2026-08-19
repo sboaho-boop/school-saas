@@ -682,6 +682,7 @@ export default function SettingsPage() {
                       <ul className="space-y-1.5 text-sm">
                         <li className="flex items-center gap-2"><Check size={14} className="text-emerald-500" />Up to {plan.studentLimit} students</li>
                         <li className="flex items-center gap-2"><Check size={14} className="text-emerald-500" />Up to {plan.staffLimit} staff</li>
+                        <li className="flex items-center gap-2"><Check size={14} className="text-emerald-500" />AI Tutor: {plan.id === 'free' ? '5 messages/day' : plan.id === 'pro' ? '100 messages/day' : 'Unlimited'}</li>
                         <li className="flex items-center gap-2"><Check size={14} className="text-emerald-500" />All modules included</li>
                         {plan.id === 'pro' && <li className="flex items-center gap-2"><Check size={14} className="text-emerald-500" />Priority support</li>}
                       </ul>
