@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuthStore } from '@/stores/auth';
 import { api } from '@/lib/api';
-import { Send, Bot, User, Sparkles, RefreshCw, MessageCircle, Volume2 } from 'lucide-react';
+import { Send, Bot, User, RefreshCw, Volume2, VolumeX } from 'lucide-react';
+import { VoiceRecorder, speakText } from '@/components/ai/voice-recorder';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -23,6 +24,7 @@ export default function AITutorPage() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [speakingIdx, setSpeakingIdx] = useState<number | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,6 +57,32 @@ export default function AITutorPage() {
     }
   };
 
+  const handleVoiceResult = (data: { transcribed: string; reply: string; language: string }) => {
+    setMessages((prev) => [
+      ...prev,
+      { role: 'user', content: `🎤 ${data.transcribed}` },
+      { role: 'assistant', content: data.reply },
+    ]);
+  };
+
+  const handleVoiceError = (error: string) => {
+    setMessages((prev) => [
+      ...prev,
+      { role: 'assistant', content: `Voice error: ${error}` },
+    ]);
+  };
+
+  const toggleSpeak = (idx: number, text: string) => {
+    if (speakingIdx === idx) {
+      window.speechSynthesis?.cancel();
+      setSpeakingIdx(null);
+    } else {
+      window.speechSynthesis?.cancel();
+      speakText(text, 'en');
+      setSpeakingIdx(idx);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -63,6 +91,8 @@ export default function AITutorPage() {
   };
 
   const resetChat = () => {
+    window.speechSynthesis?.cancel();
+    setSpeakingIdx(null);
     setMessages([{ role: 'assistant', content: WELCOME_MESSAGE }]);
   };
 
@@ -99,14 +129,27 @@ export default function AITutorPage() {
                     <Bot size={16} className="text-white" />
                   </div>
                 )}
-                <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
-                    msg.role === 'user'
-                      ? 'bg-primary text-primary-foreground rounded-br-md'
-                      : 'bg-muted/50 text-foreground rounded-bl-md border border-border/30'
-                  }`}
-                >
-                  {msg.content}
+                <div className="max-w-[80%] flex flex-col gap-1">
+                  <div
+                    className={`rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+                      msg.role === 'user'
+                        ? 'bg-primary text-primary-foreground rounded-br-md'
+                        : 'bg-muted/50 text-foreground rounded-bl-md border border-border/30'
+                    }`}
+                  >
+                    {msg.content}
+                  </div>
+                  {msg.role === 'assistant' && i > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-fit text-xs text-muted-foreground"
+                      onClick={() => toggleSpeak(i, msg.content)}
+                    >
+                      {speakingIdx === i ? <VolumeX size={12} className="mr-1" /> : <Volume2 size={12} className="mr-1" />}
+                      {speakingIdx === i ? 'Stop' : 'Read aloud'}
+                    </Button>
+                  )}
                 </div>
                 {msg.role === 'user' && (
                   <div className="size-8 rounded-full bg-primary flex items-center justify-center shrink-0 mt-1">
@@ -138,7 +181,8 @@ export default function AITutorPage() {
         </CardContent>
 
         <div className="border-t border-border/50 p-4">
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <VoiceRecorder onResult={handleVoiceResult} onError={handleVoiceError} disabled={loading} />
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -152,7 +196,7 @@ export default function AITutorPage() {
             </Button>
           </div>
           <p className="text-[10px] text-muted-foreground mt-2 text-center">
-            Teacher Kofi can understand English, Twi, Ga, Ewe, Fante, and Dagbani. Responses are AI-generated — verify important information.
+            Tap 🎤 to speak in English, Twi, Ga, Ewe, Fante, Hausa, or Dagbani. Responses are AI-generated — verify important information.
           </p>
         </div>
       </Card>
