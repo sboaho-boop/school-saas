@@ -57,7 +57,7 @@ export default function RegisterPage() {
 
   const handleSubmit = async () => {
     try {
-      const res = await register(email, adminPassword, adminName, phone, { privacyConsent: true, schoolName });
+      const res = await register(email, adminPassword, adminName, phone, { privacyConsent: true, schoolName, country, schoolType: academicStructure, primaryColor });
       setRegistered(res);
       setStep(4);
     } catch {}

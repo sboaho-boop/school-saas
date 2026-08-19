@@ -9,13 +9,15 @@ interface AuthStore {
   require2fa: boolean;
   tempToken: string | null;
   pendingUserId: string | null;
+  onboardingComplete: boolean;
   login: (email: string, password: string) => Promise<void>;
   verifyOtp: (otp: string) => Promise<void>;
-  register: (email: string, password: string, name: string, phone?: string, options?: { privacyConsent?: boolean; schoolName?: string }) => Promise<{ message: string; user: { id: string; email: string; name: string; role: string; isVerified: boolean }; verification: { otp: string; sentVia: { email?: boolean; sms?: boolean }; expiresAt: string; message: string } }>;
+  register: (email: string, password: string, name: string, phone?: string, options?: { privacyConsent?: boolean; schoolName?: string; country?: string; schoolType?: string; primaryColor?: string }) => Promise<{ message: string; user: { id: string; email: string; name: string; role: string; isVerified: boolean }; verification: { otp: string; sentVia: { email?: boolean; sms?: boolean }; expiresAt: string; message: string } }>;
   logout: () => void;
   initialize: () => Promise<void>;
   clearError: () => void;
   cancel2fa: () => void;
+  setOnboardingComplete: (v: boolean) => void;
 }
 
 export const ROLE_NAV_ITEMS: Record<StaffType, string[]> = {
@@ -33,11 +35,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   require2fa: false,
   tempToken: null,
   pendingUserId: null,
+  onboardingComplete: true,
 
   login: async (email, password) => {
     set({ loading: true, error: null });
     try {
-      const res = await api.post<{ user?: { id: string; email: string; name: string; role: string }; token?: string; require2fa?: boolean; tempToken?: string; userId?: string }>('/auth/login', { email, password });
+      const res = await api.post<{ user?: { id: string; email: string; name: string; role: string }; token?: string; require2fa?: boolean; tempToken?: string; userId?: string; onboardingComplete?: boolean }>('/auth/login', { email, password });
       if (res.require2fa) {
         set({ require2fa: true, tempToken: res.tempToken || null, pendingUserId: res.userId || null, loading: false });
         return;
@@ -47,6 +50,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       const matched = staffList.find((s) => s.email === (res.user as any).email);
       set({
         currentUser: matched || { id: (res.user as any).id, name: (res.user as any).name, email: (res.user as any).email, role: (res.user as any).role, phone: '', department: '', staffType: (res.user as any).role as StaffType, status: 'active', hireDate: '' },
+        onboardingComplete: res.onboardingComplete ?? true,
         loading: false,
       });
     } catch (err: any) {
@@ -80,7 +84,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   register: async (email, password, name, phone, options) => {
     set({ loading: true, error: null });
     try {
-      const res = await api.post<{ message: string; user: { id: string; email: string; name: string; role: string; isVerified: boolean }; verification: { otp: string; sentVia: { email?: boolean; sms?: boolean }; expiresAt: string; message: string } }>('/auth/register', { email, password, name, role: 'admin', phone: phone || '', privacyConsent: options?.privacyConsent || false, schoolName: options?.schoolName });
+      const res = await api.post<{ message: string; user: { id: string; email: string; name: string; role: string; isVerified: boolean }; verification: { otp: string; sentVia: { email?: boolean; sms?: boolean }; expiresAt: string; message: string } }>('/auth/register', { email, password, name, role: 'admin', phone: phone || '', privacyConsent: options?.privacyConsent || false, schoolName: options?.schoolName, country: options?.country, schoolType: options?.schoolType, primaryColor: options?.primaryColor });
       set({ currentUser: null, loading: false });
       return res;
     } catch (err: any) {
@@ -121,4 +125,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   clearError: () => set({ error: null }),
 
   cancel2fa: () => set({ require2fa: false, tempToken: null, pendingUserId: null, error: null }),
+
+  setOnboardingComplete: (v) => set({ onboardingComplete: v }),
 }));

@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth';
-import { getToken } from '@/lib/api';
+import { getToken, api } from '@/lib/api';
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const currentUser = useAuthStore((s) => s.currentUser);
   const initialize = useAuthStore((s) => s.initialize);
   const [checking, setChecking] = useState(true);
@@ -35,6 +36,21 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       router.replace('/login');
     }
   }, [currentUser, checking, router]);
+
+  useEffect(() => {
+    if (checking || !currentUser) return;
+    if (pathname === '/onboarding') return;
+    const role = currentUser.role;
+    if (role !== 'admin' && role !== 'headteacher') return;
+
+    api.get<{ onboardingComplete: boolean }>('/school/onboarding-status')
+      .then((res) => {
+        if (!res.onboardingComplete) {
+          router.replace('/onboarding');
+        }
+      })
+      .catch(() => {});
+  }, [checking, currentUser, pathname, router]);
 
   if (checking) {
     return (
