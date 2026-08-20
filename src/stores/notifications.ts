@@ -5,8 +5,10 @@ import type { Notification } from '@/types';
 interface NotificationStore {
   notifications: Notification[];
   unreadCount: number;
+  total: number;
   loading: boolean;
   fetchNotifications: () => Promise<void>;
+  fetchUnreadCount: () => Promise<void>;
   markAsRead: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
   addNotification: (notification: Omit<Notification, 'id' | 'read'>) => void;
@@ -15,16 +17,24 @@ interface NotificationStore {
 export const useNotificationStore = create<NotificationStore>((set, get) => ({
   notifications: [],
   unreadCount: 0,
+  total: 0,
   loading: false,
 
   fetchNotifications: async () => {
     set({ loading: true });
     try {
-      const notifications = await api.get<Notification[]>('/notifications');
-      set({ notifications, unreadCount: notifications.filter((n) => !n.read).length, loading: false });
+      const res = await api.get<{ notifications: Notification[]; total: number; unreadCount: number }>('/notifications');
+      set({ notifications: res.notifications, total: res.total, unreadCount: res.unreadCount, loading: false });
     } catch {
       set({ loading: false });
     }
+  },
+
+  fetchUnreadCount: async () => {
+    try {
+      const res = await api.get<{ count: number }>('/notifications/unread-count');
+      set({ unreadCount: res.count });
+    } catch {}
   },
 
   markAsRead: async (id) => {

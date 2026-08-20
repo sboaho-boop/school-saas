@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Search, User, LogOut, Menu } from 'lucide-react';
+import { Bell, Search, User, LogOut, Menu, CheckCheck } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +23,23 @@ import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 const notificationIcons: Record<string, string> = {
+  student_absent: '🚨',
+  student_late: '⏰',
+  fee_payment_received: '💰',
+  fee_payment_overdue: '⚠️',
+  result_published: '📊',
+  assignment_posted: '📝',
+  announcement_created: '📢',
+  event_reminder: '📅',
+  new_message: '💬',
+  report_card_available: '📄',
+  task_assigned: '📋',
+  task_completed: '✅',
+  incident_reported: '⚠️',
+  subscription_changed: '💳',
+  low_wallet_balance: '💸',
+  submission_graded: '✅',
+  exam_published: '📝',
   fee_reminder: '💰',
   task_deadline: '📋',
   attendance_alert: '📊',
@@ -39,7 +56,7 @@ const roleLabels: Record<string, string> = {
 };
 
 export function Header() {
-  const { notifications, unreadCount, markAsRead } = useNotificationStore();
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotificationStore();
   const user = useAuthStore((s) => s.currentUser);
   const { theme } = useThemeStore();
   const { t } = useI18n();
@@ -87,7 +104,14 @@ export function Header() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-80">
             <DropdownMenuGroup>
-              <DropdownMenuLabel>{t('header.notifications')}</DropdownMenuLabel>
+              <div className="flex items-center justify-between">
+                <DropdownMenuLabel>{t('header.notifications')}</DropdownMenuLabel>
+                {unreadCount > 0 && (
+                  <button onClick={markAllAsRead} className="text-xs text-primary hover:underline flex items-center gap-1 mr-2">
+                    <CheckCheck size={12} /> Mark all read
+                  </button>
+                )}
+              </div>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <div className="max-h-80 overflow-auto">
