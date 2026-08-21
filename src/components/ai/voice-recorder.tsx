@@ -21,9 +21,10 @@ interface VoiceRecorderProps {
   onError: (error: string) => void;
   disabled?: boolean;
   endpoint?: string;
+  onRecorded?: (blob: Blob, language: string) => void;
 }
 
-export function VoiceRecorder({ onResult, onError, disabled, endpoint = '/ai/voice' }: VoiceRecorderProps) {
+export function VoiceRecorder({ onResult, onError, disabled, endpoint = '/ai/voice', onRecorded }: VoiceRecorderProps) {
   const [recording, setRecording] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [language, setLanguage] = useState('en');
@@ -46,7 +47,11 @@ export function VoiceRecorder({ onResult, onError, disabled, endpoint = '/ai/voi
       mediaRecorder.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
         const blob = new Blob(chunksRef.current, { type: mediaRecorder.mimeType });
-        await sendAudio(blob);
+        if (onRecorded) {
+          onRecorded(blob, language);
+        } else {
+          await sendAudio(blob);
+        }
       };
 
       mediaRecorder.start();
@@ -54,7 +59,7 @@ export function VoiceRecorder({ onResult, onError, disabled, endpoint = '/ai/voi
     } catch {
       onError('Microphone access denied. Please allow microphone access and try again.');
     }
-  }, [onError, language]);
+  }, [onError, language, onRecorded]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && recording) {
