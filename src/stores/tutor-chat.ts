@@ -18,7 +18,16 @@ interface TutorChatStore {
   loadHistory: () => Promise<void>;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+
 const WELCOME_MESSAGE = "Hi! I'm Teacher Kofi, your AI learning companion 🎉\n\nI can help you with:\n• Mathematics 📐\n• English 📖\n• Science 🔬\n• Ghanaian languages (Twi, Ga, Ewe, Fante, Dagbani) 🗣️\n• Homework help 📝\n• Quizzes and learning games 🎮\n\nWhat would you like to learn today?";
+
+function authHeaders(extra?: Record<string, string>): Record<string, string> {
+  const headers: Record<string, string> = { ...(extra || {}) };
+  const token = typeof window !== 'undefined' ? localStorage.getItem('tutor_token') : null;
+  if (token) headers.Authorization = 'Bearer ' + token;
+  return headers;
+}
 
 export const useTutorChat = create<TutorChatStore>((set, get) => ({
   messages: [{ role: 'assistant', content: WELCOME_MESSAGE }],
@@ -28,25 +37,77 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
   sendMessage: async (message: string) => {
     const { messages } = get();
     const userMsg: ChatMessage = { role: 'user', content: message };
-    set({ messages: [...messages, userMsg], loading: true });
+    const placeholder: ChatMessage = { role: 'assistant', content: '' };
+    set({ messages: [...messages, userMsg, placeholder], loading: true });
 
     const history = messages.slice(1).map((m) => ({ role: m.role, content: m.content }));
+    let started = false;
 
+    const patchLast = (content: string, extra?: Partial<TutorChatStore>) => {
+      set((s) => {
+        const arr = [...s.messages];
+        arr[arr.length - 1] = { role: 'assistant', content };
+        return { messages: arr, ...(extra || {}) };
+      });
+    };
+
+    // 1) Stream tokens for a fast reply
     try {
-      const res = await tutorRequest<{ reply: string; remaining: number }>('/tutor/ai/chat', {
+      const res = await fetch(API_URL + '/tutor/ai/chat/stream', {
         method: 'POST',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ message, history }),
       });
-      set((s) => ({
-        messages: [...s.messages, { role: 'assistant', content: res.reply }],
-        remaining: res.remaining,
-        loading: false,
-      }));
+      if (!res.ok) throw new Error('Stream failed');
+
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error('No stream');
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let text = '';
+
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let sep = buffer.indexOf('\n\n');
+        while (sep !== -1) {
+          const event = buffer.slice(0, sep);
+          buffer = buffer.slice(sep + 2);
+          sep = buffer.indexOf('\n\n');
+          for (const line of event.split('\n')) {
+            if (!line.startsWith('data:')) continue;
+            const payload = line.slice(5).trim();
+            if (!payload) continue;
+            try {
+              const evt = JSON.parse(payload);
+              if (typeof evt.token === 'string') {
+                text += evt.token;
+                if (!started) { started = true; set({ loading: false }); }
+                patchLast(text);
+              } else if (evt.done) {
+                patchLast(text, { remaining: evt.remaining, loading: false });
+              } else if (evt.error) {
+                throw new Error(evt.error);
+              }
+            } catch { /* partial json line */ }
+          }
+        }
+      }
+      if (!text.trim()) throw new Error('Empty reply');
+      set({ loading: false });
+      return;
     } catch {
-      set((s) => ({
-        messages: [...s.messages, { role: 'assistant', content: 'Sorry, I had trouble connecting. Please try again.' }],
-        loading: false,
-      }));
+      // 2) Fallback: classic JSON reply (patches the placeholder bubble)
+      try {
+        const res = await tutorRequest<{ reply: string; remaining: number }>('/tutor/ai/chat', {
+          method: 'POST',
+          body: JSON.stringify({ message, history }),
+        });
+        patchLast(res.reply, { remaining: res.remaining, loading: false });
+      } catch {
+        patchLast('Sorry, I had trouble connecting. Please try again.', { loading: false });
+      }
     }
   },
 
@@ -61,11 +122,9 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
     formData.append('history', JSON.stringify(history));
 
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('tutor_token') : null;
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-      const res = await fetch(apiUrl + '/tutor/ai/voice', {
+      const res = await fetch(API_URL + '/tutor/ai/voice', {
         method: 'POST',
-        headers: token ? { Authorization: 'Bearer ' + token } : {},
+        headers: authHeaders(),
         body: formData,
       });
       const data = await res.json();
