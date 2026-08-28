@@ -11,14 +11,22 @@ interface TutorChatStore {
   messages: ChatMessage[];
   loading: boolean;
   remaining: number | null;
-  sendMessage: (message: string) => Promise<void>;
+  sendMessage: (message: string, image?: string) => Promise<void>;
   sendVoice: (audioBlob: Blob, language: string) => Promise<void>;
-  sendImage: (prompt: string) => Promise<void>;
+  sendImage: (prompt: string, style?: string) => Promise<void>;
+  sendPhoto: (file: File, caption?: string) => Promise<void>;
   resetChat: () => void;
   loadHistory: () => Promise<void>;
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+
+export function mediaSrc(raw?: string): string | undefined {
+  if (!raw) return undefined;
+  if (/^https?:\/\//i.test(raw) || raw.startsWith('data:')) return raw;
+  const origin = API_URL.replace(/\/api\/?$/, '');
+  return origin + raw;
+}
 
 const WELCOME_MESSAGE = "Hi! I'm Teacher Kofi, your AI learning companion 🎉\n\nI can help you with:\n• Mathematics 📐\n• English 📖\n• Science 🔬\n• Ghanaian languages (Twi, Ga, Ewe, Fante, Dagbani) 🗣️\n• Homework help 📝\n• Quizzes and learning games 🎮\n\nWhat would you like to learn today?";
 
@@ -34,13 +42,18 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
   loading: false,
   remaining: null,
 
-  sendMessage: async (message: string) => {
+  sendMessage: async (message: string, image?: string) => {
     const { messages } = get();
     const userMsg: ChatMessage = { role: 'user', content: message };
+    if (image) userMsg.image = image;
     const placeholder: ChatMessage = { role: 'assistant', content: '' };
     set({ messages: [...messages, userMsg, placeholder], loading: true });
 
-    const history = messages.slice(1).map((m) => ({ role: m.role, content: m.content }));
+    const history = messages.slice(1).map((m) => {
+      const entry: { role: string; content: string; image?: string } = { role: m.role, content: m.content };
+      if (m.image) entry.image = m.image;
+      return entry;
+    });
     let started = false;
 
     const patchLast = (content: string, extra?: Partial<TutorChatStore>) => {
@@ -56,7 +69,7 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
       const res = await fetch(API_URL + '/tutor/ai/chat/stream', {
         method: 'POST',
         headers: authHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ message, history }),
+        body: JSON.stringify({ message, history, ...(image ? { image } : {}) }),
       });
       if (!res.ok) throw new Error('Stream failed');
 
@@ -102,7 +115,7 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
       try {
         const res = await tutorRequest<{ reply: string; remaining: number }>('/tutor/ai/chat', {
           method: 'POST',
-          body: JSON.stringify({ message, history }),
+          body: JSON.stringify({ message, history, ...(image ? { image } : {}) }),
         });
         patchLast(res.reply, { remaining: res.remaining, loading: false });
       } catch {
@@ -147,7 +160,7 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
     }
   },
 
-  sendImage: async (prompt: string) => {
+  sendImage: async (prompt: string, style?: string) => {
     const { messages } = get();
     const userMsg: ChatMessage = { role: 'user', content: '🎨 ' + prompt };
     set({ messages: [...messages, userMsg], loading: true });
@@ -155,7 +168,7 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
     try {
       const res = await tutorRequest<{ imageData: string; prompt: string; remaining: number }>('/tutor/ai/image', {
         method: 'POST',
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt, style }),
       });
       set((s) => ({
         messages: [
@@ -168,6 +181,27 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
     } catch {
       set((s) => ({
         messages: [...s.messages, { role: 'assistant', content: 'Sorry, I could not draw that right now. Please try again.' }],
+        loading: false,
+      }));
+    }
+  },
+
+  sendPhoto: async (file: File, caption?: string) => {
+    const text = (caption || '').trim() || '📷 Look at this picture — what do you see?';
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch(API_URL + '/tutor/upload', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      await get().sendMessage(text, String(data.url));
+    } catch (err: unknown) {
+      set((s) => ({
+        messages: [...s.messages, { role: 'assistant', content: 'Sorry, I could not upload that photo: ' + ((err as Error).message || 'Try again.') }],
         loading: false,
       }));
     }

@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTutorAuth, tutorRequest } from '@/stores/tutor-auth';
-import { useTutorChat } from '@/stores/tutor-chat';
-import { Send, Bot, User, RefreshCw, Volume2, VolumeX, AlertTriangle, CheckCircle2, Loader2, Image as ImageIcon } from 'lucide-react';
+import { useTutorChat, mediaSrc } from '@/stores/tutor-chat';
+import { Send, Bot, User, RefreshCw, Volume2, VolumeX, AlertTriangle, CheckCircle2, Loader2, Image as ImageIcon, Camera as CameraIcon, Sparkles } from 'lucide-react';
 import { KofiMessage } from '@/components/ai/kofi-message';
 import { VoiceRecorder, speakText } from '@/components/ai/voice-recorder';
 import Link from 'next/link';
@@ -18,9 +18,11 @@ function TutorDashboardContent() {
   const fetchMe = useTutorAuth((s) => s.fetchMe);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { messages, loading, remaining, sendMessage, sendVoice, sendImage, resetChat, loadHistory } = useTutorChat();
+  const { messages, loading, remaining, sendMessage, sendVoice, sendImage, sendPhoto, resetChat, loadHistory } = useTutorChat();
   const [input, setInput] = useState('');
   const [imageMode, setImageMode] = useState(false);
+  const [imgStyle, setImgStyle] = useState<'cartoon' | 'real'>('cartoon');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [speakingIdx, setSpeakingIdx] = useState<number | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const [verifying, setVerifying] = useState(false);
@@ -74,10 +76,19 @@ function TutorDashboardContent() {
     setInput('');
     if (imageMode) {
       setImageMode(false);
-      await sendImage(msg);
+      await sendImage(msg, imgStyle);
     } else {
       await sendMessage(msg);
     }
+  };
+
+  const handleAttachPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || loading || limitReached) return;
+    const caption = input.trim();
+    setInput('');
+    await sendPhoto(file, caption);
   };
 
   const handleVoiceResult = (data: { transcribed: string; reply: string; language: string }) => {
@@ -217,13 +228,25 @@ function TutorDashboardContent() {
                 )}
                 <div className="max-w-[80%] flex flex-col gap-1">
                   <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${msg.role === 'user' ? 'bg-primary text-primary-foreground rounded-br-md' : 'bg-muted/50 text-foreground rounded-bl-md border border-border/30'}`}>
-                    {msg.role === 'user' ? msg.content : (
+                    {msg.role === 'user' ? (
+                      <>
+                        {msg.content}
+                        {msg.image && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={mediaSrc(msg.image)}
+                            alt="Attached photo"
+                            className="mt-2 w-full max-w-xs rounded-xl border border-black/10 shadow-sm"
+                          />
+                        )}
+                      </>
+                    ) : (
                       <div className="space-y-3">
                         <KofiMessage content={msg.content} />
                         {msg.image && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
-                            src={msg.image}
+                            src={mediaSrc(msg.image)}
                             alt="Teacher Kofi drawing"
                             className="w-full max-w-sm rounded-xl border border-border/40 shadow-sm"
                           />
@@ -269,6 +292,7 @@ function TutorDashboardContent() {
         </CardContent>
 
         <div className="border-t border-border/50 p-4">
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAttachPhoto} />
           <div className="flex gap-2 items-center">
             <VoiceRecorder
               onResult={handleVoiceResult}
@@ -277,6 +301,15 @@ function TutorDashboardContent() {
               endpoint="/tutor/ai/voice"
               onRecorded={handleVoiceRecorded}
             />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={loading || limitReached}
+              title="Attach a photo for Teacher Kofi to look at"
+            >
+              <CameraIcon size={16} />
+            </Button>
             <Button
               variant={imageMode ? 'default' : 'outline'}
               size="icon"
@@ -287,11 +320,37 @@ function TutorDashboardContent() {
             >
               <ImageIcon size={16} />
             </Button>
+            {imageMode && (
+              <div className="flex items-center gap-1 rounded-lg border border-border/60 p-0.5">
+                <Button
+                  variant={imgStyle === 'cartoon' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="h-7 px-2 text-xs"
+                  onClick={() => setImgStyle('cartoon')}
+                >
+                  🎨 Cartoon
+                </Button>
+                <Button
+                  variant={imgStyle === 'real' ? 'default' : 'ghost'}
+                  size="sm"
+                  className="h-7 px-2 text-xs"
+                  onClick={() => setImgStyle('real')}
+                >
+                  <Sparkles size={12} className="mr-1" /> Real photo
+                </Button>
+              </div>
+            )}
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={imageMode ? 'Describe a picture for Kofi to draw...' : 'Ask Teacher Kofi anything...'}
+              placeholder={
+                imageMode
+                  ? imgStyle === 'real'
+                    ? 'Describe a real photo for Kofi to create...'
+                    : 'Describe a picture for Kofi to draw...'
+                  : 'Ask Teacher Kofi anything...'
+              }
               disabled={loading || limitReached}
               className="flex-1"
             />
@@ -301,8 +360,10 @@ function TutorDashboardContent() {
           </div>
           <p className="text-[10px] text-muted-foreground mt-2 text-center">
             {imageMode
-              ? '🎨 Tell Kofi what to draw — e.g. "a fraction pizza with 4 slices" or "a diagram of the water cycle".'
-              : 'Tap 🎤 to speak in English, Twi, Ga, Ewe, Fante, Hausa, or Dagbani. Responses are AI-generated.'}
+              ? imgStyle === 'real'
+                ? '✨ Real photo mode — e.g. "a realistic photo of our school compound at sunrise" or "a realistic photo of a jollof rice bowl".'
+                : '🎨 Tell Kofi what to draw — e.g. "a fraction pizza with 4 slices" or "a diagram of the water cycle".'
+              : 'Tap 🎤 to speak, add a 📷 photo for Kofi to look at, or type. Responses are AI-generated.'}
           </p>
         </div>
       </Card>
