@@ -52,7 +52,7 @@ export const useAcademicsStore = create<AcademicsStore>((set) => ({
   fetchClasses: async () => {
     try {
       const classes = await api.get<AcademicClass[]>('/academics/classes');
-      set({ classes });
+      set({ classes: Array.isArray(classes) ? classes : [] });
     } catch (err: any) {
       set({ error: err.message });
     }
@@ -60,7 +60,7 @@ export const useAcademicsStore = create<AcademicsStore>((set) => ({
   fetchSubjects: async () => {
     try {
       const subjects = await api.get<Subject[]>('/academics/subjects');
-      set({ subjects });
+      set({ subjects: Array.isArray(subjects) ? subjects : [] });
     } catch (err: any) {
       set({ error: err.message });
     }
@@ -68,7 +68,7 @@ export const useAcademicsStore = create<AcademicsStore>((set) => ({
   fetchTerms: async () => {
     try {
       const terms = await api.get<Term[]>('/academics/terms');
-      set({ terms });
+      set({ terms: Array.isArray(terms) ? terms : [] });
     } catch (err: any) {
       set({ error: err.message });
     }

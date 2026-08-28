@@ -21,7 +21,7 @@ export const useTaskStore = create<TaskStore>((set) => ({
     set({ loading: true, error: null });
     try {
       const tasks = await api.get<Task[]>('/tasks');
-      set({ tasks, loading: false });
+      set({ tasks: Array.isArray(tasks) ? tasks : [], loading: false });
     } catch (err: any) {
       set({ error: err.message, loading: false });
     }

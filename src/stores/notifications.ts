@@ -24,7 +24,12 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
     set({ loading: true });
     try {
       const res = await api.get<{ notifications: Notification[]; total: number; unreadCount: number }>('/notifications');
-      set({ notifications: res.notifications, total: res.total, unreadCount: res.unreadCount, loading: false });
+      set({
+        notifications: Array.isArray(res.notifications) ? res.notifications : [],
+        total: res.total,
+        unreadCount: res.unreadCount,
+        loading: false,
+      });
     } catch {
       set({ loading: false });
     }

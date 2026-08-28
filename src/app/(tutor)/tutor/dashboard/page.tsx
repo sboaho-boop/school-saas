@@ -1,22 +1,62 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { useTutorAuth } from '@/stores/tutor-auth';
+import { useTutorAuth, tutorRequest } from '@/stores/tutor-auth';
 import { useTutorChat } from '@/stores/tutor-chat';
-import { Send, Bot, User, RefreshCw, Volume2, VolumeX, AlertTriangle } from 'lucide-react';
+import { Send, Bot, User, RefreshCw, Volume2, VolumeX, AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
 import { VoiceRecorder, speakText } from '@/components/ai/voice-recorder';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function TutorDashboard() {
+function TutorDashboardContent() {
   const user = useTutorAuth((s) => s.user);
+  const fetchMe = useTutorAuth((s) => s.fetchMe);
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const { messages, loading, remaining, sendMessage, sendVoice, resetChat, loadHistory } = useTutorChat();
   const [input, setInput] = useState('');
   const [speakingIdx, setSpeakingIdx] = useState<number | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [verifying, setVerifying] = useState(false);
+  const [upgradeNotice, setUpgradeNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const verifyRanRef = useRef(false);
+
+  useEffect(() => {
+    if (searchParams.get('upgraded') === '1' && !verifyRanRef.current) {
+      verifyRanRef.current = true;
+      const reference = searchParams.get('reference') || searchParams.get('trxref') || '';
+      setVerifying(true);
+      (async () => {
+        try {
+          let plan = '';
+          if (reference) {
+            const res = await tutorRequest<{ plan?: string }>('/tutor/subscription/verify', {
+              method: 'POST',
+              body: JSON.stringify({ reference }),
+            });
+            plan = res.plan || '';
+          }
+          await fetchMe();
+          const label = plan ? plan.charAt(0).toUpperCase() + plan.slice(1) : '';
+          setUpgradeNotice({
+            type: 'success',
+            text: label ? `Welcome to Teacher Kofi ${label}! Your upgrade is active.` : 'Your upgrade is active!',
+          });
+        } catch (err) {
+          const message = err instanceof Error ? err.message : '';
+          setUpgradeNotice({ type: 'error', text: message || 'We could not confirm your payment. If you were charged, contact support for help.' });
+          await fetchMe().catch(() => {});
+        } finally {
+          setVerifying(false);
+          router.replace('/tutor/dashboard', { scroll: false });
+        }
+      })();
+    }
+  }, [searchParams, fetchMe, router]);
 
   useEffect(() => {
     loadHistory();
@@ -105,6 +145,35 @@ export default function TutorDashboard() {
           </Button>
         </div>
       </div>
+
+      {(verifying || upgradeNotice) && (
+        <Card className={`mb-4 ${upgradeNotice?.type === 'error' ? 'border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-800' : 'border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 dark:border-emerald-800'}`}>
+          <CardContent className="p-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              {verifying ? (
+                <Loader2 size={20} className="animate-spin text-violet-500 shrink-0" />
+              ) : (
+                <CheckCircle2 size={20} className={upgradeNotice?.type === 'error' ? 'text-red-500 shrink-0' : 'text-emerald-500 shrink-0'} />
+              )}
+              <div>
+                {verifying ? (
+                  <>
+                    <p className="text-sm font-medium">Confirming your subscription...</p>
+                    <p className="text-xs text-muted-foreground">Please wait a moment.</p>
+                  </>
+                ) : (
+                  <p className={`text-sm font-medium ${upgradeNotice?.type === 'error' ? 'text-red-600' : 'text-emerald-700 dark:text-emerald-400'}`}>
+                    {upgradeNotice?.text}
+                  </p>
+                )}
+              </div>
+            </div>
+            {!verifying && (
+              <Button size="sm" variant="outline" onClick={() => setUpgradeNotice(null)}>Dismiss</Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {limitReached && (
         <Card className="mb-4 border-orange-200 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-800">
@@ -213,5 +282,15 @@ export default function TutorDashboard() {
         </div>
       </Card>
     </div>
+  );
+}
+
+export default function TutorDashboard() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[50vh] flex items-center justify-center text-muted-foreground">Loading...</div>
+    }>
+      <TutorDashboardContent />
+    </Suspense>
   );
 }

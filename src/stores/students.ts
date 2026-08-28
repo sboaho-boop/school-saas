@@ -20,7 +20,7 @@ export const useStudentStore = create<StudentStore>((set) => ({
     set({ loading: true, error: null });
     try {
       const students = await api.get<Student[]>('/students');
-      set({ students, loading: false });
+      set({ students: Array.isArray(students) ? students : [], loading: false });
     } catch (err: any) {
       set({ error: err.message, loading: false });
     }

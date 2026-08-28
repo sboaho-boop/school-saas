@@ -67,7 +67,7 @@ export const useSuperAdminStore = create<SuperAdminStore>((set) => ({
     set({ loading: true });
     try {
       const schools = await superApi.get<SchoolInfo[]>('/super/schools');
-      set({ schools, loading: false });
+      set({ schools: Array.isArray(schools) ? schools : [], loading: false });
     } catch { set({ loading: false }); }
   },
 

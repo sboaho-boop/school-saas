@@ -20,7 +20,7 @@ export const useTransportStore = create<TransportStore>((set) => ({
     set({ loading: true, error: null });
     try {
       const routes = await api.get<TransportRoute[]>('/transport');
-      set({ routes, loading: false });
+      set({ routes: Array.isArray(routes) ? routes : [], loading: false });
     } catch (err: any) {
       set({ error: err.message, loading: false });
     }

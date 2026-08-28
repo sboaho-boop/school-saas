@@ -71,6 +71,7 @@ export function AddStaffDialog() {
   const [assignedRouteId, setAssignedRouteId] = useState('');
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
   const [verification, setVerification] = useState<any>(null);
+  const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
     if (open) api.get<any[]>('/campus').then(setCampuses).catch(() => {});
@@ -97,6 +98,7 @@ export function AddStaffDialog() {
     e.preventDefault();
     if (!name || !email || !role || !department) return;
     const route = assignedRouteId ? routes.find((r) => r.id === assignedRouteId) : undefined;
+    setSubmitError('');
     try {
       const result = await addStaff({
         name, email, phone, role, department, staffType, status,
@@ -109,7 +111,9 @@ export function AddStaffDialog() {
       });
       if (result?.verification) setVerification(result.verification);
       else { resetForm(); setOpen(false); }
-    } catch {}
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Failed to create staff member. Please try again.');
+    }
   };
 
   const resetForm = () => {
@@ -117,6 +121,7 @@ export function AddStaffDialog() {
     setStaffType('teaching'); setCampusId(''); setAssignedClasses([]); setClassInput(''); setAssignedSubjects([]);
     setSubjectInput(''); setAssignedRouteId(''); setStatus('active');
     setVerification(null);
+    setSubmitError('');
   };
 
   const handleClose = () => { resetForm(); setOpen(false); };
@@ -183,6 +188,9 @@ export function AddStaffDialog() {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
+              {submitError && (
+                <p className="text-sm text-red-600 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900 px-3 py-2 rounded-md">{submitError}</p>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name</Label>
                 <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />

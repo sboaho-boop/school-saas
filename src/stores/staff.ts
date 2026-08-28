@@ -20,7 +20,7 @@ export const useStaffStore = create<StaffStore>((set) => ({
     set({ loading: true, error: null });
     try {
       const staff = await api.get<Staff[]>('/staff');
-      set({ staff, loading: false });
+      set({ staff: Array.isArray(staff) ? staff : [], loading: false });
     } catch (err: any) {
       set({ error: err.message, loading: false });
     }

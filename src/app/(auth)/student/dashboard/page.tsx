@@ -253,6 +253,30 @@ export default function StudentDashboardPage() {
           </div>
         </motion.div>
 
+        <Card className="border-violet-300/60 dark:border-violet-800/60 bg-gradient-to-r from-violet-50 via-fuchsia-50 to-transparent dark:from-violet-950/40 dark:via-fuchsia-950/30 dark:to-transparent shadow-sm overflow-hidden relative">
+          <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="size-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shrink-0">
+              <Bot size={20} className="text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold flex items-center gap-1.5">
+                <Sparkles size={14} className="text-violet-500" />Teacher Kofi is now everywhere
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Get your own Teacher Kofi account and keep learning at home — with more messages, voice input, and read-aloud in 7 languages.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button size="sm" variant="outline" className="border-violet-300 text-violet-700 hover:bg-violet-50 dark:border-violet-800 dark:text-violet-300" onClick={() => router.push('/student/ai-tutor')}>
+                Ask in class
+              </Button>
+              <Button size="sm" className="bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600" onClick={() => router.push('/tutor')}>
+                Get Teacher Kofi
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         <TimetableSection />
         <TasksReminderSection />
 

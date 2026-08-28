@@ -29,7 +29,7 @@ export const useAttendanceStore = create<AttendanceStore>((set, get) => ({
     try {
       const qs = params ? '?' + new URLSearchParams(params as any).toString() : '';
       const records = await api.get<AttendanceRecord[]>(`/attendance${qs}`);
-      set({ records, loading: false });
+      set({ records: Array.isArray(records) ? records : [], loading: false });
     } catch (err: any) {
       set({ error: err.message, loading: false });
     }

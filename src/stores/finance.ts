@@ -20,7 +20,7 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
     set({ loading: true, error: null });
     try {
       const records = await api.get<FeeRecord[]>('/finance');
-      set({ records, loading: false });
+      set({ records: Array.isArray(records) ? records : [], loading: false });
     } catch (err: any) {
       set({ error: err.message, loading: false });
     }

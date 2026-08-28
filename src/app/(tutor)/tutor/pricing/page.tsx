@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, Bot, Zap, Infinity } from 'lucide-react';
 import { useTutorAuth, tutorRequest } from '@/stores/tutor-auth';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 const PLANS = [
   {
@@ -21,7 +23,7 @@ const PLANS = [
   {
     id: 'pro',
     name: 'Pro',
-    price: 'GH\u20B599.99',
+    price: '',
     period: '/month',
     icon: Zap,
     color: 'from-violet-500 to-fuchsia-500',
@@ -29,11 +31,12 @@ const PLANS = [
     cta: 'Upgrade to Pro',
     popular: true,
     paystackPlan: 'pro',
+    defaultPrice: 999,
   },
   {
     id: 'unlimited',
     name: 'Unlimited',
-    price: 'GH\u20B5199.99',
+    price: '',
     period: '/month',
     icon: Infinity,
     color: 'from-amber-500 to-orange-500',
@@ -41,13 +44,26 @@ const PLANS = [
     cta: 'Go Unlimited',
     popular: false,
     paystackPlan: 'unlimited',
+    defaultPrice: 1999,
   },
 ];
 
 export default function TutorPricing() {
   const user = useTutorAuth((s) => s.user);
-  const fetchMe = useTutorAuth((s) => s.fetchMe);
   const [loading, setLoading] = useState<string | null>(null);
+  const [prices, setPrices] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    fetch(API_URL + '/tutor/subscription/plans')
+      .then((res) => res.json())
+      .then((data: Record<string, { priceGHS: number } | undefined>) => {
+        const map: Record<string, number> = {};
+        if (data?.pro?.priceGHS) map.pro = data.pro.priceGHS;
+        if (data?.unlimited?.priceGHS) map.unlimited = data.unlimited.priceGHS;
+        setPrices(map);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleUpgrade = async (plan: string) => {
     setLoading(plan);
@@ -57,10 +73,10 @@ export default function TutorPricing() {
         body: JSON.stringify({ plan }),
       });
       if (res.authorization_url) {
-        window.location.href = res.authorization_url;
+        window.location.assign(res.authorization_url);
       }
-    } catch (err: any) {
-      alert(err.message || 'Payment failed to initialize');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Payment failed to initialize');
     } finally {
       setLoading(null);
     }
@@ -99,7 +115,9 @@ export default function TutorPricing() {
                   </div>
                   <h3 className="text-xl font-bold">{plan.name}</h3>
                   <div className="flex items-baseline gap-1 my-3">
-                    <span className="text-3xl font-extrabold">{plan.price}</span>
+                    <span className="text-3xl font-extrabold">
+                      {plan.price || `GH\u20B5${(prices[plan.id] ?? plan.defaultPrice).toLocaleString()}`}
+                    </span>
                     <span className="text-sm text-muted-foreground">{plan.period}</span>
                   </div>
                   <ul className="space-y-2.5 mb-6">
