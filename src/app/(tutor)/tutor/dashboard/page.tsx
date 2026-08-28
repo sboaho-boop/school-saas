@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTutorAuth, tutorRequest } from '@/stores/tutor-auth';
 import { useTutorChat } from '@/stores/tutor-chat';
-import { Send, Bot, User, RefreshCw, Volume2, VolumeX, AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
+import { Send, Bot, User, RefreshCw, Volume2, VolumeX, AlertTriangle, CheckCircle2, Loader2, Image as ImageIcon } from 'lucide-react';
 import { KofiMessage } from '@/components/ai/kofi-message';
 import { VoiceRecorder, speakText } from '@/components/ai/voice-recorder';
 import Link from 'next/link';
@@ -18,8 +18,9 @@ function TutorDashboardContent() {
   const fetchMe = useTutorAuth((s) => s.fetchMe);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { messages, loading, remaining, sendMessage, sendVoice, resetChat, loadHistory } = useTutorChat();
+  const { messages, loading, remaining, sendMessage, sendVoice, sendImage, resetChat, loadHistory } = useTutorChat();
   const [input, setInput] = useState('');
+  const [imageMode, setImageMode] = useState(false);
   const [speakingIdx, setSpeakingIdx] = useState<number | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const [verifying, setVerifying] = useState(false);
@@ -71,7 +72,12 @@ function TutorDashboardContent() {
     if (!input.trim() || loading) return;
     const msg = input.trim();
     setInput('');
-    await sendMessage(msg);
+    if (imageMode) {
+      setImageMode(false);
+      await sendImage(msg);
+    } else {
+      await sendMessage(msg);
+    }
   };
 
   const handleVoiceResult = (data: { transcribed: string; reply: string; language: string }) => {
@@ -210,14 +216,20 @@ function TutorDashboardContent() {
                   </div>
                 )}
                 <div className="max-w-[80%] flex flex-col gap-1">
-                  <div
-                    className={`rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
-                      msg.role === 'user'
-                        ? 'bg-primary text-primary-foreground rounded-br-md'
-                        : 'bg-muted/50 text-foreground rounded-bl-md border border-border/30'
-                    }`}
-                  >
-                    {msg.role === 'user' ? msg.content : <KofiMessage content={msg.content} />}
+                  <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${msg.role === 'user' ? 'bg-primary text-primary-foreground rounded-br-md' : 'bg-muted/50 text-foreground rounded-bl-md border border-border/30'}`}>
+                    {msg.role === 'user' ? msg.content : (
+                      <div className="space-y-3">
+                        <KofiMessage content={msg.content} />
+                        {msg.image && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={msg.image}
+                            alt="Teacher Kofi drawing"
+                            className="w-full max-w-sm rounded-xl border border-border/40 shadow-sm"
+                          />
+                        )}
+                      </div>
+                    )}
                   </div>
                   {msg.role === 'assistant' && i > 0 && (
                     <Button
@@ -265,20 +277,32 @@ function TutorDashboardContent() {
               endpoint="/tutor/ai/voice"
               onRecorded={handleVoiceRecorded}
             />
+            <Button
+              variant={imageMode ? 'default' : 'outline'}
+              size="icon"
+              onClick={() => setImageMode((v) => !v)}
+              disabled={loading || limitReached}
+              className={imageMode ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500' : ''}
+              title={imageMode ? 'Back to chat' : 'Ask Teacher Kofi to draw a picture'}
+            >
+              <ImageIcon size={16} />
+            </Button>
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask Teacher Kofi anything..."
+              placeholder={imageMode ? 'Describe a picture for Kofi to draw...' : 'Ask Teacher Kofi anything...'}
               disabled={loading || limitReached}
               className="flex-1"
             />
             <Button onClick={handleSend} disabled={!input.trim() || loading || limitReached} size="icon">
-              <Send size={16} />
+              {imageMode ? <ImageIcon size={16} /> : <Send size={16} />}
             </Button>
           </div>
           <p className="text-[10px] text-muted-foreground mt-2 text-center">
-            Tap 🎤 to speak in English, Twi, Ga, Ewe, Fante, Hausa, or Dagbani. Responses are AI-generated.
+            {imageMode
+              ? '🎨 Tell Kofi what to draw — e.g. "a fraction pizza with 4 slices" or "a diagram of the water cycle".'
+              : 'Tap 🎤 to speak in English, Twi, Ga, Ewe, Fante, Hausa, or Dagbani. Responses are AI-generated.'}
           </p>
         </div>
       </Card>

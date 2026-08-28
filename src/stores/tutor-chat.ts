@@ -4,6 +4,7 @@ import { tutorRequest } from './tutor-auth';
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
+  image?: string;
 }
 
 interface TutorChatStore {
@@ -12,6 +13,7 @@ interface TutorChatStore {
   remaining: number | null;
   sendMessage: (message: string) => Promise<void>;
   sendVoice: (audioBlob: Blob, language: string) => Promise<void>;
+  sendImage: (prompt: string) => Promise<void>;
   resetChat: () => void;
   loadHistory: () => Promise<void>;
 }
@@ -78,9 +80,35 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
         remaining: data.remaining,
         loading: false,
       }));
-    } catch (err: any) {
+    } catch (err: unknown) {
       set((s) => ({
-        messages: [...s.messages, { role: 'assistant', content: 'Voice error: ' + (err.message || 'Failed') }],
+        messages: [...s.messages, { role: 'assistant', content: 'Voice error: ' + ((err as Error).message || 'Failed') }],
+        loading: false,
+      }));
+    }
+  },
+
+  sendImage: async (prompt: string) => {
+    const { messages } = get();
+    const userMsg: ChatMessage = { role: 'user', content: '🎨 ' + prompt };
+    set({ messages: [...messages, userMsg], loading: true });
+
+    try {
+      const res = await tutorRequest<{ imageData: string; prompt: string; remaining: number }>('/tutor/ai/image', {
+        method: 'POST',
+        body: JSON.stringify({ prompt }),
+      });
+      set((s) => ({
+        messages: [
+          ...s.messages,
+          { role: 'assistant', content: "Here's your picture! 🖼️ Ask me to draw something else anytime.", image: res.imageData },
+        ],
+        remaining: res.remaining,
+        loading: false,
+      }));
+    } catch {
+      set((s) => ({
+        messages: [...s.messages, { role: 'assistant', content: 'Sorry, I could not draw that right now. Please try again.' }],
         loading: false,
       }));
     }
