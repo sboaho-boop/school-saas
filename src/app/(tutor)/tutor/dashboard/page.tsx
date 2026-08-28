@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useTutorAuth, tutorRequest } from '@/stores/tutor-auth';
 import { useTutorChat } from '@/stores/tutor-chat';
 import { Send, Bot, User, RefreshCw, Volume2, VolumeX, AlertTriangle, CheckCircle2, Loader2 } from 'lucide-react';
+import { KofiMessage } from '@/components/ai/kofi-message';
 import { VoiceRecorder, speakText } from '@/components/ai/voice-recorder';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -216,7 +217,7 @@ function TutorDashboardContent() {
                         : 'bg-muted/50 text-foreground rounded-bl-md border border-border/30'
                     }`}
                   >
-                    {msg.content}
+                    {msg.role === 'user' ? msg.content : <KofiMessage content={msg.content} />}
                   </div>
                   {msg.role === 'assistant' && i > 0 && (
                     <Button

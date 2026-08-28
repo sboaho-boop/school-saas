@@ -9,6 +9,7 @@ import { useAuthStore } from '@/stores/auth';
 import { api } from '@/lib/api';
 import { Send, Bot, User, RefreshCw, Volume2, VolumeX } from 'lucide-react';
 import { VoiceRecorder, speakText } from '@/components/ai/voice-recorder';
+import { KofiMessage } from '@/components/ai/kofi-message';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -137,7 +138,7 @@ export default function AITutorPage() {
                         : 'bg-muted/50 text-foreground rounded-bl-md border border-border/30'
                     }`}
                   >
-                    {msg.content}
+                    {msg.role === 'user' ? msg.content : <KofiMessage content={msg.content} />}
                   </div>
                   {msg.role === 'assistant' && i > 0 && (
                     <Button
