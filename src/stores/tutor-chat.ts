@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { tutorRequest } from './tutor-auth';
+import { speakText } from '@/lib/speech';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -12,7 +13,7 @@ interface TutorChatStore {
   loading: boolean;
   remaining: number | null;
   sendMessage: (message: string, image?: string) => Promise<void>;
-  sendVoice: (audioBlob: Blob, language: string) => Promise<void>;
+  sendVoice: (audioBlob: Blob, language: string, mime?: string) => Promise<void>;
   sendImage: (prompt: string, style?: string) => Promise<void>;
   sendPhoto: (file: File, caption?: string) => Promise<void>;
   resetChat: () => void;
@@ -124,13 +125,14 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
     }
   },
 
-  sendVoice: async (audioBlob: Blob, language: string) => {
+  sendVoice: async (audioBlob: Blob, language: string, mime?: string) => {
     const { messages } = get();
     set({ loading: true });
 
     const history = messages.slice(1).map((m) => ({ role: m.role, content: m.content }));
     const formData = new FormData();
-    formData.append('audio', audioBlob, 'voice.webm');
+    formData.append('audio', audioBlob, mime === 'audio/wav' ? 'voice.wav' : 'voice.webm');
+    formData.append('mime', mime || audioBlob.type || 'audio/wav');
     formData.append('language', language);
     formData.append('history', JSON.stringify(history));
 
@@ -152,6 +154,7 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
         remaining: data.remaining,
         loading: false,
       }));
+      speakText(data.reply || '', data.language || language);
     } catch (err: unknown) {
       set((s) => ({
         messages: [...s.messages, { role: 'assistant', content: 'Voice error: ' + ((err as Error).message || 'Failed') }],

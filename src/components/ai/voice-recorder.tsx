@@ -4,6 +4,9 @@ import { useState, useRef, useCallback } from 'react';
 import { Mic, MicOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { audioBlobToWav } from '@/lib/audio-to-wav';
+
+export { speakText } from '@/lib/speech';
 
 const VOICE_LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -21,7 +24,7 @@ interface VoiceRecorderProps {
   onError: (error: string) => void;
   disabled?: boolean;
   endpoint?: string;
-  onRecorded?: (blob: Blob, language: string) => void;
+  onRecorded?: (blob: Blob, language: string, mime: string) => void;
 }
 
 export function VoiceRecorder({ onResult, onError, disabled, endpoint = '/ai/voice', onRecorded }: VoiceRecorderProps) {
@@ -30,6 +33,33 @@ export function VoiceRecorder({ onResult, onError, disabled, endpoint = '/ai/voi
   const [language, setLanguage] = useState('en');
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+
+  async function sendAudio(blob: Blob, mime?: string) {
+    setProcessing(true);
+    try {
+      const formData = new FormData();
+      formData.append('audio', blob, mime === 'audio/wav' ? 'voice.wav' : 'voice.webm');
+      formData.append('mime', mime || blob.type || 'audio/wav');
+      formData.append('language', language);
+      formData.append('history', '[]');
+
+      const token = localStorage.getItem('edu_token');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+      const res = await fetch(`${apiUrl}${endpoint}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Voice processing failed');
+      await onResult({ transcribed: data.transcribed, reply: data.reply, language: data.language });
+    } catch (err: any) {
+      onError(err.message || 'Voice processing failed');
+    } finally {
+      setProcessing(false);
+    }
+  }
 
   const startRecording = useCallback(async () => {
     try {
@@ -46,11 +76,12 @@ export function VoiceRecorder({ onResult, onError, disabled, endpoint = '/ai/voi
 
       mediaRecorder.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(chunksRef.current, { type: mediaRecorder.mimeType });
+        const raw = new Blob(chunksRef.current, { type: mediaRecorder.mimeType });
+        const { blob, mime } = await audioBlobToWav(raw);
         if (onRecorded) {
-          onRecorded(blob, language);
+          onRecorded(blob, language, mime);
         } else {
-          await sendAudio(blob);
+          await sendAudio(blob, mime);
         }
       };
 
@@ -67,32 +98,6 @@ export function VoiceRecorder({ onResult, onError, disabled, endpoint = '/ai/voi
       setRecording(false);
     }
   }, [recording]);
-
-  const sendAudio = async (blob: Blob) => {
-    setProcessing(true);
-    try {
-      const formData = new FormData();
-      formData.append('audio', blob, 'voice.webm');
-      formData.append('language', language);
-      formData.append('history', '[]');
-
-      const token = localStorage.getItem('edu_token');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-      const res = await fetch(`${apiUrl}${endpoint}`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Voice processing failed');
-      onResult({ transcribed: data.transcribed, reply: data.reply, language: data.language });
-    } catch (err: any) {
-      onError(err.message || 'Voice processing failed');
-    } finally {
-      setProcessing(false);
-    }
-  };
 
   const isActive = recording || processing;
 
@@ -129,27 +134,4 @@ export function VoiceRecorder({ onResult, onError, disabled, endpoint = '/ai/voi
       </Button>
     </div>
   );
-}
-
-export function speakText(text: string, lang: string = 'en') {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return;
-
-  window.speechSynthesis.cancel();
-
-  const utterance = new SpeechSynthesisUtterance(text);
-  const langMap: Record<string, string> = {
-    en: 'en-US',
-    fr: 'fr-FR',
-    tw: 'en-US',
-    ha: 'ha-NG',
-    ga: 'en-US',
-    ewe: 'en-US',
-    fante: 'en-US',
-    dagbani: 'en-US',
-  };
-  utterance.lang = langMap[lang] || 'en-US';
-  utterance.rate = 0.9;
-  utterance.pitch = 1.0;
-
-  window.speechSynthesis.speak(utterance);
 }

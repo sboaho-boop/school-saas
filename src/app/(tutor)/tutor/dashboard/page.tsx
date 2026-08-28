@@ -107,8 +107,8 @@ function TutorDashboardContent() {
     }));
   };
 
-  const handleVoiceRecorded = async (blob: Blob, language: string) => {
-    await sendVoice(blob, language);
+  const handleVoiceRecorded = async (blob: Blob, language: string, mime?: string) => {
+    await sendVoice(blob, language, mime);
   };
 
   const toggleSpeak = (idx: number, text: string) => {

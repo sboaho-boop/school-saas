@@ -61,6 +61,7 @@ export default function StudentAITutorPage() {
   };
 
   const handleVoiceResult = (data: { transcribed: string; reply: string; language: string }) => {
+    speakText(data.reply, data.language);
     setMessages((prev) => [
       ...prev,
       { role: 'user', content: `🎤 ${data.transcribed}` },
