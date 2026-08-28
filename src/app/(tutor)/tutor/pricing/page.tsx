@@ -31,7 +31,7 @@ const PLANS = [
     cta: 'Upgrade to Pro',
     popular: true,
     paystackPlan: 'pro',
-    defaultPrice: 999,
+    defaultPrice: 19,
   },
   {
     id: 'unlimited',
@@ -44,7 +44,7 @@ const PLANS = [
     cta: 'Go Unlimited',
     popular: false,
     paystackPlan: 'unlimited',
-    defaultPrice: 1999,
+    defaultPrice: 39,
   },
 ];
 
