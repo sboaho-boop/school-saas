@@ -3,10 +3,19 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, Bot, Zap, Infinity } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Loader2, Check, Bot, Zap, Infinity, Smartphone, Lock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useTutorAuth, tutorRequest } from '@/stores/tutor-auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+
+const CHANNELS = [
+  { id: 'mtn-gh', label: 'MTN Mobile Money', hint: '*170#' },
+  { id: 'vodafone-gh', label: 'Vodafone / Telecel Cash', hint: '*110#' },
+];
 
 const PLANS = [
   {
@@ -27,7 +36,7 @@ const PLANS = [
     period: '/month',
     icon: Zap,
     color: 'from-violet-500 to-fuchsia-500',
-    features: ['100 messages per day', 'Everything in Free', 'Voice input (Whisper)', 'Priority responses', 'Conversation history'],
+    features: ['100 messages per day', 'Everything in Free', 'Voice input', 'Priority responses', 'Conversation history'],
     cta: 'Upgrade to Pro',
     popular: true,
     paystackPlan: 'pro',
@@ -48,10 +57,36 @@ const PLANS = [
   },
 ];
 
+type InitResponse = {
+  message?: string;
+  verificationType?: 'OTP' | 'USSD';
+  otpPrefix?: string | null;
+  hubtelPreApprovalId?: string;
+  clientReferenceId?: string;
+};
+
+type ConfirmResponse = {
+  success?: boolean;
+  pending?: boolean;
+  plan?: string;
+  message?: string;
+};
+
 export default function TutorPricing() {
   const user = useTutorAuth((s) => s.user);
-  const [loading, setLoading] = useState<string | null>(null);
+  const router = useRouter();
   const [prices, setPrices] = useState<Record<string, number>>({});
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string>('');
+  const [step, setStep] = useState<'phone' | 'otp' | 'approve'>('phone');
+  const [phone, setPhone] = useState('');
+  const [channel, setChannel] = useState('mtn-gh');
+  const [otpCode, setOtpCode] = useState('');
+  const [initInfo, setInitInfo] = useState<InitResponse | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(API_URL + '/tutor/subscription/plans')
@@ -65,20 +100,52 @@ export default function TutorPricing() {
       .catch(() => {});
   }, []);
 
-  const handleUpgrade = async (plan: string) => {
-    setLoading(plan);
+  const openPayment = (plan: string) => {
+    setSelectedPlan(plan);
+    setStep('phone');
+    setInitInfo(null);
+    setOtpCode('');
+    setError(null);
+    setNotice(null);
+    setModalOpen(true);
+  };
+
+  const handleStart = async () => {
+    setBusy(true);
+    setError(null);
+    setNotice(null);
     try {
-      const res = await tutorRequest<{ authorization_url: string }>('/tutor/subscription/init', {
+      const res = await tutorRequest<InitResponse>('/tutor/subscription/init', {
         method: 'POST',
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan: selectedPlan, phone, channel }),
       });
-      if (res.authorization_url) {
-        window.location.assign(res.authorization_url);
-      }
+      setInitInfo(res);
+      setStep(res.verificationType === 'OTP' ? 'otp' : 'approve');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Payment failed to initialize');
+      setError(err instanceof Error ? err.message : 'Could not start the payment.');
     } finally {
-      setLoading(null);
+      setBusy(false);
+    }
+  };
+
+  const handleConfirm = async (withOtp?: boolean) => {
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const res = await tutorRequest<ConfirmResponse>('/tutor/subscription/confirm', {
+        method: 'POST',
+        body: JSON.stringify(withOtp ? { otpCode } : {}),
+      });
+      if (res.success) {
+        router.replace('/tutor/dashboard?upgraded=1');
+        return;
+      }
+      setNotice(res.message || 'Approval not confirmed yet. Approve on your phone, then try again.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not confirm the payment.');
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -132,10 +199,10 @@ export default function TutorPricing() {
                     <Button
                       className={`w-full ${plan.popular ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600' : ''}`}
                       variant={isCurrent ? 'default' : plan.popular ? 'default' : 'outline'}
-                      disabled={isCurrent || loading !== null}
-                      onClick={() => handleUpgrade(plan.paystackPlan!)}
+                      disabled={isCurrent}
+                      onClick={() => openPayment(plan.paystackPlan!)}
                     >
-                      {isCurrent ? 'Current Plan' : loading === plan.paystackPlan ? 'Redirecting...' : plan.cta}
+                      {isCurrent ? 'Current Plan' : plan.cta}
                     </Button>
                   ) : (
                     <Button className="w-full" variant="outline" disabled>
@@ -149,9 +216,108 @@ export default function TutorPricing() {
         </div>
 
         <div className="text-center mt-8 text-sm text-muted-foreground">
-          <p>Payments secured by Paystack. Cancel anytime. Prices in Ghana Cedis (GH\u20B5).</p>
+          <p className="flex items-center justify-center gap-1.5">
+            <Lock size={14} /> Pay by Mobile Money via Hubtel. Auto-renews monthly — cancel anytime from your dashboard.
+          </p>
         </div>
       </div>
+
+      <Dialog open={modalOpen} onOpenChange={(o) => setModalOpen(o)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Smartphone size={18} className="text-violet-500" />
+              Pay {PLANS.find((p) => p.paystackPlan === selectedPlan)?.name || ''} with Mobile Money
+            </DialogTitle>
+            <DialogDescription>
+              {step === 'phone' && 'Enter your Mobile Money number to start the approval.'}
+              {step === 'otp' && 'Enter the OTP sent to your phone to finish the approval.'}
+              {step === 'approve' && 'Approve the request on your phone, then confirm below.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {step === 'phone' && (
+              <>
+                <div className="space-y-2">
+                  <Label>Network</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {CHANNELS.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setChannel(c.id)}
+                        className={`rounded-lg border p-3 text-left text-sm transition-colors ${
+                          channel === c.id ? 'border-violet-500 bg-violet-50 dark:bg-violet-950/30' : 'border-border hover:border-border/70'
+                        }`}
+                      >
+                        <span className="font-medium block">{c.label}</span>
+                        <span className="text-xs text-muted-foreground">{c.hint}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Mobile Money number</Label>
+                  <Input
+                    id="phone"
+                    inputMode="tel"
+                    placeholder="e.g. 0244 123 456"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                </div>
+                {error && <p className="text-sm text-red-600">{error}</p>}
+                <Button className="w-full" onClick={handleStart} disabled={busy || !phone.trim()}>
+                  {busy ? <Loader2 className="size-4 animate-spin" /> : 'Continue'}
+                </Button>
+              </>
+            )}
+
+            {step === 'otp' && (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  An OTP has been sent to <strong>{phone}</strong>. Enter it below to finish.
+                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="otp">OTP code</Label>
+                  <Input
+                    id="otp"
+                    inputMode="numeric"
+                    placeholder="e.g. 123456"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                  />
+                </div>
+                {error && <p className="text-sm text-red-600">{error}</p>}
+                {notice && <p className="text-sm text-amber-600">{notice}</p>}
+                <Button className="w-full" onClick={() => handleConfirm(true)} disabled={busy || !otpCode.trim()}>
+                  {busy ? <Loader2 className="size-4 animate-spin" /> : 'Verify & Activate My Plan'}
+                </Button>
+              </>
+            )}
+
+            {step === 'approve' && (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  An approval request was sent to <strong>{phone}</strong>. Follow the prompt on your phone
+                  (use the <em>Hubtel/USSD code</em> shown) to approve {selectedPlan === 'pro' ? 'GHS 19' : 'GHS 39'}/month.
+                  Once done, tap the button below.
+                </p>
+                {error && <p className="text-sm text-red-600">{error}</p>}
+                {notice && <p className="text-sm text-amber-600">{notice}</p>}
+                <Button className="w-full" onClick={() => handleConfirm(false)} disabled={busy}>
+                  {busy ? <Loader2 className="size-4 animate-spin" /> : 'I have approved — Activate My Plan'}
+                </Button>
+              </>
+            )}
+
+            <p className="text-xs text-muted-foreground text-center">
+              Approval is required once. After approval, your plan renews automatically every month until you cancel.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
