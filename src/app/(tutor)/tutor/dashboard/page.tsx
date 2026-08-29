@@ -10,6 +10,7 @@ import { useTutorChat, mediaSrc } from '@/stores/tutor-chat';
 import { Send, Bot, User, RefreshCw, Volume2, VolumeX, AlertTriangle, CheckCircle2, Loader2, Image as ImageIcon, Camera as CameraIcon, Sparkles } from 'lucide-react';
 import { KofiMessage } from '@/components/ai/kofi-message';
 import { VoiceRecorder, speakText } from '@/components/ai/voice-recorder';
+import { TutorSubscriptionCard } from '@/components/tutor/subscription-card';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -192,6 +193,8 @@ function TutorDashboardContent() {
           </CardContent>
         </Card>
       )}
+
+      {user && <TutorSubscriptionCard />}
 
       {limitReached && (
         <Card className="mb-4 border-orange-200 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-800">
