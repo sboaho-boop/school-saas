@@ -264,11 +264,12 @@ export default function TutorPricing() {
                     inputMode="tel"
                     placeholder="e.g. 0244 123 456"
                     value={phone}
+                    autoFocus
                     onChange={(e) => setPhone(e.target.value)}
                   />
                 </div>
                 {error && <p className="text-sm text-red-600">{error}</p>}
-                <Button className="w-full" onClick={handleStart} disabled={busy || !phone.trim()}>
+                <Button className="w-full" onClick={handleStart} disabled={busy || phone.replace(/\D/g, '').length < 9}>
                   {busy ? <Loader2 className="size-4 animate-spin" /> : 'Continue'}
                 </Button>
               </>
