@@ -9,6 +9,54 @@ const VOICE_LANG_BCP47: Record<string, string> = {
   dagbani: 'en-US',
 };
 
+export interface DeviceVoiceInfo {
+  supported: boolean;
+  langs: Record<string, boolean>;
+  details: string[];
+}
+
+function langMatches(lang: string, base: string): boolean {
+  const a = lang.replace('_', '-').toLowerCase();
+  const b = base.toLowerCase();
+  return a === b || a === VOICE_LANG_BCP47[base]?.toLowerCase() || a.startsWith(b);
+}
+
+function getVoices(): SpeechSynthesisVoice[] {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return [];
+  warmVoices();
+  return window.speechSynthesis.getVoices() || [];
+}
+
+function resolveVoice(lang: string): SpeechSynthesisVoice | null {
+  const voices = getVoices();
+  const base = lang.toLowerCase();
+  return (
+    voices.find((v) => v.lang && langMatches(v.lang, base))
+    || voices.find((v) => v.lang && v.lang.replace('_', '-').toLowerCase().startsWith('en-'))
+    || null
+  );
+}
+
+export function listDeviceVoices(): string[] {
+  return getVoices().map((v) => `${v.name} (${v.lang})`);
+}
+
+export function checkDeviceVoices(): DeviceVoiceInfo {
+  const voices = getVoices();
+  if (typeof window === 'undefined' || !window.speechSynthesis) {
+    return { supported: false, langs: {}, details: [] };
+  }
+  const langs: Record<string, boolean> = {};
+  for (const base of Object.keys(VOICE_LANG_BCP47)) {
+    langs[base] = voices.some((v) => v.lang && langMatches(v.lang, base));
+  }
+  return {
+    supported: voices.length > 0,
+    langs,
+    details: voices.slice(0, 12).map((v) => `${v.name} (${v.lang})`),
+  };
+}
+
 let voicesLoaded = false;
 function warmVoices() {
   if (voicesLoaded || typeof window === 'undefined' || !window.speechSynthesis) return;
@@ -29,12 +77,7 @@ export async function speakText(text: string, lang: string = 'en'): Promise<void
     const utterance = new SpeechSynthesisUtterance(text);
     const bcp47 = VOICE_LANG_BCP47[lang] || 'en-US';
     utterance.lang = bcp47;
-
-    const voices = window.speechSynthesis.getVoices() || [];
-    const base = lang.toLowerCase();
-    const match =
-      voices.find((v) => v.lang && v.lang.replace('_', '-').toLowerCase().startsWith(base))
-      || voices.find((v) => v.lang && v.lang.replace('_', '-').toLowerCase().startsWith('en-'));
+    const match = resolveVoice(lang);
     if (match) utterance.voice = match;
 
     utterance.rate = 0.95;

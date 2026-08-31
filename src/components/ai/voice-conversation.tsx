@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Mic, MicOff, Loader2 } from 'lucide-react';
 import { useTutorChat } from '@/stores/tutor-chat';
 import { audioBlobToWav } from '@/lib/audio-to-wav';
-import { speakText } from '@/lib/speech';
+import { speakText, checkDeviceVoices, listDeviceVoices } from '@/lib/speech';
 
 const LANGUAGES = [
   { code: 'en', label: 'English', flag: '🇬🇧' },
@@ -32,6 +32,7 @@ export function VoiceLesson() {
   const [stage, setStage] = useState<Stage>('idle');
   const [language, setLanguage] = useState('en');
   const [status, setStatus] = useState('');
+  const [voiceCheck, setVoiceCheck] = useState<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -145,6 +146,30 @@ export function VoiceLesson() {
     }
   }
 
+  function toggleVoiceCheck() {
+    if (voiceCheck) {
+      setVoiceCheck(null);
+      return;
+    }
+    const info = checkDeviceVoices();
+    if (!info.supported) {
+      setVoiceCheck('This browser/device does not support speech voices.');
+      return;
+    }
+    const labels: Record<string, string> = {
+      en: 'English', tw: 'Twi', fr: 'Français', ga: 'Ga', ewe: 'Ewe', ha: 'Hausa',
+    };
+    const good = Object.entries(info.langs)
+      .filter(([, ok]) => ok)
+      .map(([code]) => labels[code] || code)
+      .join(', ');
+    const parts = [
+      good ? `✅ Good: ${good}` : 'No native Ghanaian-lang voice found.',
+      `Pairs: ${listDeviceVoices().length} voices on this device.`,
+    ];
+    setVoiceCheck(parts.join('  •  '));
+  }
+
   function endSession() {
     sessionOpenRef.current = false;
     busyRef.current = false;
@@ -207,6 +232,15 @@ export function VoiceLesson() {
               </button>
             ))}
           </div>
+          {voiceCheck && (
+            <p className="mt-2 text-xs text-violet-600 dark:text-violet-400">{voiceCheck}</p>
+          )}
+          <button
+            onClick={toggleVoiceCheck}
+            className="mt-2 text-xs font-medium text-violet-500 underline-offset-2 hover:underline dark:text-violet-400"
+          >
+            {voiceCheck ? 'Hide voice check' : 'Check which languages my device can speak'}
+          </button>
         </div>
       )}
 
