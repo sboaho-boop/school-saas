@@ -128,6 +128,18 @@ function TutorDashboardContent() {
 
   const limitReached = remaining !== null && remaining === 0;
 
+  const quickActions = [
+    { label: '📚 Quiz me', prompt: 'Give me a short quiz on the last topic we just covered. 3-5 questions with A/B/C/D options. I will answer and you grade me.' },
+    { label: '📝 Summarize', prompt: 'Summarize the last lesson we covered into a short, clear study note I can revise from (key points only, easy to remember).' },
+    { label: '⬆️ Next level', prompt: 'I understood the last topic. Teach me the next level / more advanced part of it, a little harder this time.' },
+    { label: '✏️ Check my work', prompt: 'I am going to show you my schoolwork/answers. Please check it kindly, point out any mistakes gently, and show me how to fix them.' },
+  ];
+
+  const runQuickAction = async (prompt: string) => {
+    if (loading || limitReached) return;
+    await sendMessage(prompt);
+  };
+
   return (
     <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4">
       <div className="flex items-center justify-between py-4">
@@ -218,6 +230,18 @@ function TutorDashboardContent() {
         />
 
         <div className="mt-3">
+          <div className="flex flex-wrap gap-2 mb-2">
+            {quickActions.map((a) => (
+              <button
+                key={a.label}
+                onClick={() => runQuickAction(a.prompt)}
+                disabled={loading || limitReached}
+                className="chalk-btn inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"
+              >
+                {a.label}
+              </button>
+            ))}
+          </div>
           <div className="chalk-tray rounded-xl px-3 py-3">
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAttachPhoto} />
             <div className="flex gap-2 items-center">
