@@ -1,11 +1,23 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Caveat, Patrick_Hand } from "next/font/google";
 import "./globals.css";
 import { ThemeToggleFloating } from "@/components/layout/theme-toggle";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+});
+
+const caveat = Caveat({
+  variable: "--font-chalk",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+});
+
+const patrick = Patrick_Hand({
+  variable: "--font-chalk-body",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -41,7 +53,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${caveat.variable} ${patrick.variable} antialiased`} suppressHydrationWarning>
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />

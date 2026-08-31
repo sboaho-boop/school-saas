@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useRef, useEffect, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTutorAuth, tutorRequest } from '@/stores/tutor-auth';
-import { useTutorChat, mediaSrc } from '@/stores/tutor-chat';
-import { Send, Bot, User, RefreshCw, Volume2, VolumeX, AlertTriangle, CheckCircle2, Loader2, Image as ImageIcon, Camera as CameraIcon, Sparkles } from 'lucide-react';
-import { KofiMessage } from '@/components/ai/kofi-message';
+import { useTutorChat } from '@/stores/tutor-chat';
+import { Send, Bot, RefreshCw, AlertTriangle, CheckCircle2, Loader2, Image as ImageIcon, Camera as CameraIcon, Sparkles } from 'lucide-react';
+import { ClassroomBoard } from '@/components/ai/classroom-board';
 import { VoiceRecorder, speakText } from '@/components/ai/voice-recorder';
 import { VoiceLesson } from '@/components/ai/voice-conversation';
 import { TutorSubscriptionCard } from '@/components/tutor/subscription-card';
@@ -26,7 +25,6 @@ function TutorDashboardContent() {
   const [imgStyle, setImgStyle] = useState<'cartoon' | 'real'>('cartoon');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [speakingIdx, setSpeakingIdx] = useState<number | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
   const [verifying, setVerifying] = useState(false);
   const [upgradeNotice, setUpgradeNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const verifyRanRef = useRef(false);
@@ -67,10 +65,6 @@ function TutorDashboardContent() {
   useEffect(() => {
     loadHistory();
   }, [loadHistory]);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
@@ -216,163 +210,93 @@ function TutorDashboardContent() {
 
       <VoiceLesson />
 
-      <Card className="flex-1 border-border/50 shadow-sm overflow-hidden flex flex-col">
-        <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
-          <AnimatePresence>
-            {messages.map((msg, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2 }}
-                className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                {msg.role === 'assistant' && (
-                  <div className="size-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shrink-0 mt-1">
-                    <Bot size={16} className="text-white" />
-                  </div>
-                )}
-                <div className="max-w-[80%] flex flex-col gap-1">
-                  <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${msg.role === 'user' ? 'bg-primary text-primary-foreground rounded-br-md' : 'bg-muted/50 text-foreground rounded-bl-md border border-border/30'}`}>
-                    {msg.role === 'user' ? (
-                      <>
-                        {msg.content}
-                        {msg.image && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={mediaSrc(msg.image)}
-                            alt="Attached photo"
-                            className="mt-2 w-full max-w-xs rounded-xl border border-black/10 shadow-sm"
-                          />
-                        )}
-                      </>
-                    ) : (
-                      <div className="space-y-3">
-                        <KofiMessage content={msg.content} />
-                        {msg.image && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={mediaSrc(msg.image)}
-                            alt="Teacher Kofi drawing"
-                            className="w-full max-w-sm rounded-xl border border-border/40 shadow-sm"
-                          />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  {msg.role === 'assistant' && i > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-fit text-xs text-muted-foreground"
-                      onClick={() => toggleSpeak(i, msg.content)}
-                    >
-                      {speakingIdx === i ? <VolumeX size={12} className="mr-1" /> : <Volume2 size={12} className="mr-1" />}
-                      {speakingIdx === i ? 'Stop' : 'Read aloud'}
-                    </Button>
-                  )}
-                </div>
-                {msg.role === 'user' && (
-                  <div className="size-8 rounded-full bg-primary flex items-center justify-center shrink-0 mt-1">
-                    <User size={16} className="text-primary-foreground" />
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </AnimatePresence>
-          {loading && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3">
-              <div className="size-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shrink-0">
-                <Bot size={16} className="text-white" />
-              </div>
-              <div className="bg-muted/50 rounded-2xl rounded-bl-md px-4 py-3 border border-border/30">
-                <div className="flex gap-1.5">
-                  <span className="size-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="size-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="size-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '300ms' }} />
-                </div>
-              </div>
-            </motion.div>
-          )}
-          <div ref={bottomRef} />
-        </CardContent>
+      <div className="flex-1 flex flex-col min-h-[60vh]">
+        <ClassroomBoard
+          messages={messages}
+          loading={loading}
+          speakingIdx={speakingIdx}
+          onToggleSpeak={toggleSpeak}
+        />
 
-        <div className="border-t border-border/50 p-4">
-          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAttachPhoto} />
-          <div className="flex gap-2 items-center">
-            <VoiceRecorder
-              onResult={handleVoiceResult}
-              onError={handleVoiceError}
-              disabled={loading || limitReached}
-              endpoint="/tutor/ai/voice"
-              onRecorded={handleVoiceRecorded}
-            />
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={loading || limitReached}
-              title="Attach a photo for Teacher Kofi to look at"
-            >
-              <CameraIcon size={16} />
-            </Button>
-            <Button
-              variant={imageMode ? 'default' : 'outline'}
-              size="icon"
-              onClick={() => setImageMode((v) => !v)}
-              disabled={loading || limitReached}
-              className={imageMode ? 'bg-gradient-to-r from-violet-500 to-fuchsia-500' : ''}
-              title={imageMode ? 'Back to chat' : 'Ask Teacher Kofi to draw a picture'}
-            >
-              <ImageIcon size={16} />
-            </Button>
-            {imageMode && (
-              <div className="flex items-center gap-1 rounded-lg border border-border/60 p-0.5">
-                <Button
-                  variant={imgStyle === 'cartoon' ? 'default' : 'ghost'}
-                  size="sm"
-                  className="h-7 px-2 text-xs"
-                  onClick={() => setImgStyle('cartoon')}
-                >
-                  🎨 Cartoon
-                </Button>
-                <Button
-                  variant={imgStyle === 'real' ? 'default' : 'ghost'}
-                  size="sm"
-                  className="h-7 px-2 text-xs"
-                  onClick={() => setImgStyle('real')}
-                >
-                  <Sparkles size={12} className="mr-1" /> Real photo
-                </Button>
-              </div>
-            )}
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={
-                imageMode
-                  ? imgStyle === 'real'
-                    ? 'Describe a real photo for Kofi to create...'
-                    : 'Describe a picture for Kofi to draw...'
-                  : 'Ask Teacher Kofi anything...'
-              }
-              disabled={loading || limitReached}
-              className="flex-1"
-            />
-            <Button onClick={handleSend} disabled={!input.trim() || loading || limitReached} size="icon">
-              {imageMode ? <ImageIcon size={16} /> : <Send size={16} />}
-            </Button>
+        <div className="mt-3">
+          <div className="chalk-tray rounded-xl px-3 py-3">
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAttachPhoto} />
+            <div className="flex gap-2 items-center">
+              <VoiceRecorder
+                onResult={handleVoiceResult}
+                onError={handleVoiceError}
+                disabled={loading || limitReached}
+                endpoint="/tutor/ai/voice"
+                onRecorded={handleVoiceRecorded}
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={loading || limitReached}
+                title="Attach a photo for Teacher Kofi to look at"
+                className="bg-white/10 border-white/25 text-white hover:bg-white/20 hover:text-white"
+              >
+                <CameraIcon size={16} />
+              </Button>
+              <Button
+                variant={imageMode ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setImageMode((v) => !v)}
+                disabled={loading || limitReached}
+                className={imageMode ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-black' : 'bg-white/10 border-white/25 text-white hover:bg-white/20 hover:text-white'}
+                title={imageMode ? 'Back to chat' : 'Ask Teacher Kofi to draw a picture'}
+              >
+                <ImageIcon size={16} />
+              </Button>
+              {imageMode && (
+                <div className="flex items-center gap-1 rounded-lg border border-white/25 p-0.5 bg-black/20">
+                  <Button
+                    variant={imgStyle === 'cartoon' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => setImgStyle('cartoon')}
+                  >
+                    🎨 Cartoon
+                  </Button>
+                  <Button
+                    variant={imgStyle === 'real' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => setImgStyle('real')}
+                  >
+                    <Sparkles size={12} className="mr-1" /> Real photo
+                  </Button>
+                </div>
+              )}
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={
+                  imageMode
+                    ? imgStyle === 'real'
+                      ? 'Describe a real photo for Kofi to create...'
+                      : 'Describe a picture for Kofi to draw...'
+                    : 'Ask Teacher Kofi anything...'
+                }
+                disabled={loading || limitReached}
+                className="flex-1 bg-black/25 border-white/25 text-white placeholder:text-white/60"
+              />
+              <Button onClick={handleSend} disabled={!input.trim() || loading || limitReached} size="icon" className="bg-gradient-to-r from-yellow-400 to-amber-500 text-black hover:from-yellow-300 hover:to-amber-400">
+                {imageMode ? <ImageIcon size={16} /> : <Send size={16} />}
+              </Button>
+            </div>
+            <p className="text-[10px] text-emerald-100/60 mt-2 text-center">
+              {imageMode
+                ? imgStyle === 'real'
+                  ? '✨ Real photo mode — e.g. "a realistic photo of our school compound at sunrise" or "a realistic photo of a jollof rice bowl".'
+                  : '🎨 Tell Kofi what to draw — e.g. "a fraction pizza with 4 slices" or "a diagram of the water cycle".'
+                : 'Tap 🎤 to speak, add a 📷 photo for Kofi to look at, or type. Lessons appear on the classroom board.'}
+            </p>
           </div>
-          <p className="text-[10px] text-muted-foreground mt-2 text-center">
-            {imageMode
-              ? imgStyle === 'real'
-                ? '✨ Real photo mode — e.g. "a realistic photo of our school compound at sunrise" or "a realistic photo of a jollof rice bowl".'
-                : '🎨 Tell Kofi what to draw — e.g. "a fraction pizza with 4 slices" or "a diagram of the water cycle".'
-              : 'Tap 🎤 to speak, add a 📷 photo for Kofi to look at, or type. Responses are AI-generated.'}
-          </p>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

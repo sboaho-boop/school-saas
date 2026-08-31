@@ -128,3 +128,133 @@
     @apply font-sans;
   }
 }
+
+/* ===== Classroom chalkboard ===== */
+@layer components {
+  .chalk-board {
+    background-color: #1e3a2f;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.05), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.04), transparent 45%),
+      radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.12), transparent 60%);
+    box-shadow:
+      inset 0 0 40px rgba(0, 0, 0, 0.45),
+      inset 0 0 8px rgba(0, 0, 0, 0.3);
+    position: relative;
+  }
+  .chalk-board::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(rgba(255, 255, 255, 0.5) 0.4px, transparent 0.6px),
+      radial-gradient(rgba(255, 255, 255, 0.28) 0.5px, transparent 0.8px);
+    background-size: 9px 9px, 13px 13px;
+    background-position: 0 0, 7px 7px;
+    opacity: 0.14;
+    mix-blend-mode: overlay;
+  }
+  .chalk-dust {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(rgba(255, 255, 255, 0.6) 1px, transparent 1.4px),
+      radial-gradient(rgba(255, 255, 255, 0.4) 0.6px, transparent 1px);
+    background-size: 17px 17px, 11px 11px;
+    opacity: 0.06;
+  }
+  .chalk-frame {
+    background: linear-gradient(145deg, #7a4a21, #5b341a 55%, #45270f);
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    border-radius: 0.9rem;
+    padding: 12px;
+  }
+  .chalk-tray {
+    background: linear-gradient(180deg, #6b3d1c, #4a2a11);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+  }
+  .chalk-text {
+    font-family: var(--font-chalk-body), var(--font-chalk), ui-sans-serif, system-ui, sans-serif;
+    color: #f5f2e6;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
+    letter-spacing: 0.01em;
+  }
+  .chalk-text strong {
+    font-weight: 600;
+  }
+  .chalk-heading {
+    font-family: var(--font-chalk), "Comic Sans MS", cursive, sans-serif;
+    color: #fdfae8;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+  }
+  .chalk-color-white { color: #f5f2e6; }
+  .chalk-color-yellow { color: #ffe97a; }
+  .chalk-color-green { color: #b6f0b3; }
+  .chalk-color-pink { color: #ffc0d0; }
+  .chalk-color-blue { color: #a8d8ff; }
+  .chalk-color-orange { color: #ffd9a0; }
+  .chalk-underline {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+  }
+  .chalk-line {
+    border-top: 2px dashed rgba(245, 242, 230, 0.35);
+  }
+  .chalk-list {
+    list-style: none;
+    padding-left: 0;
+  }
+  .chalk-list li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 2px;
+  }
+  .chalk-list li::before {
+    content: "✦";
+    position: absolute;
+    left: 2px;
+    top: 0;
+    color: #ffe97a;
+    opacity: 0.85;
+  }
+  .chalk-ol {
+    list-style: none;
+    counter-reset: chalk;
+    padding-left: 0;
+  }
+  .chalk-ol li {
+    counter-increment: chalk;
+    position: relative;
+    padding-left: 24px;
+    margin-bottom: 2px;
+  }
+  .chalk-ol li::before {
+    content: counter(chalk) ".";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #a8d8ff;
+    font-weight: 600;
+  }
+  .chalk-bubble {
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(245, 242, 230, 0.14);
+    border-radius: 1.1rem;
+  }
+  .chalk-btn {
+    color: #f5f2e6;
+    border: 1px solid rgba(245, 242, 230, 0.25);
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 0.6rem;
+    backdrop-filter: blur(2px);
+    transition: background 0.15s;
+  }
+  .chalk-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+  }
+}

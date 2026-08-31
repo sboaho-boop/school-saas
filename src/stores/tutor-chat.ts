@@ -2,10 +2,20 @@ import { create } from 'zustand';
 import { tutorRequest } from './tutor-auth';
 import { speakText } from '@/lib/speech';
 
+export interface MediaBlock {
+  type: 'image' | 'link';
+  keywords?: string;
+  data?: string;
+  url?: string;
+  label?: string;
+  hasImage?: boolean;
+}
+
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   image?: string;
+  media?: MediaBlock[];
 }
 
 interface TutorChatStore {
@@ -57,11 +67,14 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
       return entry;
     });
     let started = false;
+    let streamMedia: MediaBlock[] | undefined;
 
-    const patchLast = (content: string, extra?: Partial<TutorChatStore>) => {
+    const patchLast = (content: string, extra?: Partial<TutorChatStore> & { media?: MediaBlock[] }) => {
       set((s) => {
         const arr = [...s.messages];
-        arr[arr.length - 1] = { role: 'assistant', content };
+        const nl: ChatMessage = { role: 'assistant', content };
+        if (streamMedia) nl.media = streamMedia;
+        arr[arr.length - 1] = nl;
         return { messages: arr, ...(extra || {}) };
       });
     };
@@ -100,6 +113,12 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
                 text += evt.token;
                 if (!started) { started = true; set({ loading: false }); }
                 patchLast(text);
+              } else if (evt.media && Array.isArray(evt.media)) {
+                streamMedia = evt.media;
+                patchLast(text);
+              } else if (evt.reply && typeof evt.reply === 'string') {
+                text = evt.reply;
+                patchLast(text);
               } else if (evt.done) {
                 patchLast(text, { remaining: evt.remaining, loading: false });
               } else if (evt.error) {
@@ -115,10 +134,11 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
     } catch {
       // 2) Fallback: classic JSON reply (patches the placeholder bubble)
       try {
-        const res = await tutorRequest<{ reply: string; remaining: number }>('/tutor/ai/chat', {
+        const res = await tutorRequest<{ reply: string; remaining: number; media?: MediaBlock[] }>('/tutor/ai/chat', {
           method: 'POST',
           body: JSON.stringify({ message, history, ...(image ? { image } : {}) }),
         });
+        streamMedia = res.media;
         patchLast(res.reply, { remaining: res.remaining, loading: false });
       } catch {
         patchLast('Sorry, I had trouble connecting. Please try again.', { loading: false });
@@ -134,13 +154,13 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
 
     const history = messages.slice(1).map((m) => ({ role: m.role, content: m.content }));
     try {
-      const res = await tutorRequest<{ reply: string; remaining: number }>('/tutor/ai/chat', {
+      const res = await tutorRequest<{ reply: string; remaining: number; media?: MediaBlock[] }>('/tutor/ai/chat', {
         method: 'POST',
         body: JSON.stringify({ message, history }),
       });
       set((s) => {
         const arr = [...s.messages];
-        arr[arr.length - 1] = { role: 'assistant', content: res.reply };
+        arr[arr.length - 1] = { role: 'assistant', content: res.reply, ...(res.media ? { media: res.media } : {}) };
         return { messages: arr, remaining: res.remaining, loading: false };
       });
       return res.reply;
@@ -248,12 +268,12 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
 
   loadHistory: async () => {
     try {
-      const history = await tutorRequest<Array<{ userMessage: string; aiResponse: string }>>('/tutor/ai/history');
+      const history = await tutorRequest<Array<{ userMessage: string; aiResponse: string; media?: MediaBlock[] }>>('/tutor/ai/history');
       if (history.length > 0) {
         const mapped: ChatMessage[] = [];
         for (const h of history.reverse()) {
           mapped.push({ role: 'user', content: h.userMessage });
-          mapped.push({ role: 'assistant', content: h.aiResponse });
+          mapped.push({ role: 'assistant', content: h.aiResponse, ...(h.media ? { media: h.media } : {}) });
         }
         set({ messages: [{ role: 'assistant', content: WELCOME_MESSAGE }, ...mapped] });
       }
