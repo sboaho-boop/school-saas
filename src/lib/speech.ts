@@ -19,23 +19,32 @@ function warmVoices() {
   };
 }
 
-export function speakText(text: string, lang: string = 'en') {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return;
-  warmVoices();
+export function speakText(text: string, lang: string = 'en'): Promise<void> {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return resolve();
+    warmVoices();
+    if (!text) return resolve();
 
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  const bcp47 = VOICE_LANG_BCP47[lang] || 'en-US';
-  utterance.lang = bcp47;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    const bcp47 = VOICE_LANG_BCP47[lang] || 'en-US';
+    utterance.lang = bcp47;
 
-  const voices = window.speechSynthesis.getVoices() || [];
-  const base = lang.toLowerCase();
-  const match =
-    voices.find((v) => v.lang && v.lang.replace('_', '-').toLowerCase().startsWith(base))
-    || voices.find((v) => v.lang && v.lang.replace('_', '-').toLowerCase().startsWith('en-'));
-  if (match) utterance.voice = match;
+    const voices = window.speechSynthesis.getVoices() || [];
+    const base = lang.toLowerCase();
+    const match =
+      voices.find((v) => v.lang && v.lang.replace('_', '-').toLowerCase().startsWith(base))
+      || voices.find((v) => v.lang && v.lang.replace('_', '-').toLowerCase().startsWith('en-'));
+    if (match) utterance.voice = match;
 
-  utterance.rate = 0.95;
-  utterance.pitch = 1.05;
-  window.speechSynthesis.speak(utterance);
+    utterance.rate = 0.95;
+    utterance.pitch = 1.05;
+
+    let settled = false;
+    const done = () => { if (!settled) { settled = true; resolve(); } };
+    utterance.onend = done;
+    utterance.onerror = done;
+    window.speechSynthesis.speak(utterance);
+    setTimeout(done, 30000);
+  });
 }

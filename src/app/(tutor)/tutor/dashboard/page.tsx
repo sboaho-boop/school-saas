@@ -10,6 +10,7 @@ import { useTutorChat, mediaSrc } from '@/stores/tutor-chat';
 import { Send, Bot, User, RefreshCw, Volume2, VolumeX, AlertTriangle, CheckCircle2, Loader2, Image as ImageIcon, Camera as CameraIcon, Sparkles } from 'lucide-react';
 import { KofiMessage } from '@/components/ai/kofi-message';
 import { VoiceRecorder, speakText } from '@/components/ai/voice-recorder';
+import { VoiceConversation } from '@/components/ai/voice-conversation';
 import { TutorSubscriptionCard } from '@/components/tutor/subscription-card';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -304,6 +305,7 @@ function TutorDashboardContent() {
               endpoint="/tutor/ai/voice"
               onRecorded={handleVoiceRecorded}
             />
+            <VoiceConversation />
             <Button
               variant="outline"
               size="icon"

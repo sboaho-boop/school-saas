@@ -13,7 +13,7 @@ interface TutorChatStore {
   loading: boolean;
   remaining: number | null;
   sendMessage: (message: string, image?: string) => Promise<void>;
-  sendVoice: (audioBlob: Blob, language: string, mime?: string) => Promise<void>;
+  sendVoice: (audioBlob: Blob, language: string, mime?: string) => Promise<{ reply: string; remaining: number; language?: string; transcribed?: string }>;
   sendImage: (prompt: string, style?: string) => Promise<void>;
   sendPhoto: (file: File, caption?: string) => Promise<void>;
   resetChat: () => void;
@@ -154,12 +154,14 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
         remaining: data.remaining,
         loading: false,
       }));
-      speakText(data.reply || '', data.language || language);
+      await speakText(data.reply || '', data.language || language);
+      return data;
     } catch (err: unknown) {
       set((s) => ({
         messages: [...s.messages, { role: 'assistant', content: 'Voice error: ' + ((err as Error).message || 'Failed') }],
         loading: false,
       }));
+      throw err;
     }
   },
 
