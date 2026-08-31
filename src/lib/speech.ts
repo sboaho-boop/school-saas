@@ -9,11 +9,6 @@ const VOICE_LANG_BCP47: Record<string, string> = {
   dagbani: 'en-US',
 };
 
-// Ghanaian languages that need cloud voices for correct pronunciation.
-const CLOUD_FIRST = ['tw', 'fante', 'ewe', 'ha', 'ga', 'dagbani'];
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-
 let voicesLoaded = false;
 function warmVoices() {
   if (voicesLoaded || typeof window === 'undefined' || !window.speechSynthesis) return;
@@ -24,39 +19,7 @@ function warmVoices() {
   };
 }
 
-function hasLocalVoice(lang: string): boolean {
-  if (typeof window === 'undefined' || !window.speechSynthesis) return false;
-  const voices = window.speechSynthesis.getVoices() || [];
-  const base = lang.toLowerCase();
-  return voices.some((v) => v.lang && v.lang.replace('_', '-').toLowerCase().startsWith(base));
-}
-
-async function speakCloud(text: string, lang: string): Promise<boolean> {
-  try {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('tutor_token') : null;
-    if (!token) return false;
-    const res = await fetch(`${API_URL}/tutor/ai/speak`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-      body: JSON.stringify({ text, lang }),
-    });
-    if (!res.ok) return false;
-    const blob = await res.blob();
-    if (!blob || blob.size === 0) return false;
-    return await new Promise<boolean>((resolve) => {
-      const url = URL.createObjectURL(blob);
-      const audio = new window.Audio();
-      audio.src = url;
-      audio.onended = () => { URL.revokeObjectURL(url); resolve(true); };
-      audio.onerror = () => { URL.revokeObjectURL(url); resolve(false); };
-      audio.play().catch(() => { URL.revokeObjectURL(url); resolve(false); });
-    });
-  } catch {
-    return false;
-  }
-}
-
-async function speakBrowser(text: string, lang: string): Promise<void> {
+export async function speakText(text: string, lang: string = 'en'): Promise<void> {
   await new Promise<void>((resolve) => {
     if (typeof window === 'undefined' || !window.speechSynthesis) return resolve();
     warmVoices();
@@ -84,14 +47,4 @@ async function speakBrowser(text: string, lang: string): Promise<void> {
     window.speechSynthesis.speak(utterance);
     setTimeout(done, 30000);
   });
-}
-
-export async function speakText(text: string, lang: string = 'en'): Promise<void> {
-  if (!text) return;
-  const preferCloud = CLOUD_FIRST.includes(lang.toLowerCase()) || !hasLocalVoice(lang);
-  if (preferCloud) {
-    const ok = await speakCloud(text, lang);
-    if (ok) return;
-  }
-  await speakBrowser(text, lang);
 }
