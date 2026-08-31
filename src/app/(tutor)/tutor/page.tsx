@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Bot, Mic, Globe, BookOpen, Shield, Zap, Star, Volume2 } from 'lucide-react';
+import { KofiAvatar } from '@/components/ai/kofi-avatar';
+import { Mic, Globe, BookOpen, Shield, Zap, Star, Volume2 } from 'lucide-react';
 
 const FEATURES = [
   { icon: BookOpen, title: 'Ghanaian Curriculum', desc: 'Follows Basic 1-9, JHS, and SHS curriculum with step-by-step explanations.' },
@@ -140,7 +141,7 @@ export default function TutorLanding() {
       <footer className="border-t border-border py-8">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Bot size={16} className="text-violet-500" />
+            <KofiAvatar size={8} title="Teacher Kofi" />
             <span className="text-sm font-semibold">Teacher Kofi</span>
             <span className="text-xs text-muted-foreground">by EduPlatform</span>
           </div>

@@ -4,7 +4,8 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTutorAuth } from '@/stores/tutor-auth';
 import Link from 'next/link';
-import { Bot, LogOut, CreditCard } from 'lucide-react';
+import { LogOut, CreditCard } from 'lucide-react';
+import { KofiAvatar } from '@/components/ai/kofi-avatar';
 import { Button } from '@/components/ui/button';
 
 const PUBLIC_PATHS = ['/tutor', '/tutor/login', '/tutor/signup', '/tutor/pricing'];
@@ -31,9 +32,7 @@ export default function TutorLayout({ children }: { children: React.ReactNode })
         <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
           <div className="max-w-6xl mx-auto flex items-center justify-between px-4 h-16">
             <Link href="/tutor" className="flex items-center gap-2.5">
-              <div className="size-9 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-                <Bot size={20} className="text-white" />
-              </div>
+              <KofiAvatar size={12} title="Teacher Kofi" />
               <span className="font-bold text-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
                 Teacher Kofi
               </span>
@@ -73,9 +72,7 @@ export default function TutorLayout({ children }: { children: React.ReactNode })
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 h-14">
           <Link href="/tutor/dashboard" className="flex items-center gap-2.5">
-            <div className="size-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-              <Bot size={18} className="text-white" />
-            </div>
+            <KofiAvatar size={10} title="Teacher Kofi" />
             <span className="font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
               Teacher Kofi
             </span>

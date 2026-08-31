@@ -10,7 +10,8 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, getToken, setToken, API_URL } from '@/lib/api';
-import { GraduationCap, Wallet, Check, X, Clock, AlertCircle, Eye, LogOut, Send, Plus, FileText, BookOpen, Calendar, Bell, Upload, File, Image, Loader2, User, BarChart3, Percent, Trophy, Users, Bot, Sparkles } from 'lucide-react';
+import { GraduationCap, Wallet, Check, X, Clock, AlertCircle, Eye, LogOut, Send, Plus, FileText, BookOpen, Calendar, Bell, Upload, File, Image, Loader2, User, BarChart3, Percent, Trophy, Users, Sparkles } from 'lucide-react';
+import { KofiAvatar } from '@/components/ai/kofi-avatar';
 
 const DAY_LABELS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
@@ -255,8 +256,8 @@ export default function StudentDashboardPage() {
 
         <Card className="border-violet-300/60 dark:border-violet-800/60 bg-gradient-to-r from-violet-50 via-fuchsia-50 to-transparent dark:from-violet-950/40 dark:via-fuchsia-950/30 dark:to-transparent shadow-sm overflow-hidden relative">
           <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
-            <div className="size-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shrink-0">
-              <Bot size={20} className="text-white" />
+            <div className="shrink-0 flex items-center justify-center">
+              <KofiAvatar size={12} title="Teacher Kofi" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold flex items-center gap-1.5">

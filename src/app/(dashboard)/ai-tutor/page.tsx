@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuthStore } from '@/stores/auth';
 import { api } from '@/lib/api';
-import { Send, Bot, User, RefreshCw, Volume2, VolumeX } from 'lucide-react';
+import { KofiAvatar } from '@/components/ai/kofi-avatar';
+import { Send, User, RefreshCw, Volume2, VolumeX } from 'lucide-react';
 import { VoiceRecorder, speakText } from '@/components/ai/voice-recorder';
 import { KofiMessage } from '@/components/ai/kofi-message';
 
@@ -102,7 +103,7 @@ export default function AITutorPage() {
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center gap-3">
           <div className="size-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-            <Bot size={22} className="text-white" />
+            <KofiAvatar size={12} title="Teacher Kofi" />
           </div>
           <div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">Teacher Kofi</h1>
@@ -126,9 +127,7 @@ export default function AITutorPage() {
                 className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {msg.role === 'assistant' && (
-                  <div className="size-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shrink-0 mt-1">
-                    <Bot size={16} className="text-white" />
-                  </div>
+                  <KofiAvatar size={9} title="Teacher Kofi" className="mt-1" />
                 )}
                 <div className="max-w-[80%] flex flex-col gap-1">
                   <div
@@ -166,9 +165,7 @@ export default function AITutorPage() {
               animate={{ opacity: 1 }}
               className="flex gap-3"
             >
-              <div className="size-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shrink-0">
-                <Bot size={16} className="text-white" />
-              </div>
+              <KofiAvatar size={9} title="Teacher Kofi" className="shrink-0" />
               <div className="bg-muted/50 rounded-2xl rounded-bl-md px-4 py-3 border border-border/30">
                 <div className="flex gap-1.5">
                   <span className="size-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '0ms' }} />

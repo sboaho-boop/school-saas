@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTutorAuth, tutorRequest } from '@/stores/tutor-auth';
 import { useTutorChat } from '@/stores/tutor-chat';
-import { Send, Bot, RefreshCw, AlertTriangle, CheckCircle2, Loader2, Image as ImageIcon, Camera as CameraIcon, Sparkles } from 'lucide-react';
+import { Send, RefreshCw, AlertTriangle, CheckCircle2, Loader2, Image as ImageIcon, Camera as CameraIcon, Sparkles } from 'lucide-react';
+import { KofiAvatar } from '@/components/ai/kofi-avatar';
 import { ClassroomBoard } from '@/components/ai/classroom-board';
 import { VoiceRecorder, speakText } from '@/components/ai/voice-recorder';
 import { VoiceLesson } from '@/components/ai/voice-conversation';
@@ -131,9 +132,7 @@ function TutorDashboardContent() {
     <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4">
       <div className="flex items-center justify-between py-4">
         <div className="flex items-center gap-3">
-          <div className="size-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-            <Bot size={22} className="text-white" />
-          </div>
+          <KofiAvatar size={24} title="Teacher Kofi" />
           <div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
               Teacher Kofi

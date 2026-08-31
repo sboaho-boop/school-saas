@@ -44,11 +44,11 @@ import {
   Smartphone,
   Clock,
   Award,
-  Bot,
   Mic,
   Send,
 } from 'lucide-react';
 import { useState, useCallback } from 'react';
+import { KofiAvatar } from '@/components/ai/kofi-avatar';
 
 const stats = [
   { label: 'Active Schools', value: '125K+', icon: School },
@@ -318,7 +318,7 @@ export default function HomePage() {
             <Link href="/login" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Login</Link>
             <Link href="/parent/login" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Parents</Link>
             <Link href="/student/login" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Students</Link>
-            <Link href="/tutor" className="text-sm text-muted-foreground hover:text-fuchsia-400 transition-colors flex items-center gap-1"><Bot className="h-3.5 w-3.5" />Teacher Kofi</Link>
+            <Link href="/tutor" className="text-sm text-muted-foreground hover:text-fuchsia-400 transition-colors flex items-center gap-1"><KofiAvatar size={5} title="Teacher Kofi" />Teacher Kofi</Link>
             <LanguageSwitcher />
             <Link href="/register">
               <Button size="sm" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-500/20">
@@ -719,7 +719,7 @@ export default function HomePage() {
               viewport={{ once: true }}
             >
               <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/80 mb-4 border border-white/10">
-                <Bot size={14} className="mr-1 text-fuchsia-400" /> Meet Teacher Kofi
+                <KofiAvatar size={6} title="Teacher Kofi" className="mr-1" /> Meet Teacher Kofi
               </span>
               <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
                 Your AI tutor now follows students{' '}
@@ -754,7 +754,7 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-3">
                 <Link href="/tutor">
                   <Button size="lg" className="bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 font-semibold shadow-xl shadow-fuchsia-500/20 text-base px-8">
-                    <Bot size={18} className="mr-2" /> Try Teacher Kofi Free
+                    <KofiAvatar size={9} title="Teacher Kofi" className="mr-2" /> Try Teacher Kofi Free
                   </Button>
                 </Link>
                 <Link href="/tutor/pricing">

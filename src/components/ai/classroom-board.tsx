@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, User, Volume2, VolumeX, Loader2, Link2, PlayCircle } from 'lucide-react';
+import { User, Volume2, VolumeX, Loader2, Link2, PlayCircle } from 'lucide-react';
+import { KofiAvatar } from './kofi-avatar';
 import { KofiChalk } from './kofi-chalk';
 import { mediaSrc } from '@/stores/tutor-chat';
 import type { MediaBlock } from '@/stores/tutor-chat';
@@ -89,8 +90,8 @@ export function ClassroomBoard({ messages, loading, speakingIdx, onToggleSpeak }
                     className="chalk-text text-[15px] leading-relaxed"
                   >
                     <div className="flex items-start gap-2">
-                      <div className="mt-0.5 shrink-0 size-9 rounded-full bg-emerald-900/60 border border-yellow-200/30 flex items-center justify-center shadow-inner">
-                        <Bot size={16} className="text-yellow-100" />
+                      <div className="mt-0.5 shrink-0 rounded-full bg-emerald-900/40 p-0.5 flex items-center justify-center">
+                        <KofiAvatar size={9} title="Teacher Kofi" />
                       </div>
                       <div className="min-w-0">
                         <span className="chalk-color-yellow chalk-underline text-sm">Teacher Kofi:</span>

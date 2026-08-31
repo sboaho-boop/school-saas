@@ -7,7 +7,8 @@ import { useTutorAuth } from '@/stores/tutor-auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Bot, Mail, Lock } from 'lucide-react';
+import { KofiAvatar } from '@/components/ai/kofi-avatar';
+import { Mail, Lock } from 'lucide-react';
 
 export default function TutorLoginPage() {
   const router = useRouter();
@@ -28,9 +29,7 @@ export default function TutorLoginPage() {
       <Card className="w-full max-w-md border-border/50 shadow-lg">
         <CardContent className="p-8">
           <div className="flex items-center justify-center mb-6">
-            <div className="size-12 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-              <Bot size={24} className="text-white" />
-            </div>
+            <KofiAvatar size={26} title="Teacher Kofi" />
           </div>
           <h1 className="text-2xl font-bold text-center mb-1">Welcome Back</h1>
           <p className="text-sm text-muted-foreground text-center mb-6">Sign in to Teacher Kofi</p>
