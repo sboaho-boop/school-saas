@@ -14,6 +14,7 @@ interface TutorChatStore {
   remaining: number | null;
   sendMessage: (message: string, image?: string) => Promise<void>;
   sendVoice: (audioBlob: Blob, language: string, mime?: string) => Promise<{ reply: string; remaining: number; language?: string; transcribed?: string }>;
+  sendLessonPrompt: (message: string) => Promise<string>;
   sendImage: (prompt: string, style?: string) => Promise<void>;
   sendPhoto: (file: File, caption?: string) => Promise<void>;
   resetChat: () => void;
@@ -122,6 +123,34 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
       } catch {
         patchLast('Sorry, I had trouble connecting. Please try again.', { loading: false });
       }
+    }
+  },
+
+  sendLessonPrompt: async (message: string) => {
+    const { messages } = get();
+    const userMsg: ChatMessage = { role: 'user', content: '🎯 ' + message };
+    const placeholder: ChatMessage = { role: 'assistant', content: '' };
+    set({ messages: [...messages, userMsg, placeholder], loading: true });
+
+    const history = messages.slice(1).map((m) => ({ role: m.role, content: m.content }));
+    try {
+      const res = await tutorRequest<{ reply: string; remaining: number }>('/tutor/ai/chat', {
+        method: 'POST',
+        body: JSON.stringify({ message, history }),
+      });
+      set((s) => {
+        const arr = [...s.messages];
+        arr[arr.length - 1] = { role: 'assistant', content: res.reply };
+        return { messages: arr, remaining: res.remaining, loading: false };
+      });
+      return res.reply;
+    } catch {
+      set((s) => {
+        const arr = [...s.messages];
+        arr[arr.length - 1] = { role: 'assistant', content: 'Sorry, I had trouble starting the lesson. Please try again.' };
+        return { messages: arr, loading: false };
+      });
+      return '';
     }
   },
 

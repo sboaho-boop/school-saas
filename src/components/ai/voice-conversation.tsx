@@ -1,228 +1,247 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Mic, MicOff, Loader2, Pause, Play } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Mic, MicOff, Loader2 } from 'lucide-react';
 import { useTutorChat } from '@/stores/tutor-chat';
 import { audioBlobToWav } from '@/lib/audio-to-wav';
+import { speakText } from '@/lib/speech';
 
-const SILENCE_MS = 1100;      // how long of quiet before we send the utterance
-const RMS_THRESHOLD = 0.012;  // below this = "silence"
+const LANGUAGES = [
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'tw', label: 'Twi', flag: '🇬🇭' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  { code: 'ga', label: 'Ga', flag: '🇬🇭' },
+  { code: 'ewe', label: 'Ewe', flag: '🇬🇭' },
+  { code: 'ha', label: 'Hausa', flag: '🇳🇬' },
+];
 
-type SessionState = 'idle' | 'listening' | 'thinking' | 'paused';
+const LESSON_IDEAS = [
+  { label: 'Maths quiz', emoji: '➕', prompt: 'Let us start a fun maths quiz for me. Ask me one question at a time and wait for my answer.' },
+  { label: 'Fractions', emoji: '🍕', prompt: 'Teach me fractions using pizza and food. Ask me a simple question.' },
+  { label: 'Spelling', emoji: '✏️', prompt: 'Give me a spelling test. Say a word and ask me to spell it.' },
+  { label: 'Stories', emoji: '📖', prompt: 'Let us make up a fun story together. You start the story and ask me what happens next.' },
+  { label: 'Science', emoji: '🔬', prompt: 'Teach me a simple science fact and ask me a question about it.' },
+  { label: 'Counting', emoji: '🔢', prompt: 'Let us practice counting. Count with me and ask me to count along.' },
+];
 
-function isSession(s: SessionState | string | undefined, value: SessionState): boolean {
-  return (s as SessionState) === value;
-}
+type Stage = 'idle' | 'listening' | 'recording' | 'thinking' | 'ready';
 
-interface ActiveRecorder {
-  mediaRecorder: MediaRecorder;
-  chunks: Blob[];
-  stream: MediaStream;
-}
-
-interface ActiveLoop {
-  audioContext: AudioContext;
-  stopNode: () => void;
-  recorder: ActiveRecorder | null;
-}
-
-export function VoiceConversation() {
+export function VoiceLesson() {
   const sendVoice = useTutorChat((s) => s.sendVoice);
-  const [session, setSession] = useState<SessionState>('idle');
+  const sendLessonPrompt = useTutorChat((s) => s.sendLessonPrompt);
+  const [stage, setStage] = useState<Stage>('idle');
+  const [language, setLanguage] = useState('en');
   const [status, setStatus] = useState('');
-  const loopRef = useRef<ActiveLoop | null>(null);
-  const sessionRef = useRef<SessionState>('idle');
-  const thinkingRef = useRef(false);
-  const timersRef = useRef<number[]>([]);
-  const silenceTimerRef = useRef<number | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const busyRef = useRef(false);
+  const sessionOpenRef = useRef(false);
+  const stageRef = useRef<Stage>('idle');
+  const langRef = useRef('en');
 
-  useEffect(() => {
-    sessionRef.current = session;
-  }, [session]);
-
-  function clearTimers() {
-    timersRef.current.forEach((t) => window.clearTimeout(t));
-    timersRef.current = [];
-    if (silenceTimerRef.current) { window.clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
-  }
+  useEffect(() => { stageRef.current = stage; }, [stage]);
+  useEffect(() => { langRef.current = language; }, [language]);
 
   function setStatusText(t: string) {
     setStatus(t);
   }
 
-  // Safely finish the current utterance via its MediaRecorder (triggers onstop → send).
-  function finalizeUtterance() {
-    const rec = loopRef.current?.recorder;
-    if (rec && rec.mediaRecorder.state === 'recording') {
-      rec.mediaRecorder.stop();
-      loopRef.current!.recorder = null;
-    }
-  }
-
-  async function start() {
-    if (loopRef.current) return;
-    setStatusText('Starting…');
+  async function ensureStream(): Promise<MediaStream | null> {
+    if (streamRef.current) return streamRef.current;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const AC: typeof AudioContext =
-        window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      const audioContext = new AC();
-      const source = audioContext.createMediaStreamSource(stream);
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 512;
-      source.connect(analyser);
-      const dataArray = new Float32Array(analyser.fftSize);
-
-      let recorder: ActiveRecorder | null = null;
-      let lastActivityMs = Date.now();
-      let hadSpeech = false;
-      let streamOn = true;
-
-      async function processActiveUtterance(rec: ActiveRecorder, language: string) {
-        if (isSession(sessionRef.current, 'paused') || isSession(sessionRef.current, 'idle')) return;
-        if (thinkingRef.current) return;
-        const raw = new Blob(rec.chunks, { type: rec.mediaRecorder.mimeType });
-        const { blob, mime } = await audioBlobToWav(raw);
-        thinkingRef.current = true;
-        setSession('thinking');
-        setStatusText('Teacher Kofi is thinking…');
-        try {
-          await sendVoice(blob, language, mime);
-        } catch {
-          setStatusText('Sorry, there was a problem. Try again.');
-        }
-        thinkingRef.current = false;
-        if (isSession(sessionRef.current, 'paused') || isSession(sessionRef.current, 'idle')) return;
-        if (loopRef.current && !loopRef.current.recorder) {
-          armRecorder();
-        }
-        setSession('listening');
-        setStatusText('Listening… speak when ready');
-      }
-
-      function armRecorder() {
-        if (!streamOn) return;
-        const mr = new MediaRecorder(stream, {
-          mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm',
-        });
-        const rec: ActiveRecorder = { mediaRecorder: mr, chunks: [], stream };
-        mr.ondataavailable = (e) => { if (e.data.size > 0) rec.chunks.push(e.data); };
-        mr.onstop = async () => {
-          const isThinking = thinkingRef.current;
-          if (!isThinking && sessionRef.current !== 'idle' && rec.chunks.length > 0) {
-            await processActiveUtterance(rec, 'en');
-          }
-        };
-        mr.start();
-        recorder = rec;
-        loopRef.current!.recorder = rec;
-      }
-
-      function teardown() {
-        clearTimers();
-        streamOn = false;
-        if (recorder && recorder.mediaRecorder.state !== 'inactive') {
-          try { recorder.mediaRecorder.stop(); } catch {}
-        }
-        source.disconnect();
-        audioContext.close().catch(() => {});
-        stream.getTracks().forEach((t) => t.stop());
-        loopRef.current = null;
-        recorder = null;
-      }
-
-      loopRef.current = { audioContext, recorder: null, stopNode: teardown };
-
-      // VAD loop: sample RMS; when quiet follows speech, finalize the utterance.
-      function tick() {
-        if (!streamOn) return;
-        analyser.getFloatTimeDomainData(dataArray);
-        let sum = 0;
-        for (let i = 0; i < dataArray.length; i++) sum += dataArray[i] * dataArray[i];
-        const rms = Math.sqrt(sum / dataArray.length);
-        const now = Date.now();
-
-        if (rms >= RMS_THRESHOLD) {
-          lastActivityMs = now;
-          hadSpeech = true;
-        } else if (hadSpeech && (now - lastActivityMs) >= SILENCE_MS) {
-          hadSpeech = false;
-          finalizeUtterance();
-          lastActivityMs = now;
-        }
-
-        // Ensure a recorder is armed whenever we're actively listening.
-        if (
-          sessionRef.current === 'listening' &&
-          !thinkingRef.current &&
-          loopRef.current &&
-          !loopRef.current.recorder
-        ) {
-          armRecorder();
-        }
-      }
-
-      const interval = window.setInterval(tick, 60);
-      timersRef.current.push(interval);
-      armRecorder();
-      setSession('listening');
-      setStatusText('Listening… speak when ready');
+      streamRef.current = stream;
+      return stream;
     } catch {
-      setStatusText('Microphone access denied. Please allow mic access and try again.');
-      setSession('idle');
+      setStatusText('Please allow the microphone so Teacher Kofi can hear you.');
+      return null;
     }
   }
 
-  function stop() {
-    clearTimers();
-    const loop = loopRef.current;
-    if (loop) {
-      loop.stopNode();
+  function startRecording() {
+    if (!streamRef.current) return;
+    const mr = new MediaRecorder(streamRef.current, {
+      mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm',
+    });
+    chunksRef.current = [];
+    mr.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
+    mr.onstop = () => sendRecordedChunks();
+    mr.start();
+    mediaRecorderRef.current = mr;
+    setStage('recording');
+    setStatusText('I am listening… let go when you finish');
+  }
+
+  function stopRecording() {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
     }
-    thinkingRef.current = false;
-    loopRef.current = null;
-    setSession('idle');
+  }
+
+  async function sendRecordedChunks() {
+    if (busyRef.current || !sessionOpenRef.current) return;
+    const raw = new Blob(chunksRef.current, { type: mediaRecorderRef.current?.mimeType || 'audio/webm' });
+    if (raw.size === 0) {
+      setStage(stageRef.current === 'ready' ? 'ready' : 'listening');
+      return;
+    }
+    busyRef.current = true;
+    const { blob, mime } = await audioBlobToWav(raw);
+    setStage('thinking');
+    setStatusText('Teacher Kofi is thinking…');
+    try {
+      const lang = langRef.current;
+      const data = await sendVoice(blob, lang, mime);
+      if (data.reply) await speakText(data.reply, data.language || lang);
+    } catch {
+      setStatusText('Sorry, I could not hear that. Try again.');
+    }
+    busyRef.current = false;
+    if (stageRef.current === 'idle' || stageRef.current === 'thinking') {
+      setStage('listening');
+      setStatusText('Tap and hold the mic to talk');
+    } else {
+      setStage(stageRef.current);
+    }
+  }
+
+  const beginTalk = async () => {
+    if (busyRef.current) return;
+    const stream = await ensureStream();
+    if (!stream) return;
+    if (stage === 'thinking') return;
+    sessionOpenRef.current = true;
+    startRecording();
+  };
+
+  const endTalk = () => {
+    if (stageRef.current === 'recording') {
+      stopRecording();
+    }
+  };
+
+  // Tap/toggle fallback for touch devices: a short tap on the mic starts or stops.
+  async function startLesson(prompt: string) {
+    if (busyRef.current) return;
+    sessionOpenRef.current = true;
+    // Start listening so the student can then hold-to-talk.
+    if (!streamRef.current) {
+      const stream = await ensureStream();
+      if (!stream) return;
+    }
+    if (stageRef.current === 'idle') {
+      setStage('listening');
+      setStatusText('Great! Start a lesson below, or tap the mic to talk');
+    }
+    busyRef.current = true;
+    const lang = langRef.current;
+    const reply = await sendLessonPrompt(prompt);
+    if (reply) await speakText(reply, lang);
+    busyRef.current = false;
+    if (stageRef.current !== 'idle') {
+      setStage('listening');
+      setStatusText('Tap and hold the mic to talk');
+    }
+  }
+
+  function endSession() {
+    sessionOpenRef.current = false;
+    busyRef.current = false;
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try { mediaRecorderRef.current.stop(); } catch {}
+    }
+    mediaRecorderRef.current = null;
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    setStage('idle');
     setStatusText('');
   }
 
-  function togglePause() {
-    if (session !== 'listening' && session !== 'paused') return;
-    if (sessionRef.current === 'listening') {
-      setSession('paused');
-      setStatusText('Paused — tap play to continue');
-    } else if (sessionRef.current === 'paused') {
-      setSession('listening');
-      setStatusText('Listening… speak when ready');
-    }
-  }
-
   useEffect(() => {
-    return () => stop();
+    return () => endSession();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const active = session !== 'idle';
+  const active = stage !== 'idle';
 
   return (
-    <div className="flex items-center gap-2">
-      <Button
-        variant={active ? 'destructive' : 'outline'}
-        size="icon"
-        className={`shrink-0 ${active ? 'animate-pulse' : ''}`}
-        onClick={active ? stop : start}
-        title={active ? 'End voice conversation' : 'Start a voice conversation with Teacher Kofi'}
-      >
-        {session === 'thinking' ? <Loader2 size={16} className="animate-spin" /> : active ? <MicOff size={16} /> : <Mic size={16} />}
-      </Button>
-      {active && (
-        <>
-          <Button variant="outline" size="icon" onClick={togglePause} title={session === 'paused' ? 'Continue' : 'Pause'}>
-            {session === 'paused' ? <Play size={16} /> : <Pause size={16} />}
-          </Button>
-          <span className="text-xs text-muted-foreground min-w-[0] max-w-[140px] truncate">{status}</span>
-        </>
+    <div className="rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-violet-950/30 dark:to-fuchsia-950/30 dark:border-violet-800/40 p-4 mb-4">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm font-semibold text-violet-700 dark:text-violet-300">
+          🗣️ Talk to Teacher Kofi
+        </p>
+        <div className="flex items-center gap-2">
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="h-8 rounded-lg border border-violet-300 bg-white text-xs px-2 dark:bg-card dark:border-violet-800"
+            aria-label="Lesson language"
+          >
+            {LANGUAGES.map((l) => (
+              <option key={l.code} value={l.code}>{l.flag} {l.label}</option>
+            ))}
+          </select>
+          {active && (
+            <button
+              onClick={endSession}
+              className="h-8 rounded-lg border border-violet-300 px-3 text-xs text-violet-700 hover:bg-violet-100 dark:text-violet-300 dark:hover:bg-violet-900/40 dark:border-violet-800"
+            >
+              End
+            </button>
+          )}
+        </div>
+      </div>
+
+      {stage === 'idle' && (
+        <div className="mb-3">
+          <p className="text-xs text-violet-600 dark:text-violet-400 mb-2">Pick a lesson to start:</p>
+          <div className="flex flex-wrap gap-2">
+            {LESSON_IDEAS.map((idea) => (
+              <button
+                key={idea.label}
+                onClick={() => startLesson(idea.prompt)}
+                className="inline-flex items-center gap-1.5 rounded-full border border-violet-300 bg-white px-3 py-1.5 text-sm font-medium text-violet-700 shadow-sm hover:bg-violet-100 active:scale-95 transition dark:bg-card dark:text-violet-300 dark:border-violet-800 dark:hover:bg-violet-900/40"
+              >
+                <span>{idea.emoji}</span> {idea.label}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
+
+      <div className="flex items-center gap-4">
+        <button
+          onPointerDown={(e) => { e.preventDefault(); beginTalk(); }}
+          onPointerUp={(e) => { e.preventDefault(); endTalk(); }}
+          onPointerCancel={() => endTalk()}
+          onPointerLeave={() => { if (stageRef.current === 'recording') endTalk(); }}
+          disabled={stage === 'thinking'}
+          title={active ? 'Hold to talk, let go to send' : 'Start talking to Teacher Kofi'}
+          className={[
+            'relative size-20 rounded-full flex items-center justify-center transition select-none touch-none',
+            stage === 'recording' ? 'bg-red-500 text-white animate-pulse' : 'bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white shadow-lg hover:shadow-xl active:scale-95',
+            stage === 'thinking' ? 'opacity-70' : '',
+          ].join(' ')}
+        >
+          {stage === 'recording' ? (
+            <MicOff size={30} />
+          ) : stage === 'thinking' ? (
+            <Loader2 size={30} className="animate-spin" />
+          ) : (
+            <Mic size={30} />
+          )}
+        </button>
+        <div className="flex flex-col gap-1">
+          <p className="text-sm font-medium text-violet-800 dark:text-violet-200">
+            {stage === 'idle' || stage === 'listening' ? 'Tap and hold the mic to talk' : stage === 'recording' ? 'Keep talking…' : stage === 'thinking' ? 'Teacher Kofi is answering…' : ''}
+          </p>
+          {status && <p className="text-xs text-violet-500 dark:text-violet-400">{status}</p>}
+        </div>
+        {stage === 'idle' && language !== 'en' && (
+          <p className="text-xs text-violet-500 dark:text-violet-400 ml-auto">Kofi will reply in {LANGUAGES.find((l) => l.code === language)?.label}</p>
+        )}
+      </div>
     </div>
   );
 }
