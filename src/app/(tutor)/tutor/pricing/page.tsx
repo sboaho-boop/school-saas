@@ -3,19 +3,11 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Loader2, Check, Bot, Zap, Infinity, Smartphone, Lock } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { useTutorAuth, tutorRequest } from '@/stores/tutor-auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-
-const CHANNELS = [
-  { id: 'mtn-gh', label: 'MTN Mobile Money', hint: '*170#' },
-  { id: 'vodafone-gh', label: 'Vodafone / Telecel Cash', hint: '*110#' },
-];
 
 const PLANS = [
   {
@@ -58,35 +50,21 @@ const PLANS = [
 ];
 
 type InitResponse = {
-  message?: string;
-  verificationType?: 'OTP' | 'USSD';
-  otpPrefix?: string | null;
-  hubtelPreApprovalId?: string;
-  clientReferenceId?: string;
-};
-
-type ConfirmResponse = {
   success?: boolean;
-  pending?: boolean;
-  plan?: string;
-  message?: string;
+  checkoutUrl?: string;
+  checkoutId?: string;
+  clientReference?: string;
+  error?: string;
 };
 
 export default function TutorPricing() {
   const user = useTutorAuth((s) => s.user);
-  const router = useRouter();
   const [prices, setPrices] = useState<Record<string, number>>({});
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string>('');
-  const [step, setStep] = useState<'phone' | 'otp' | 'approve'>('phone');
-  const [phone, setPhone] = useState('');
-  const [channel, setChannel] = useState('mtn-gh');
-  const [otpCode, setOtpCode] = useState('');
-  const [initInfo, setInitInfo] = useState<InitResponse | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(API_URL + '/tutor/subscription/plans')
@@ -102,49 +80,24 @@ export default function TutorPricing() {
 
   const openPayment = (plan: string) => {
     setSelectedPlan(plan);
-    setStep('phone');
-    setInitInfo(null);
-    setOtpCode('');
     setError(null);
-    setNotice(null);
     setModalOpen(true);
   };
 
-  const handleStart = async () => {
+  const handleStartCheckout = async () => {
     setBusy(true);
     setError(null);
-    setNotice(null);
     try {
-      const res = await tutorRequest<InitResponse>('/tutor/subscription/init', {
+      const res = await tutorRequest<InitResponse>('/tutor/subscription/checkout/init', {
         method: 'POST',
-        body: JSON.stringify({ plan: selectedPlan, phone, channel }),
+        body: JSON.stringify({ plan: selectedPlan }),
       });
-      setInitInfo(res);
-      setStep(res.verificationType === 'OTP' ? 'otp' : 'approve');
+      if (!res?.checkoutUrl) {
+        throw new Error(res?.error || 'Could not start payment.');
+      }
+      window.location.href = res.checkoutUrl;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not start the payment.');
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const handleConfirm = async (withOtp?: boolean) => {
-    setBusy(true);
-    setError(null);
-    setNotice(null);
-    try {
-      const res = await tutorRequest<ConfirmResponse>('/tutor/subscription/confirm', {
-        method: 'POST',
-        body: JSON.stringify(withOtp ? { otpCode } : {}),
-      });
-      if (res.success) {
-        router.replace('/tutor/dashboard?upgraded=1');
-        return;
-      }
-      setNotice(res.message || 'Approval not confirmed yet. Approve on your phone, then try again.');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not confirm the payment.');
-    } finally {
       setBusy(false);
     }
   };
@@ -230,92 +183,39 @@ export default function TutorPricing() {
               Pay {PLANS.find((p) => p.paystackPlan === selectedPlan)?.name || ''} with Mobile Money
             </DialogTitle>
             <DialogDescription>
-              {step === 'phone' && 'Enter your Mobile Money number to start the approval.'}
-              {step === 'otp' && 'Enter the OTP sent to your phone to finish the approval.'}
-              {step === 'approve' && 'Approve the request on your phone, then confirm below.'}
+              You will be taken to a secure Hubtel checkout page to pay with MTN / Telecel / AT Momo or card.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
-            {step === 'phone' && (
-              <>
-                <div className="space-y-2">
-                  <Label>Network</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {CHANNELS.map((c) => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => setChannel(c.id)}
-                        className={`rounded-lg border p-3 text-left text-sm transition-colors ${
-                          channel === c.id ? 'border-violet-500 bg-violet-50 dark:bg-violet-950/30' : 'border-border hover:border-border/70'
-                        }`}
-                      >
-                        <span className="font-medium block">{c.label}</span>
-                        <span className="text-xs text-muted-foreground">{c.hint}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Mobile Money number</Label>
-                  <Input
-                    id="phone"
-                    inputMode="tel"
-                    placeholder="e.g. 0244 123 456"
-                    value={phone}
-                    autoFocus
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
-                </div>
-                {error && <p className="text-sm text-red-600">{error}</p>}
-                <Button className="w-full" onClick={handleStart} disabled={busy || phone.replace(/\D/g, '').length < 9}>
-                  {busy ? <Loader2 className="size-4 animate-spin" /> : 'Continue'}
-                </Button>
-              </>
-            )}
+            <div className="rounded-lg border border-border/60 p-4 text-sm">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-muted-foreground">Plan</span>
+                <span className="font-semibold">{PLANS.find((p) => p.paystackPlan === selectedPlan)?.name || ''} (monthly)</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Amount</span>
+                <span className="font-extrabold text-lg">
+                  GH\u20B5{(prices[selectedPlan] ?? (selectedPlan === 'unlimited' ? 39 : 19)).toLocaleString()}
+                </span>
+              </div>
+              <p className="mt-3 text-xs text-muted-foreground">
+                After payment your plan activates immediately and automatically renews each month. Cancel anytime from your dashboard.
+              </p>
+            </div>
 
-            {step === 'otp' && (
-              <>
-                <p className="text-sm text-muted-foreground">
-                  An OTP has been sent to <strong>{phone}</strong>. Enter it below to finish.
-                </p>
-                <div className="space-y-2">
-                  <Label htmlFor="otp">OTP code</Label>
-                  <Input
-                    id="otp"
-                    inputMode="numeric"
-                    placeholder="e.g. 123456"
-                    value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value)}
-                  />
-                </div>
-                {error && <p className="text-sm text-red-600">{error}</p>}
-                {notice && <p className="text-sm text-amber-600">{notice}</p>}
-                <Button className="w-full" onClick={() => handleConfirm(true)} disabled={busy || !otpCode.trim()}>
-                  {busy ? <Loader2 className="size-4 animate-spin" /> : 'Verify & Activate My Plan'}
-                </Button>
-              </>
-            )}
+            {error && <p className="text-sm text-red-600">{error}</p>}
 
-            {step === 'approve' && (
-              <>
-                <p className="text-sm text-muted-foreground">
-                  An approval request was sent to <strong>{phone}</strong>. Follow the prompt on your phone
-                  (use the <em>Hubtel/USSD code</em> shown) to approve {selectedPlan === 'pro' ? 'GHS 19' : 'GHS 39'}/month.
-                  Once done, tap the button below.
-                </p>
-                {error && <p className="text-sm text-red-600">{error}</p>}
-                {notice && <p className="text-sm text-amber-600">{notice}</p>}
-                <Button className="w-full" onClick={() => handleConfirm(false)} disabled={busy}>
-                  {busy ? <Loader2 className="size-4 animate-spin" /> : 'I have approved — Activate My Plan'}
-                </Button>
-              </>
-            )}
-
-            <p className="text-xs text-muted-foreground text-center">
-              Approval is required once. After approval, your plan renews automatically every month until you cancel.
-            </p>
+            <Button className="w-full" onClick={handleStartCheckout} disabled={busy}>
+              {busy ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" /> Opening secure payment...
+                </>
+              ) : (
+                'Continue to Payment'
+              )}
+            </Button>
+            <p className="text-xs text-muted-foreground text-center">Secured by Hubtel. You confirm the amount before paying.</p>
           </div>
         </DialogContent>
       </Dialog>
