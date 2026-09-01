@@ -80,6 +80,10 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
     };
 
     // 1) Stream tokens for a fast reply
+    let timedOut = false;
+    const timeout = setTimeout(() => {
+      timedOut = true;
+    }, 45000);
     try {
       const res = await fetch(API_URL + '/tutor/ai/chat/stream', {
         method: 'POST',
@@ -95,6 +99,7 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
       let text = '';
 
       for (;;) {
+        if (timedOut) throw new Error('Stream timed out');
         const { done, value } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
@@ -120,6 +125,7 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
                 text = evt.reply;
                 patchLast(text);
               } else if (evt.done) {
+                clearTimeout(timeout);
                 patchLast(text, { remaining: evt.remaining, loading: false });
               } else if (evt.error) {
                 throw new Error(evt.error);
@@ -128,10 +134,12 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
           }
         }
       }
+      clearTimeout(timeout);
       if (!text.trim()) throw new Error('Empty reply');
       set({ loading: false });
       return;
     } catch {
+      clearTimeout(timeout);
       // 2) Fallback: classic JSON reply (patches the placeholder bubble)
       try {
         const res = await tutorRequest<{ reply: string; remaining: number; media?: MediaBlock[] }>('/tutor/ai/chat', {
