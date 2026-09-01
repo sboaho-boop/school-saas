@@ -12,6 +12,8 @@ import { ClassroomBoard } from '@/components/ai/classroom-board';
 import { VoiceRecorder, speakText } from '@/components/ai/voice-recorder';
 import { VoiceLesson } from '@/components/ai/voice-conversation';
 import { TutorSubscriptionCard } from '@/components/tutor/subscription-card';
+import { TutorProgressCard } from '@/components/tutor/progress-card';
+import { TutorCurriculumCard } from '@/components/tutor/curriculum-card';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -201,6 +203,8 @@ function TutorDashboardContent() {
       )}
 
       {user && <TutorSubscriptionCard />}
+      {user && <TutorProgressCard />}
+      {user && <TutorCurriculumCard />}
 
       {limitReached && (
         <Card className="mb-4 border-orange-200 bg-orange-50 dark:bg-orange-950/20 dark:border-orange-800">
