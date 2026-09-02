@@ -36,9 +36,9 @@ function TimetableSection() {
 
   return (
     <Card className="border-border/50 shadow-sm">
-      <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Calendar size={16} />Timetable</CardTitle></CardHeader>
+      <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Calendar size={16} />Class Timetable</CardTitle></CardHeader>
       <CardContent className="overflow-x-auto">
-        <div className="grid grid-cols-5 gap-2 min-w-[500px]">
+        <div className="grid grid-cols-5 gap-2 min-w-[520px]">
           {DAY_LABELS.map((day, idx) => (
             <div key={idx} className="space-y-1">
               <p className="text-[10px] font-semibold text-center text-muted-foreground uppercase tracking-wider mb-2">{day.slice(0, 3)}</p>
@@ -48,13 +48,100 @@ function TimetableSection() {
                 byDay[idx].slice(0, 6).map((s: any) => (
                   <div key={s.id} className="text-[10px] bg-muted/30 rounded p-1.5 border border-border/30">
                     <p className="font-medium truncate">{s.startTime}-{s.endTime}</p>
-                    <p className="text-muted-foreground truncate">{s.room}</p>
+                    <p className="text-muted-foreground truncate">{s.subjectName}</p>
+                    {s.room && <p className="text-muted-foreground/70 truncate">Room: {s.room}</p>}
                   </div>
                 ))
               )}
             </div>
           ))}
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ExamScheduleSection() {
+  const [exams, setExams] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get('/student/exams')
+      .then((data: any) => { setExams(data || []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  if (loading) return null;
+  if (exams.length === 0) return null;
+
+  return (
+    <Card className="border-border/50 shadow-sm">
+      <CardHeader><CardTitle className="text-sm flex items-center gap-2"><BookOpen size={16} />Exam Schedule</CardTitle></CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {exams.map((e) => (
+            <div key={e.id} className="flex items-center justify-between gap-2 text-sm p-2.5 rounded-lg border border-border/50">
+              <div className="min-w-0">
+                <p className="font-medium truncate">{e.title}</p>
+                <p className="text-[10px] text-muted-foreground">{e.subjectName}{e.duration ? ` · ${e.duration} min` : ''}</p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="text-[11px] font-medium text-primary">{e.dueDate}</p>
+                {e.totalPoints > 0 && <p className="text-[10px] text-muted-foreground">{e.totalPoints} pts</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ClassReportSection() {
+  const [report, setReport] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get('/student/report-card')
+      .then((data: any) => { setReport(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  if (loading) return null;
+  if (!report || report.noTerm || report.subjects.length === 0) return null;
+
+  return (
+    <Card className="border-border/50 shadow-sm">
+      <CardHeader>
+        <CardTitle className="text-sm flex items-center gap-2"><FileText size={16} />Class Report</CardTitle>
+        {report.term && <p className="text-xs text-muted-foreground">{report.term.name} · {report.term.academicYear}</p>}
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-1">
+          {report.subjects.map((s: any) => (
+            <div key={s.subjectId} className="flex items-center justify-between text-sm py-1.5 border-b border-border/30">
+              <div>
+                <span className="font-medium">{s.subjectName}</span>
+                {s.subjectCode && <span className="text-muted-foreground ml-1 text-xs">({s.subjectCode})</span>}
+                {s.remarks && <span className="block text-[10px] text-muted-foreground">{s.remarks}</span>}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`font-bold ${s.score >= 80 ? 'text-emerald-500' : s.score >= 60 ? 'text-amber-500' : 'text-red-500'}`}>
+                  {s.score > 0 ? `${s.score}%` : '—'}
+                </span>
+                {s.grade && <Badge variant="outline" className="text-[10px]">{s.grade}</Badge>}
+              </div>
+            </div>
+          ))}
+        </div>
+        {report.totalSubjects > 0 && (
+          <div className="flex items-center justify-between mt-3 pt-2 border-t border-border/50 text-sm">
+            <span className="font-semibold">Average</span>
+            <span className={`font-bold ${report.average >= 80 ? 'text-emerald-500' : report.average >= 60 ? 'text-amber-500' : 'text-red-500'}`}>
+              {report.average}%{report.overallGrade && <Badge variant="secondary" className="ml-2 text-[10px]">{report.overallGrade}</Badge>}
+            </span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -279,6 +366,8 @@ export default function StudentDashboardPage() {
         </Card>
 
         <TimetableSection />
+        <ExamScheduleSection />
+        <ClassReportSection />
         <TasksReminderSection />
 
         {data?.wallet && (
