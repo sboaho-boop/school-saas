@@ -79,30 +79,40 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
       });
     };
 
-    // 1) Stream tokens for a fast reply
-    let timedOut = false;
-    const timeout = setTimeout(() => {
-      timedOut = true;
-    }, 45000);
+    // 1) Stream tokens for a fast reply (AbortController so a stuck connection can never hang the UI)
+    const streamCtrl = new AbortController();
+    const streamTimeout = setTimeout(() => streamCtrl.abort(), 45000);
     try {
       const res = await fetch(API_URL + '/tutor/ai/chat/stream', {
         method: 'POST',
         headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ message, history, ...(image ? { image } : {}) }),
+        signal: streamCtrl.signal,
       });
-      if (!res.ok) throw new Error('Stream failed');
+      if (!res.ok) {
+        clearTimeout(streamTimeout);
+        throw new Error('Stream failed');
+      }
 
       const reader = res.body?.getReader();
-      if (!reader) throw new Error('No stream');
+      if (!reader) {
+        clearTimeout(streamTimeout);
+        throw new Error('No stream');
+      }
       const decoder = new TextDecoder();
       let buffer = '';
       let text = '';
 
       for (;;) {
-        if (timedOut) throw new Error('Stream timed out');
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
+        let readResult: { done: boolean; value?: Uint8Array };
+        try {
+          readResult = await reader.read();
+        } catch {
+          clearTimeout(streamTimeout);
+          throw new Error('Stream interrupted');
+        }
+        if (readResult.done) break;
+        buffer += decoder.decode(readResult.value, { stream: true });
         let sep = buffer.indexOf('\n\n');
         while (sep !== -1) {
           const event = buffer.slice(0, sep);
@@ -125,7 +135,7 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
                 text = evt.reply;
                 patchLast(text);
               } else if (evt.done) {
-                clearTimeout(timeout);
+                clearTimeout(streamTimeout);
                 patchLast(text, { remaining: evt.remaining, loading: false });
               } else if (evt.error) {
                 throw new Error(evt.error);
@@ -134,22 +144,36 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
           }
         }
       }
-      clearTimeout(timeout);
+      clearTimeout(streamTimeout);
       if (!text.trim()) throw new Error('Empty reply');
       set({ loading: false });
       return;
     } catch {
-      clearTimeout(timeout);
-      // 2) Fallback: classic JSON reply (patches the placeholder bubble)
+      clearTimeout(streamTimeout);
+      // 2) Fallback: classic JSON reply (with its own timeout so loading always resolves)
+      const chatCtrl = new AbortController();
+      const chatTimeout = setTimeout(() => chatCtrl.abort(), 90000);
       try {
-        const res = await tutorRequest<{ reply: string; remaining: number; media?: MediaBlock[] }>('/tutor/ai/chat', {
+        const res = await fetch(API_URL + '/tutor/ai/chat', {
           method: 'POST',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({ message, history, ...(image ? { image } : {}) }),
+          signal: chatCtrl.signal,
         });
-        streamMedia = res.media;
-        patchLast(res.reply, { remaining: res.remaining, loading: false });
-      } catch {
-        patchLast('Sorry, I had trouble connecting. Please try again.', { loading: false });
+        const bodyData = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          clearTimeout(chatTimeout);
+          const limitMsg = bodyData.error && /limit/i.test(String(bodyData.error)) ? bodyData.error : '';
+          throw new Error(limitMsg || 'Chat failed');
+        }
+        clearTimeout(chatTimeout);
+        const data = bodyData as { reply: string; remaining: number; media?: MediaBlock[] };
+        streamMedia = data.media;
+        patchLast(data.reply || '', { remaining: data.remaining, loading: false });
+      } catch (err) {
+        clearTimeout(chatTimeout);
+        const limitReached = err instanceof Error && /limit/i.test(err.message);
+        patchLast(limitReached ? err.message : 'Sorry, I had trouble connecting. Please try again.', { loading: false });
       }
     }
   },
