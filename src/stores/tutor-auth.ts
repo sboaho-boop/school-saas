@@ -33,6 +33,8 @@ interface TutorAuthStore {
   logout: () => void;
   fetchMe: () => Promise<void>;
   clearError: () => void;
+  forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (token: string, password: string) => Promise<void>;
 }
 
 async function tutorRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -103,6 +105,34 @@ export const useTutorAuth = create<TutorAuthStore>((set) => ({
   },
 
   clearError: () => set({ error: null }),
+
+  forgotPassword: async (email) => {
+    set({ loading: true, error: null });
+    try {
+      await tutorRequest('/tutor/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      });
+      set({ loading: false });
+    } catch (err: any) {
+      set({ loading: false });
+      // Always show success (server never reveals if email exists)
+    }
+  },
+
+  resetPassword: async (token, password) => {
+    set({ loading: true, error: null });
+    try {
+      await tutorRequest('/tutor/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({ token, password }),
+      });
+      set({ loading: false });
+    } catch (err: any) {
+      set({ error: err.message, loading: false });
+      throw err;
+    }
+  },
 }));
 
 export { getToken as getTutorToken, setToken as setTutorToken, tutorRequest };
