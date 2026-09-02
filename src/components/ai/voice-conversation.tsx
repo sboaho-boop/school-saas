@@ -3,34 +3,30 @@
 import { useEffect, useRef, useState } from 'react';
 import { Mic, MicOff, Loader2 } from 'lucide-react';
 import { useTutorChat } from '@/stores/tutor-chat';
+import { useI18n } from '@/stores/locale';
 import { audioBlobToWav } from '@/lib/audio-to-wav';
 import { speakText, checkDeviceVoices, listDeviceVoices } from '@/lib/speech';
+import { VOICE_LANGUAGES } from '@/i18n/voice-languages';
 
-const LANGUAGES = [
-  { code: 'en', label: 'English', flag: '🇬🇧' },
-  { code: 'tw', label: 'Twi', flag: '🇬🇭' },
-  { code: 'fr', label: 'Français', flag: '🇫🇷' },
-  { code: 'ga', label: 'Ga', flag: '🇬🇭' },
-  { code: 'ewe', label: 'Ewe', flag: '🇬🇭' },
-  { code: 'ha', label: 'Hausa', flag: '🇳🇬' },
-];
-
-const LESSON_IDEAS = [
-  { label: 'Maths quiz', emoji: '➕', prompt: 'Let us start a fun maths quiz for me. Ask me one question at a time and wait for my answer.' },
-  { label: 'Fractions', emoji: '🍕', prompt: 'Teach me fractions using pizza and food. Ask me a simple question.' },
-  { label: 'Spelling', emoji: '✏️', prompt: 'Give me a spelling test. Say a word and ask me to spell it.' },
-  { label: 'Stories', emoji: '📖', prompt: 'Let us make up a fun story together. You start the story and ask me what happens next.' },
-  { label: 'Science', emoji: '🔬', prompt: 'Teach me a simple science fact and ask me a question about it.' },
-  { label: 'Counting', emoji: '🔢', prompt: 'Let us practice counting. Count with me and ask me to count along.' },
-];
+function getLessonIdeas(t: (k: string) => string) {
+  return [
+    { label: t('tutor.lessonMaths'), emoji: '➕', prompt: 'Let us start a fun maths quiz for me. Ask me one question at a time and wait for my answer.' },
+    { label: t('tutor.lessonFractions'), emoji: '🍕', prompt: 'Teach me fractions using pizza and food. Ask me a simple question.' },
+    { label: t('tutor.lessonSpelling'), emoji: '✏️', prompt: 'Give me a spelling test. Say a word and ask me to spell it.' },
+    { label: t('tutor.lessonStories'), emoji: '📖', prompt: 'Let us make up a fun story together. You start the story and ask me what happens next.' },
+    { label: t('tutor.lessonScience'), emoji: '🔬', prompt: 'Teach me a simple science fact and ask me a question about it.' },
+    { label: t('tutor.lessonCounting'), emoji: '🔢', prompt: 'Let us practice counting. Count with me and ask me to count along.' },
+  ];
+}
 
 type Stage = 'idle' | 'listening' | 'recording' | 'thinking' | 'ready';
 
 export function VoiceLesson() {
   const sendVoice = useTutorChat((s) => s.sendVoice);
   const sendLessonPrompt = useTutorChat((s) => s.sendLessonPrompt);
+  const { lang, t } = useI18n();
   const [stage, setStage] = useState<Stage>('idle');
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useState(lang);
   const [status, setStatus] = useState('');
   const [voiceCheck, setVoiceCheck] = useState<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -39,10 +35,17 @@ export function VoiceLesson() {
   const busyRef = useRef(false);
   const sessionOpenRef = useRef(false);
   const stageRef = useRef<Stage>('idle');
-  const langRef = useRef('en');
+  const langRef = useRef(lang);
 
   useEffect(() => { stageRef.current = stage; }, [stage]);
   useEffect(() => { langRef.current = language; }, [language]);
+
+  useEffect(() => {
+    if (stage === 'idle') {
+      setLanguage(lang);
+      langRef.current = lang;
+    }
+  }, [lang, stage]);
 
   function setStatusText(t: string) {
     setStatus(t);
@@ -156,9 +159,8 @@ export function VoiceLesson() {
       setVoiceCheck('This browser/device does not support speech voices.');
       return;
     }
-    const labels: Record<string, string> = {
-      en: 'English', tw: 'Twi', fr: 'Français', ga: 'Ga', ewe: 'Ewe', ha: 'Hausa',
-    };
+    const labels: Record<string, string> = {};
+    for (const l of VOICE_LANGUAGES) labels[l.code] = l.label;
     const good = Object.entries(info.langs)
       .filter(([, ok]) => ok)
       .map(([code]) => labels[code] || code)
@@ -194,16 +196,16 @@ export function VoiceLesson() {
     <div className="rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-violet-950/30 dark:to-fuchsia-950/30 dark:border-violet-800/40 p-4 mb-4">
       <div className="flex items-center justify-between mb-3">
         <p className="text-sm font-semibold text-violet-700 dark:text-violet-300">
-          🗣️ Talk to Teacher Kofi
+          🗣️ {t('tutor.talkToKofi')}
         </p>
         <div className="flex items-center gap-2">
           <select
             value={language}
-            onChange={(e) => setLanguage(e.target.value)}
+            onChange={(e) => setLanguage(e.target.value as typeof lang)}
             className="h-8 rounded-lg border border-violet-300 bg-white text-xs px-2 dark:bg-card dark:border-violet-800"
             aria-label="Lesson language"
           >
-            {LANGUAGES.map((l) => (
+            {VOICE_LANGUAGES.map((l) => (
               <option key={l.code} value={l.code}>{l.flag} {l.label}</option>
             ))}
           </select>
@@ -212,7 +214,7 @@ export function VoiceLesson() {
               onClick={endSession}
               className="h-8 rounded-lg border border-violet-300 px-3 text-xs text-violet-700 hover:bg-violet-100 dark:text-violet-300 dark:hover:bg-violet-900/40 dark:border-violet-800"
             >
-              End
+              {t('tutor.end')}
             </button>
           )}
         </div>
@@ -220,9 +222,9 @@ export function VoiceLesson() {
 
       {stage === 'idle' && (
         <div className="mb-3">
-          <p className="text-xs text-violet-600 dark:text-violet-400 mb-2">Pick a lesson to start:</p>
+          <p className="text-xs text-violet-600 dark:text-violet-400 mb-2">{t('tutor.pickLesson')}:</p>
           <div className="flex flex-wrap gap-2">
-            {LESSON_IDEAS.map((idea) => (
+            {getLessonIdeas(t).map((idea) => (
               <button
                 key={idea.label}
                 onClick={() => startLesson(idea.prompt)}
@@ -239,7 +241,7 @@ export function VoiceLesson() {
             onClick={toggleVoiceCheck}
             className="mt-2 text-xs font-medium text-violet-500 underline-offset-2 hover:underline dark:text-violet-400"
           >
-            {voiceCheck ? 'Hide voice check' : 'Check which languages my device can speak'}
+            {voiceCheck ? t('tutor.hideVoiceCheck') : t('tutor.checkVoices')}
           </button>
         </div>
       )}
@@ -268,12 +270,12 @@ export function VoiceLesson() {
         </button>
         <div className="flex flex-col gap-1">
           <p className="text-sm font-medium text-violet-800 dark:text-violet-200">
-            {stage === 'idle' || stage === 'listening' ? 'Tap and hold the mic to talk' : stage === 'recording' ? 'Keep talking…' : stage === 'thinking' ? 'Teacher Kofi is answering…' : ''}
+            {stage === 'idle' || stage === 'listening' ? t('tutor.tapAndHold') : stage === 'recording' ? t('tutor.keepTalking') : stage === 'thinking' ? t('tutor.kofiThinking') : ''}
           </p>
           {status && <p className="text-xs text-violet-500 dark:text-violet-400">{status}</p>}
         </div>
         {stage === 'idle' && language !== 'en' && (
-          <p className="text-xs text-violet-500 dark:text-violet-400 ml-auto">Kofi will reply in {LANGUAGES.find((l) => l.code === language)?.label}</p>
+          <p className="text-xs text-violet-500 dark:text-violet-400 ml-auto">{t('tutor.kofiReplyIn').replace('{lang}', VOICE_LANGUAGES.find((l) => l.code === language)?.label || '')}</p>
         )}
       </div>
     </div>

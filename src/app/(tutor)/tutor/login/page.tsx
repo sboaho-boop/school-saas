@@ -8,11 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { KofiAvatar } from '@/components/ai/kofi-avatar';
+import { useI18n } from '@/stores/locale';
 import { Mail, Lock } from 'lucide-react';
 
 export default function TutorLoginPage() {
   const router = useRouter();
   const { login, loading, error, clearError } = useTutorAuth();
+  const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -31,8 +33,8 @@ export default function TutorLoginPage() {
           <div className="flex items-center justify-center mb-6">
             <KofiAvatar size={26} title="Teacher Kofi" />
           </div>
-          <h1 className="text-2xl font-bold text-center mb-1">Welcome Back</h1>
-          <p className="text-sm text-muted-foreground text-center mb-6">Sign in to Teacher Kofi</p>
+          <h1 className="text-2xl font-bold text-center mb-1">{t('tutor.welcomeBack')}</h1>
+          <p className="text-sm text-muted-foreground text-center mb-6">{t('tutor.signInToKofi')}</p>
 
           {error && (
             <div className="bg-destructive/10 text-destructive text-sm rounded-lg p-3 mb-4 text-center">
@@ -46,7 +48,7 @@ export default function TutorLoginPage() {
               <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="email"
-                placeholder="Email address"
+                placeholder={t('tutor.emailAddress')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -57,7 +59,7 @@ export default function TutorLoginPage() {
               <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="password"
-                placeholder="Password"
+                placeholder={t('auth.password')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -65,16 +67,16 @@ export default function TutorLoginPage() {
               />
             </div>
             <div className="flex items-center justify-end -mt-1">
-              <Link href="/tutor/forgot-password" className="text-xs text-violet-600 hover:underline">Forgot password?</Link>
+              <Link href="/tutor/forgot-password" className="text-xs text-violet-600 hover:underline">{t('tutor.forgotPassword')}</Link>
             </div>
             <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600">
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? t('tutor.signingIn') : t('tutor.signInBtn')}
             </Button>
           </form>
 
           <p className="text-sm text-center mt-6 text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <Link href="/tutor/signup" className="text-violet-600 hover:underline font-medium">Sign up free</Link>
+            {t('tutor.dontHaveAccount')}{' '}
+            <Link href="/tutor/signup" className="text-violet-600 hover:underline font-medium">{t('tutor.signUpFree')}</Link>
           </p>
         </CardContent>
       </Card>

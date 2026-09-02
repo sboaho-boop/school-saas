@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { tutorRequest } from './tutor-auth';
 import { speakText } from '@/lib/speech';
+import { getCurrentLang } from './locale';
 
 export interface MediaBlock {
   type: 'image' | 'link';
@@ -86,7 +87,7 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
       const res = await fetch(API_URL + '/tutor/ai/chat/stream', {
         method: 'POST',
         headers: authHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ message, history, ...(image ? { image } : {}) }),
+        body: JSON.stringify({ message, history, language: getCurrentLang(), ...(image ? { image } : {}) }),
         signal: streamCtrl.signal,
       });
       if (!res.ok) {
@@ -157,7 +158,7 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
         const res = await fetch(API_URL + '/tutor/ai/chat', {
           method: 'POST',
           headers: authHeaders({ 'Content-Type': 'application/json' }),
-          body: JSON.stringify({ message, history, ...(image ? { image } : {}) }),
+          body: JSON.stringify({ message, history, language: getCurrentLang(), ...(image ? { image } : {}) }),
           signal: chatCtrl.signal,
         });
         const bodyData = await res.json().catch(() => ({}));
@@ -188,7 +189,7 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
     try {
       const res = await tutorRequest<{ reply: string; remaining: number; media?: MediaBlock[] }>('/tutor/ai/chat', {
         method: 'POST',
-        body: JSON.stringify({ message, history }),
+        body: JSON.stringify({ message, history, language: getCurrentLang() }),
       });
       set((s) => {
         const arr = [...s.messages];

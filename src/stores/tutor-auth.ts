@@ -22,19 +22,21 @@ interface TutorUser {
   subscriptionEnd?: string;
   dailyUsage?: number;
   dailyUsageDate?: string;
+  preferredLanguage?: string;
 }
 
 interface TutorAuthStore {
   user: TutorUser | null;
   loading: boolean;
   error: string | null;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, language?: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   fetchMe: () => Promise<void>;
   clearError: () => void;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string) => Promise<void>;
+  setPreferredLanguage: (language: string) => Promise<void>;
 }
 
 async function tutorRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -98,6 +100,14 @@ export const useTutorAuth = create<TutorAuthStore>((set) => ({
     try {
       const user = await tutorRequest<TutorUser>('/tutor/auth/me');
       set({ user });
+      if (user?.preferredLanguage && typeof window !== 'undefined') {
+        try {
+          const stored = localStorage.getItem('eduplatform-lang');
+          if (!stored || stored === 'en') {
+            localStorage.setItem('eduplatform-lang', user.preferredLanguage);
+          }
+        } catch {}
+      }
     } catch {
       setToken(null);
       set({ user: null });
@@ -105,6 +115,18 @@ export const useTutorAuth = create<TutorAuthStore>((set) => ({
   },
 
   clearError: () => set({ error: null }),
+
+  setPreferredLanguage: async (language: string) => {
+    try {
+      const user = await tutorRequest<TutorUser>('/tutor/auth/me', {
+        method: 'PUT',
+        body: JSON.stringify({ preferredLanguage: language }),
+      });
+      set({ user });
+    } catch {
+      // Non-fatal; language still persists locally in this session
+    }
+  },
 
   forgotPassword: async (email) => {
     set({ loading: true, error: null });

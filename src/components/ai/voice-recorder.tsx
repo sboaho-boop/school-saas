@@ -1,23 +1,14 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Mic, MicOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { audioBlobToWav } from '@/lib/audio-to-wav';
+import { VOICE_LANGUAGES } from '@/i18n/voice-languages';
+import { useI18n } from '@/stores/locale';
 
 export { speakText } from '@/lib/speech';
-
-const VOICE_LANGUAGES = [
-  { code: 'en', label: 'English' },
-  { code: 'fr', label: 'Français' },
-  { code: 'tw', label: 'Twi' },
-  { code: 'ha', label: 'Hausa' },
-  { code: 'ga', label: 'Ga' },
-  { code: 'ewe', label: 'Ewe' },
-  { code: 'fante', label: 'Fante' },
-  { code: 'dagbani', label: 'Dagbani' },
-];
 
 interface VoiceRecorderProps {
   onResult: (data: { transcribed: string; reply: string; language: string }) => void;
@@ -30,9 +21,12 @@ interface VoiceRecorderProps {
 export function VoiceRecorder({ onResult, onError, disabled, endpoint = '/ai/voice', onRecorded }: VoiceRecorderProps) {
   const [recording, setRecording] = useState(false);
   const [processing, setProcessing] = useState(false);
-  const [language, setLanguage] = useState('en');
+  const { lang } = useI18n();
+  const [language, setLanguage] = useState(lang);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+
+  useEffect(() => { setLanguage(lang); }, [lang]);
 
   async function sendAudio(blob: Blob, mime?: string) {
     setProcessing(true);

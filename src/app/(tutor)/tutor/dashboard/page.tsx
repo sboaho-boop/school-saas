@@ -16,10 +16,12 @@ import { TutorProgressCard } from '@/components/tutor/progress-card';
 import { TutorCurriculumCard } from '@/components/tutor/curriculum-card';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useI18n } from '@/stores/locale';
 
 function TutorDashboardContent() {
   const user = useTutorAuth((s) => s.user);
   const fetchMe = useTutorAuth((s) => s.fetchMe);
+  const { t, lang } = useI18n();
   const searchParams = useSearchParams();
   const router = useRouter();
   const { messages, loading, remaining, sendMessage, sendVoice, sendImage, sendPhoto, resetChat, loadHistory } = useTutorChat();
@@ -51,11 +53,11 @@ function TutorDashboardContent() {
           const label = plan ? plan.charAt(0).toUpperCase() + plan.slice(1) : '';
           setUpgradeNotice({
             type: 'success',
-            text: label ? `Welcome to Teacher Kofi ${label}! Your upgrade is active.` : 'Your upgrade is active!',
+            text: label ? t('tutor.welcomeToPlan').replace('{plan}', label) : t('tutor.upgradeActive'),
           });
         } catch (err) {
           const message = err instanceof Error ? err.message : '';
-          setUpgradeNotice({ type: 'error', text: message || 'We could not confirm your payment. If you were charged, contact support for help.' });
+          setUpgradeNotice({ type: 'error', text: message || t('tutor.upgradeError') });
           await fetchMe().catch(() => {});
         } finally {
           setVerifying(false);
@@ -116,7 +118,7 @@ function TutorDashboardContent() {
       setSpeakingIdx(null);
     } else {
       window.speechSynthesis?.cancel();
-      speakText(text, 'en');
+      speakText(text, lang);
       setSpeakingIdx(idx);
     }
   };
@@ -131,10 +133,10 @@ function TutorDashboardContent() {
   const limitReached = remaining !== null && remaining === 0;
 
   const quickActions = [
-    { label: '📚 Quiz me', prompt: 'Give me a short quiz on the last topic we just covered. 3-5 questions with A/B/C/D options. I will answer and you grade me.' },
-    { label: '📝 Summarize', prompt: 'Summarize the last lesson we covered into a short, clear study note I can revise from (key points only, easy to remember).' },
-    { label: '⬆️ Next level', prompt: 'I understood the last topic. Teach me the next level / more advanced part of it, a little harder this time.' },
-    { label: '✏️ Check my work', prompt: 'I am going to show you my schoolwork/answers. Please check it kindly, point out any mistakes gently, and show me how to fix them.' },
+    { label: '📚 ' + t('tutor.quizMe'), prompt: 'Give me a short quiz on the last topic we just covered. 3-5 questions with A/B/C/D options. I will answer and you grade me.' },
+    { label: '📝 ' + t('tutor.summarize'), prompt: 'Summarize the last lesson we covered into a short, clear study note I can revise from (key points only, easy to remember).' },
+    { label: '⬆️ ' + t('tutor.nextLevel'), prompt: 'I understood the last topic. Teach me the next level / more advanced part of it, a little harder this time.' },
+    { label: '✏️ ' + t('tutor.checkMyWork'), prompt: 'I am going to show you my schoolwork/answers. Please check it kindly, point out any mistakes gently, and show me how to fix them.' },
   ];
 
   const runQuickAction = async (prompt: string) => {
@@ -153,8 +155,8 @@ function TutorDashboardContent() {
             </h1>
             <p className="text-xs text-muted-foreground">
               {remaining !== null
-                ? remaining === -1 ? 'Unlimited messages today' : remaining + ' messages remaining today'
-                : 'Your AI learning companion'
+                ? remaining === -1 ? t('tutor.unlimitedMessages') : t('tutor.messagesRemaining').replace('{count}', String(remaining))
+                : t('tutor.yourCompanionShort')
               }
             </p>
           </div>
@@ -163,12 +165,12 @@ function TutorDashboardContent() {
           {user?.plan === 'free' && (
             <Link href="/tutor/pricing">
               <Button variant="outline" size="sm" className="text-violet-600 border-violet-300 hover:bg-violet-50">
-                Upgrade
+                {t('tutor.upgrade')}
               </Button>
             </Link>
           )}
           <Button variant="outline" size="sm" onClick={resetChat}>
-            <RefreshCw size={14} className="mr-2" /> New Chat
+            <RefreshCw size={14} className="mr-2" /> {t('tutor.newChat')}
           </Button>
         </div>
       </div>
@@ -185,8 +187,8 @@ function TutorDashboardContent() {
               <div>
                 {verifying ? (
                   <>
-                    <p className="text-sm font-medium">Confirming your subscription...</p>
-                    <p className="text-xs text-muted-foreground">Please wait a moment.</p>
+                    <p className="text-sm font-medium">{t('tutor.confirmingSubscription')}</p>
+                    <p className="text-xs text-muted-foreground">{t('tutor.pleaseWait')}</p>
                   </>
                 ) : (
                   <p className={`text-sm font-medium ${upgradeNotice?.type === 'error' ? 'text-red-600' : 'text-emerald-700 dark:text-emerald-400'}`}>
@@ -196,7 +198,7 @@ function TutorDashboardContent() {
               </div>
             </div>
             {!verifying && (
-              <Button size="sm" variant="outline" onClick={() => setUpgradeNotice(null)}>Dismiss</Button>
+              <Button size="sm" variant="outline" onClick={() => setUpgradeNotice(null)}>{t('common.close')}</Button>
             )}
           </CardContent>
         </Card>
@@ -212,12 +214,12 @@ function TutorDashboardContent() {
             <div className="flex items-center gap-3">
               <AlertTriangle size={20} className="text-orange-500" />
               <div>
-                <p className="text-sm font-medium">Daily limit reached</p>
-                <p className="text-xs text-muted-foreground">Upgrade to Pro for 100 messages/day</p>
+                <p className="text-sm font-medium">{t('tutor.dailyLimitReached')}</p>
+                <p className="text-xs text-muted-foreground">{t('tutor.upgradeForMore')}</p>
               </div>
             </div>
             <Link href="/tutor/pricing">
-              <Button size="sm" className="bg-gradient-to-r from-violet-500 to-fuchsia-500">Upgrade</Button>
+              <Button size="sm" className="bg-gradient-to-r from-violet-500 to-fuchsia-500">{t('tutor.upgrade')}</Button>
             </Link>
           </CardContent>
       </Card>
@@ -261,7 +263,7 @@ function TutorDashboardContent() {
                 size="icon"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={loading || limitReached}
-                title="Attach a photo for Teacher Kofi to look at"
+                title={t('tutor.attachPhoto')}
                 className="bg-white/10 border-white/25 text-white hover:bg-white/20 hover:text-white"
               >
                 <CameraIcon size={16} />
@@ -272,7 +274,7 @@ function TutorDashboardContent() {
                 onClick={() => setImageMode((v) => !v)}
                 disabled={loading || limitReached}
                 className={imageMode ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-black' : 'bg-white/10 border-white/25 text-white hover:bg-white/20 hover:text-white'}
-                title={imageMode ? 'Back to chat' : 'Ask Teacher Kofi to draw a picture'}
+                title={imageMode ? t('tutor.backToChat') : t('tutor.askKofiDraw')}
               >
                 <ImageIcon size={16} />
               </Button>
@@ -284,7 +286,7 @@ function TutorDashboardContent() {
                     className="h-7 px-2 text-xs"
                     onClick={() => setImgStyle('cartoon')}
                   >
-                    🎨 Cartoon
+                    {t('tutor.cartoonMode')}
                   </Button>
                   <Button
                     variant={imgStyle === 'real' ? 'default' : 'ghost'}
@@ -292,7 +294,7 @@ function TutorDashboardContent() {
                     className="h-7 px-2 text-xs"
                     onClick={() => setImgStyle('real')}
                   >
-                    <Sparkles size={12} className="mr-1" /> Real photo
+                    <Sparkles size={12} className="mr-1" /> {t('tutor.realPhoto')}
                   </Button>
                 </div>
               )}
@@ -303,9 +305,9 @@ function TutorDashboardContent() {
                 placeholder={
                   imageMode
                     ? imgStyle === 'real'
-                      ? 'Describe a real photo for Kofi to create...'
-                      : 'Describe a picture for Kofi to draw...'
-                    : 'Ask Teacher Kofi anything...'
+                      ? t('tutor.describePhoto')
+                      : t('tutor.describePicture')
+                    : t('tutor.askAnything')
                 }
                 disabled={loading || limitReached}
                 className="flex-1 bg-black/25 border-white/25 text-white placeholder:text-white/60"
@@ -317,9 +319,9 @@ function TutorDashboardContent() {
             <p className="text-[10px] text-emerald-100/60 mt-2 text-center">
               {imageMode
                 ? imgStyle === 'real'
-                  ? '✨ Real photo mode — e.g. "a realistic photo of our school compound at sunrise" or "a realistic photo of a jollof rice bowl".'
-                  : '🎨 Tell Kofi what to draw — e.g. "a fraction pizza with 4 slices" or "a diagram of the water cycle".'
-                : 'Tap 🎤 to speak, add a 📷 photo for Kofi to look at, or type. Lessons appear on the classroom board.'}
+                  ? t('tutor.realPhotoHint')
+                  : t('tutor.cartoonHint')
+                : t('tutor.tapMicHint')}
             </p>
           </div>
         </div>

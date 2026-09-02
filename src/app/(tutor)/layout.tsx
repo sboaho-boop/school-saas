@@ -1,17 +1,20 @@
-'use client';
+﻿'use client';
 
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTutorAuth } from '@/stores/tutor-auth';
+import { useI18n } from '@/stores/locale';
 import Link from 'next/link';
 import { LogOut, CreditCard } from 'lucide-react';
 import { KofiAvatar } from '@/components/ai/kofi-avatar';
 import { Button } from '@/components/ui/button';
+import { LanguageSwitcher } from '@/components/layout/language-switcher';
 
 const PUBLIC_PATHS = ['/tutor', '/tutor/login', '/tutor/signup', '/tutor/pricing'];
 
 export default function TutorLayout({ children }: { children: React.ReactNode }) {
   const { user, fetchMe, logout } = useTutorAuth();
+  const { t } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
   const isPublic = PUBLIC_PATHS.includes(pathname) && !['/tutor/dashboard'].includes(pathname);
@@ -38,23 +41,24 @@ export default function TutorLayout({ children }: { children: React.ReactNode })
               </span>
             </Link>
             <div className="flex items-center gap-3">
+              <LanguageSwitcher compact persistToBackend />
               {user ? (
                 <>
                   <Link href="/tutor/dashboard">
-                    <Button variant="ghost" size="sm">Dashboard</Button>
+                    <Button variant="ghost" size="sm">{t('tutor.dashboard')}</Button>
                   </Link>
                   <Button variant="ghost" size="sm" onClick={() => { logout(); router.push('/tutor'); }}>
-                    <LogOut size={14} className="mr-1" /> Sign Out
+                    <LogOut size={14} className="mr-1" /> {t('tutor.signOut')}
                   </Button>
                 </>
               ) : (
                 <>
                   <Link href="/tutor/login">
-                    <Button variant="ghost" size="sm">Sign In</Button>
+                    <Button variant="ghost" size="sm">{t('tutor.signIn')}</Button>
                   </Link>
                   <Link href="/tutor/signup">
                     <Button size="sm" className="bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600">
-                      Get Started Free
+                      {t('tutor.startLearningFree')}
                     </Button>
                   </Link>
                 </>
@@ -78,15 +82,16 @@ export default function TutorLayout({ children }: { children: React.ReactNode })
             </span>
           </Link>
           <div className="flex items-center gap-2">
+            <LanguageSwitcher compact persistToBackend />
             <Link href="/tutor/pricing">
-              <Button variant="ghost" size="sm"><CreditCard size={14} className="mr-1" /> Plans</Button>
+              <Button variant="ghost" size="sm"><CreditCard size={14} className="mr-1" /> {t('tutor.pricing')}</Button>
             </Link>
             {user && (
               <span className="text-xs text-muted-foreground mr-2 hidden sm:inline">
-                {user.name} · {user.plan}
+                {user.name} Â· {user.plan}
               </span>
             )}
-            <Button variant="ghost" size="sm" onClick={() => { logout(); router.push('/tutor'); }}>
+            <Button variant="ghost" size="sm" title={t('tutor.signOut')} onClick={() => { logout(); router.push('/tutor'); }}>
               <LogOut size={14} />
             </Button>
           </div>
@@ -98,3 +103,4 @@ export default function TutorLayout({ children }: { children: React.ReactNode })
     </div>
   );
 }
+

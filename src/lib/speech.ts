@@ -1,12 +1,16 @@
 const VOICE_LANG_BCP47: Record<string, string> = {
   en: 'en-US',
   fr: 'fr-FR',
-  tw: 'en-US',
+  ar: 'ar-SA',
+  sw: 'sw-KE',
   ha: 'ha-NG',
+  yo: 'yo-NG',
+  ig: 'ig-NG',
+  am: 'am-ET',
+  ak: 'en-US',
   ga: 'en-US',
-  ewe: 'en-US',
-  fante: 'en-US',
-  dagbani: 'en-US',
+  ee: 'en-US',
+  zu: 'zu-ZA',
 };
 
 export interface DeviceVoiceInfo {

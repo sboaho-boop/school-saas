@@ -67,6 +67,10 @@ export default function RootLayout({
                 if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                   document.documentElement.classList.add('dark');
                 }
+                var lang = localStorage.getItem('eduplatform-lang');
+                if (lang && lang.length <= 4) {
+                  document.documentElement.setAttribute('lang', lang);
+                }
               } catch(e) {}
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {

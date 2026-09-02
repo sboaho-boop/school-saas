@@ -6,48 +6,68 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Loader2, Check, Bot, Zap, Infinity, Smartphone, Lock } from 'lucide-react';
 import { useTutorAuth, tutorRequest } from '@/stores/tutor-auth';
+import { useI18n } from '@/stores/locale';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
-const PLANS = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: 'GH\u20B50',
-    period: '/forever',
-    icon: Bot,
-    color: 'from-gray-400 to-gray-500',
-    features: ['5 messages per day', 'Text chat', 'Ghanaian curriculum', '7 languages', 'Read aloud'],
-    cta: 'Current Plan',
-    popular: false,
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: '',
-    period: '/month',
-    icon: Zap,
-    color: 'from-violet-500 to-fuchsia-500',
-    features: ['100 messages per day', 'Everything in Free', 'Voice input', 'Priority responses', 'Conversation history'],
-    cta: 'Upgrade to Pro',
-    popular: true,
-    paystackPlan: 'pro',
-    defaultPrice: 19,
-  },
-  {
-    id: 'unlimited',
-    name: 'Unlimited',
-    price: '',
-    period: '/month',
-    icon: Infinity,
-    color: 'from-amber-500 to-orange-500',
-    features: ['Unlimited messages', 'Everything in Pro', 'No daily limits', 'Priority support', 'Early access to features'],
-    cta: 'Go Unlimited',
-    popular: false,
-    paystackPlan: 'unlimited',
-    defaultPrice: 39,
-  },
-];
+function buildPlans(t: (k: string) => string) {
+  return [
+    {
+      id: 'free',
+      name: t('tutor.free'),
+      price: 'GH\u20B50',
+      period: t('tutor.forever'),
+      icon: Bot,
+      color: 'from-gray-400 to-gray-500',
+      features: [
+        '5 ' + t('tutor.messagesPerDay'),
+        t('tutor.textChat'),
+        t('tutor.ghanaianCurr'),
+        t('tutor.languagesCount'),
+        t('tutor.readAloud'),
+      ],
+      cta: t('tutor.currentPlan'),
+      popular: false,
+    },
+    {
+      id: 'pro',
+      name: t('tutor.pro'),
+      price: '',
+      period: t('tutor.perMonth'),
+      icon: Zap,
+      color: 'from-violet-500 to-fuchsia-500',
+      features: [
+        '100 ' + t('tutor.messagesPerDay'),
+        t('tutor.everythingInFree'),
+        t('tutor.voiceInput'),
+        t('tutor.priorityResponses'),
+        t('tutor.convoHistory'),
+      ],
+      cta: t('tutor.upgradeToPro'),
+      popular: true,
+      paystackPlan: 'pro',
+      defaultPrice: 19,
+    },
+    {
+      id: 'unlimited',
+      name: t('tutor.unlimitedPlan'),
+      price: '',
+      period: t('tutor.perMonth'),
+      icon: Infinity,
+      color: 'from-amber-500 to-orange-500',
+      features: [
+        t('tutor.unlimitedMessages'),
+        t('tutor.everythingInPro'),
+        t('tutor.noDailyLimits'),
+        t('tutor.prioritySupport'),
+        t('tutor.earlyAccess'),
+      ],      cta: t('tutor.goUnlimited'),
+      popular: false,
+      paystackPlan: 'unlimited',
+      defaultPrice: 39,
+    },
+  ];
+}
 
 type InitResponse = {
   success?: boolean;
@@ -59,6 +79,8 @@ type InitResponse = {
 
 export default function TutorPricing() {
   const user = useTutorAuth((s) => s.user);
+  const { t } = useI18n();
+  const PLANS = buildPlans(t);
   const [prices, setPrices] = useState<Record<string, number>>({});
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -107,10 +129,10 @@ export default function TutorPricing() {
       <div className="max-w-5xl mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-extrabold mb-3">
-            Choose Your <span className="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">Learning Plan</span>
+            {t('tutor.choosePlan')}
           </h1>
           <p className="text-muted-foreground max-w-lg mx-auto">
-            Start free and upgrade anytime. All plans include the full Teacher Kofi experience.
+            {t('tutor.startFreeUpgrade')}
           </p>
         </div>
 
@@ -126,7 +148,7 @@ export default function TutorPricing() {
               >
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-xs font-semibold px-4 py-1 rounded-full">
-                    Most Popular
+                    {t('tutor.mostPopular')}
                   </div>
                 )}
                 <CardContent className="p-6">
@@ -155,11 +177,11 @@ export default function TutorPricing() {
                       disabled={isCurrent}
                       onClick={() => openPayment(plan.paystackPlan!)}
                     >
-                      {isCurrent ? 'Current Plan' : plan.cta}
+                      {isCurrent ? t('tutor.currentPlan') : plan.cta}
                     </Button>
                   ) : (
                     <Button className="w-full" variant="outline" disabled>
-                      {isCurrent || (!user?.plan || user.plan === 'free') ? 'Current Plan' : plan.cta}
+                      {isCurrent || (!user?.plan || user.plan === 'free') ? t('tutor.currentPlan') : plan.cta}
                     </Button>
                   )}
                 </CardContent>
@@ -170,7 +192,7 @@ export default function TutorPricing() {
 
         <div className="text-center mt-8 text-sm text-muted-foreground">
           <p className="flex items-center justify-center gap-1.5">
-            <Lock size={14} /> Pay by Mobile Money via Hubtel. Auto-renews monthly — cancel anytime from your dashboard.
+            <Lock size={14} /> {t('tutor.payByMobile')}
           </p>
         </div>
       </div>
@@ -180,10 +202,10 @@ export default function TutorPricing() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Smartphone size={18} className="text-violet-500" />
-              Pay {PLANS.find((p) => p.paystackPlan === selectedPlan)?.name || ''} with Mobile Money
+              {t('tutor.payWithMobile').replace('{plan}', PLANS.find((p) => p.paystackPlan === selectedPlan)?.name || '')}
             </DialogTitle>
             <DialogDescription>
-              You will be taken to a secure Hubtel checkout page to pay with MTN / Telecel / AT Momo or card.
+              {t('tutor.hubtelDesc')}
             </DialogDescription>
           </DialogHeader>
 
@@ -200,7 +222,7 @@ export default function TutorPricing() {
                 </span>
               </div>
               <p className="mt-3 text-xs text-muted-foreground">
-                After payment your plan activates immediately and automatically renews each month. Cancel anytime from your dashboard.
+                {t('tutor.afterPayment')}
               </p>
             </div>
 
@@ -209,13 +231,13 @@ export default function TutorPricing() {
             <Button className="w-full" onClick={handleStartCheckout} disabled={busy}>
               {busy ? (
                 <>
-                  <Loader2 className="size-4 animate-spin" /> Opening secure payment...
+                  <Loader2 className="size-4 animate-spin" /> {t('tutor.openingPayment')}
                 </>
               ) : (
-                'Continue to Payment'
+                t('tutor.continueToPayment')
               )}
             </Button>
-            <p className="text-xs text-muted-foreground text-center">Secured by Hubtel. You confirm the amount before paying.</p>
+            <p className="text-xs text-muted-foreground text-center">{t('tutor.securedByHubtel')}</p>
           </div>
         </DialogContent>
       </Dialog>

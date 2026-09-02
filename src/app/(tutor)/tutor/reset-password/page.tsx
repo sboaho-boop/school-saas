@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { KofiAvatar } from '@/components/ai/kofi-avatar';
+import { useI18n } from '@/stores/locale';
 import { Lock, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 function ResetPasswordForm() {
@@ -16,6 +17,7 @@ function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token') || '';
   const { loading, error, clearError } = useTutorAuth();
+  const { t } = useI18n();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [done, setDone] = useState(false);
@@ -38,12 +40,12 @@ function ResetPasswordForm() {
         <Card className="w-full max-w-md border-border/50 shadow-lg">
           <CardContent className="p-8 text-center">
             <AlertTriangle size={40} className="text-orange-500 mx-auto mb-4" />
-            <h1 className="text-xl font-bold mb-2">Invalid Link</h1>
+            <h1 className="text-xl font-bold mb-2">{t('tutor.invalidLink')}</h1>
             <p className="text-sm text-muted-foreground mb-6">
-              This password reset link is invalid or missing. Please request a new one.
+              {t('tutor.invalidLinkDesc')}
             </p>
             <Link href="/tutor/forgot-password">
-              <Button className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500">Request New Link</Button>
+              <Button className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500">{t('tutor.requestNewLink')}</Button>
             </Link>
           </CardContent>
         </Card>
@@ -57,12 +59,12 @@ function ResetPasswordForm() {
         <Card className="w-full max-w-md border-border/50 shadow-lg">
           <CardContent className="p-8 text-center">
             <CheckCircle2 size={40} className="text-emerald-500 mx-auto mb-4" />
-            <h1 className="text-xl font-bold mb-2">Password Reset!</h1>
+            <h1 className="text-xl font-bold mb-2">{t('tutor.passwordReset')}</h1>
             <p className="text-sm text-muted-foreground mb-6">
-              Your password has been updated. You can now sign in with your new password.
+              {t('tutor.passwordResetDesc')}
             </p>
             <Button onClick={() => router.push('/tutor/login')} className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500">
-              Sign In
+              {t('tutor.signInBtn')}
             </Button>
           </CardContent>
         </Card>
@@ -77,9 +79,9 @@ function ResetPasswordForm() {
           <div className="flex items-center justify-center mb-6">
             <KofiAvatar size={26} title="Teacher Kofi" />
           </div>
-          <h1 className="text-2xl font-bold text-center mb-1">New Password</h1>
+          <h1 className="text-2xl font-bold text-center mb-1">{t('tutor.newPassword')}</h1>
           <p className="text-sm text-muted-foreground text-center mb-6">
-            Choose a new password for your account.
+            {t('tutor.newPasswordDesc')}
           </p>
 
           {error && (
@@ -94,7 +96,7 @@ function ResetPasswordForm() {
               <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="password"
-                placeholder="New password (min 6 characters)"
+                placeholder={t('tutor.newPasswordPlaceholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -106,7 +108,7 @@ function ResetPasswordForm() {
               <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="password"
-                placeholder="Confirm new password"
+                placeholder={t('tutor.confirmPassword')}
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 required
@@ -115,12 +117,12 @@ function ResetPasswordForm() {
               />
             </div>
             <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600">
-              {loading ? 'Resetting...' : 'Reset Password'}
+              {loading ? t('tutor.resetting') : t('tutor.resetPassword')}
             </Button>
           </form>
 
           <p className="text-sm text-center mt-6 text-muted-foreground">
-            <Link href="/tutor/login" className="text-violet-600 hover:underline font-medium">Back to Sign In</Link>
+            <Link href="/tutor/login" className="text-violet-600 hover:underline font-medium">{t('tutor.backToSignIn')}</Link>
           </p>
         </CardContent>
       </Card>

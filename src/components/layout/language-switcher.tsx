@@ -5,8 +5,9 @@ import { Globe, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/stores/locale';
 import { LANGUAGES } from '@/i18n/translations';
+import { getTutorToken } from '@/stores/tutor-auth';
 
-export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
+export function LanguageSwitcher({ compact = false, persistToBackend = false }: { compact?: boolean; persistToBackend?: boolean }) {
   const { lang, setLang, t } = useI18n();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -20,6 +21,19 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
+
+  const changeLang = (code: typeof lang) => {
+    setLang(code);
+    setOpen(false);
+    if (persistToBackend && getTutorToken()) {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+      fetch(apiUrl + '/tutor/auth/me', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + getTutorToken() },
+        body: JSON.stringify({ preferredLanguage: code }),
+      }).catch(() => {});
+    }
+  };
 
   return (
     <div ref={ref} className="relative">
@@ -40,10 +54,7 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
             <button
               key={language.code}
               type="button"
-              onClick={() => {
-                setLang(language.code);
-                setOpen(false);
-              }}
+              onClick={() => changeLang(language.code)}
               className={cn(
                 'flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-accent',
                 lang === language.code && 'bg-accent font-medium'

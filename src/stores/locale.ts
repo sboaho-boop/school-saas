@@ -3,6 +3,8 @@
 import { useCallback, useSyncExternalStore } from 'react';
 import { translations, LANGUAGES, type LangCode } from '@/i18n/translations';
 
+const VALID_CODES = new Set<string>(LANGUAGES.map((l) => l.code));
+
 let lang: LangCode = 'en';
 const listeners = new Set<() => void>();
 
@@ -27,8 +29,8 @@ function initFromStorage() {
   if (typeof window === 'undefined') return;
   try {
     const stored = localStorage.getItem('eduplatform-lang');
-    if (stored === 'fr' || stored === 'tw' || stored === 'ha') {
-      lang = stored;
+    if (stored && VALID_CODES.has(stored)) {
+      lang = stored as LangCode;
     }
   } catch {}
 }
@@ -53,4 +55,14 @@ export function useI18n() {
   );
 
   return { lang: currentLang, setLang, t, languages: LANGUAGES };
+}
+
+export function getCurrentLang(): LangCode {
+  return lang;
+}
+
+export function setLocaleLanguage(value: LangCode) {
+  lang = value;
+  persistLang(value);
+  listeners.forEach((l) => l());
 }
