@@ -234,7 +234,7 @@ const scenes: Scene[] = [
             <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded flex items-center justify-center">
               <div className="grid grid-cols-3 gap-0.5">
                 {[...Array(9)].map((_, i) => (
-                  <div key={i} className={`w-1.5 h-1.5 ${Math.random() > 0.4 ? 'bg-white' : 'bg-transparent'}`} />
+                  <div key={i} className={`w-1.5 h-1.5 ${i % 2 === 0 ? 'bg-white' : 'bg-transparent'}`} />
                 ))}
               </div>
             </div>
