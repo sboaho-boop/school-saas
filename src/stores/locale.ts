@@ -1,68 +1,63 @@
 'use client';
 
-import { useCallback, useSyncExternalStore } from 'react';
+import { create } from 'zustand';
 import { translations, LANGUAGES, type LangCode } from '@/i18n/translations';
 
 const VALID_CODES = new Set<string>(LANGUAGES.map((l) => l.code));
 
-let lang: LangCode = 'en';
-const listeners = new Set<() => void>();
-
-function subscribe(cb: () => void) {
-  listeners.add(cb);
-  return () => { listeners.delete(cb); };
+interface LocaleState {
+  lang: LangCode;
+  setLang: (value: LangCode) => void;
+  t: (key: string) => string;
 }
 
-function getSnapshot() {
-  return lang;
-}
-
-function getServerSnapshot(): LangCode {
+function readStoredLang(): LangCode {
+  if (typeof window === 'undefined') return 'en';
+  try {
+    const stored = localStorage.getItem('eduplatform-lang');
+    if (stored && VALID_CODES.has(stored)) return stored as LangCode;
+  } catch {}
   return 'en';
 }
 
 function persistLang(value: LangCode) {
-  try { localStorage.setItem('eduplatform-lang', value); } catch {}
-}
-
-function initFromStorage() {
-  if (typeof window === 'undefined') return;
   try {
-    const stored = localStorage.getItem('eduplatform-lang');
-    if (stored && VALID_CODES.has(stored)) {
-      lang = stored as LangCode;
-    }
+    localStorage.setItem('eduplatform-lang', value);
   } catch {}
 }
 
-initFromStorage();
+function applyDocumentLang(value: LangCode) {
+  try {
+    document.documentElement.setAttribute('lang', value);
+  } catch {}
+}
+
+export const useLocale = create<LocaleState>((set, get) => ({
+  lang: readStoredLang(),
+  setLang: (value) => {
+    persistLang(value);
+    if (typeof document !== 'undefined') applyDocumentLang(value);
+    set({ lang: value });
+  },
+  t: (key) => {
+    const dict = translations[get().lang] || translations.en;
+    return dict[key] ?? translations.en[key] ?? key;
+  },
+}));
 
 export function useI18n() {
-  const currentLang = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-
-  const setLang = useCallback((value: LangCode) => {
-    lang = value;
-    persistLang(value);
-    listeners.forEach((l) => l());
-  }, []);
-
-  const t = useCallback(
-    (key: string) => {
-      const dict = translations[currentLang] || translations.en;
-      return dict[key] ?? translations.en[key] ?? key;
-    },
-    [currentLang],
-  );
-
-  return { lang: currentLang, setLang, t, languages: LANGUAGES };
+  const lang = useLocale((s) => s.lang);
+  const setLang = useLocale((s) => s.setLang);
+  const t = useLocale((s) => s.t);
+  return { lang, setLang, t, languages: LANGUAGES };
 }
 
 export function getCurrentLang(): LangCode {
-  return lang;
+  return useLocale.getState().lang;
 }
 
 export function setLocaleLanguage(value: LangCode) {
-  lang = value;
   persistLang(value);
-  listeners.forEach((l) => l());
+  if (typeof document !== 'undefined') applyDocumentLang(value);
+  useLocale.setState({ lang: value });
 }
