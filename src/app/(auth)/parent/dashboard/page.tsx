@@ -9,19 +9,43 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, getToken, setToken } from '@/lib/api';
-import { GraduationCap, Wallet, ArrowLeft, LogOut, Check, X, Clock, AlertCircle, Eye, Plus, Lock, Settings, KeyRound, Smartphone, Loader2 } from 'lucide-react';
+import { GraduationCap, Wallet, ArrowLeft, LogOut, Check, X, Clock, AlertCircle, Eye, Plus, Lock, Settings, KeyRound, Smartphone, Loader2, User } from 'lucide-react';
 
 interface ChildSummary {
   id: string;
   indexNumber?: string;
   firstName?: string;
   lastName?: string;
+  photoUrl?: string | null;
   name: string;
   className: string;
   wallet?: { balance: number; totalSpent: number; frozen: boolean };
   attendanceRecs?: any[];
   grades?: any[];
   transactions?: any[];
+}
+
+function ChildAvatar({ child, size = 48 }: { child: ChildSummary | null | undefined; size?: number }) {
+  if (child?.photoUrl) {
+    return (
+      <img
+        src={child.photoUrl}
+        alt={child.name || 'Child'}
+        width={size}
+        height={size}
+        className="rounded-full object-cover border-2 border-border shrink-0 bg-muted"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
+  return (
+    <div
+      className="rounded-full bg-muted flex items-center justify-center border-2 border-border shrink-0"
+      style={{ width: size, height: size }}
+    >
+      <User size={size >= 64 ? 28 : 22} className="text-muted-foreground" />
+    </div>
+  );
 }
 
 export default function ParentDashboardPage() {
@@ -143,9 +167,14 @@ export default function ParentDashboardPage() {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <Card className="border-border/50 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-lg">{selected.name}</CardTitle>
-                  <p className="text-sm text-muted-foreground">{selected.className}</p>
-                  {selected.indexNumber && <p className="text-xs font-mono text-muted-foreground/60 mt-0.5">{selected.indexNumber}</p>}
+                  <div className="flex items-center gap-3">
+                    <ChildAvatar child={selected} size={64} />
+                    <div>
+                      <CardTitle className="text-lg">{selected.name}</CardTitle>
+                      <p className="text-sm text-muted-foreground">{selected.className}</p>
+                      {selected.indexNumber && <p className="text-xs font-mono text-muted-foreground/60 mt-0.5">{selected.indexNumber}</p>}
+                    </div>
+                  </div>
                 </CardHeader>
               </Card>
             </motion.div>
@@ -305,10 +334,13 @@ export default function ParentDashboardPage() {
                 <motion.div key={child.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                   <Card className="border-border/50 shadow-sm cursor-pointer hover:border-primary/50 transition-colors" onClick={() => fetchChild(child.id)}>
                     <CardContent className="p-4 flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">{child.name}</p>
-                        <p className="text-sm text-muted-foreground">{child.className}</p>
-                        {child.indexNumber && <p className="text-xs font-mono text-muted-foreground/60 mt-0.5">{child.indexNumber}</p>}
+                      <div className="flex items-center gap-3">
+                        <ChildAvatar child={child} size={48} />
+                        <div>
+                          <p className="font-medium">{child.name}</p>
+                          <p className="text-sm text-muted-foreground">{child.className}</p>
+                          {child.indexNumber && <p className="text-xs font-mono text-muted-foreground/60 mt-0.5">{child.indexNumber}</p>}
+                        </div>
                       </div>
                       <div className="text-right">
                         {child.wallet ? (
