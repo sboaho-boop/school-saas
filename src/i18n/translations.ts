@@ -29,6 +29,7 @@ export const translations: Record<LangCode, Record<string, string>> = {
     'nav.finance': 'Finance',
     'nav.communication': 'Communication',
     'nav.conferences': 'Conferences',
+    'nav.meetings': 'PTA Meetings',
     'nav.calendar': 'Calendar',
     'nav.reports': 'Reports',
     'nav.auditLogs': 'Audit Logs',

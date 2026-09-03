@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, getToken, setToken } from '@/lib/api';
-import { GraduationCap, Wallet, ArrowLeft, LogOut, Check, X, Clock, AlertCircle, Eye, Plus, Lock, Settings, KeyRound, Smartphone, Loader2, User, BookOpen, FileText } from 'lucide-react';
+import { GraduationCap, Wallet, ArrowLeft, LogOut, Check, X, Clock, AlertCircle, Eye, Plus, Lock, Settings, KeyRound, Smartphone, Loader2, User, BookOpen, FileText, Video } from 'lucide-react';
 
 interface ChildSummary {
   id: string;
@@ -135,6 +135,68 @@ function ParentClassReportSection({ studentId }: { studentId: string }) {
             </span>
           </div>
         )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function ParentMeetingsSection({ studentId }: { studentId: string }) {
+  const [meetings, setMeetings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    api.get(`/parent/children/${studentId}/meetings`)
+      .then((data: any) => { if (!cancelled) { setMeetings((data || []).filter((m: any) => !m.isUpcoming || m.isLive || m.status !== 'ended')); setLoading(false); } })
+      .catch(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [studentId]);
+
+  if (loading) return null;
+  const visible = meetings.filter((m: any) => m.status !== 'cancelled' && (m.isUpcoming || m.isLive));
+  if (visible.length === 0) return null;
+
+  return (
+    <Card className="border-border/50 shadow-sm">
+      <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Video size={16} />Class PTA Meetings</CardTitle></CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {visible.map((m) => (
+            <div key={m.id} className="rounded-lg border border-border/50 p-3 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-medium truncate">{m.title}</p>
+                  {m.class && <p className="text-[11px] text-muted-foreground">{m.class.name}</p>}
+                </div>
+                {m.isLive && <Badge className="bg-emerald-100 text-emerald-700 shrink-0">Live</Badge>}
+              </div>
+              <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                <Clock size={12} />
+                {m.meetingDate} · {m.startTime}{m.endTime ? `–${m.endTime}` : ''}
+              </p>
+              {m.agenda && <p className="text-xs text-muted-foreground">{m.agenda}</p>}
+              {m.isLive && (
+                <button
+                  onClick={() => setExpanded(expanded === m.id ? null : m.id)}
+                  className="text-[11px] text-primary font-medium hover:underline"
+                >
+                  {expanded === m.id ? 'Hide join code' : 'Show join code'}
+                </button>
+              )}
+              {m.isLive && expanded === m.id && (
+                <div className="flex items-center gap-2 rounded-md bg-muted/50 p-2">
+                  <span className="font-mono text-sm font-semibold flex-1">{m.meetingCode}</span>
+                  <Button size="sm" onClick={() => navigator.clipboard?.writeText(m.meetingCode)}>
+                    <Check size={14} className="mr-1" />Join
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        <p className="text-[10px] text-muted-foreground mt-3">The join code is shared by the class teacher when the meeting starts.</p>
       </CardContent>
     </Card>
   );
@@ -416,6 +478,7 @@ export default function ParentDashboardPage() {
 
             <ParentExamScheduleSection studentId={selected.id} />
             <ParentClassReportSection studentId={selected.id} />
+            <ParentMeetingsSection studentId={selected.id} />
           </>
         ) : (
           <>

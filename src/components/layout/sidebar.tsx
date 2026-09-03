@@ -36,6 +36,7 @@ import {
   CalendarDays,
   MessageSquareText,
   Sparkles,
+  Video,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -71,6 +72,7 @@ const iconMap = {
   FileText,
   Pencil,
   Sparkles,
+  Video,
 };
 
 interface SidebarItem {
@@ -85,6 +87,7 @@ const sidebarItems: SidebarItem[] = [
   { id: 'students', labelKey: 'nav.students', icon: 'Users', href: '/students' },
   { id: 'staff', labelKey: 'nav.staff', icon: 'UserCog', href: '/staff' },
   { id: 'academics', labelKey: 'nav.academics', icon: 'GraduationCap', href: '/academics' },
+  { id: 'meetings', labelKey: 'nav.meetings', icon: 'Video', href: '/meetings' },
   { id: 'attendance', labelKey: 'nav.attendance', icon: 'ClipboardCheck', href: '/attendance' },
   { id: 'marks', labelKey: 'nav.marks', icon: 'ClipboardList', href: '/marks' },
   { id: 'wallet', labelKey: 'nav.wallet', icon: 'Wallet', href: '/wallet' },
