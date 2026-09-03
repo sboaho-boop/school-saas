@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, getToken, setToken } from '@/lib/api';
-import { GraduationCap, Wallet, ArrowLeft, LogOut, Check, X, Clock, AlertCircle, Eye, Plus, Lock, Settings, KeyRound, Smartphone, Loader2, User } from 'lucide-react';
+import { GraduationCap, Wallet, ArrowLeft, LogOut, Check, X, Clock, AlertCircle, Eye, Plus, Lock, Settings, KeyRound, Smartphone, Loader2, User, BookOpen, FileText } from 'lucide-react';
 
 interface ChildSummary {
   id: string;
@@ -45,6 +45,98 @@ function ChildAvatar({ child, size = 48 }: { child: ChildSummary | null | undefi
     >
       <User size={size >= 64 ? 28 : 22} className="text-muted-foreground" />
     </div>
+  );
+}
+
+function ParentExamScheduleSection({ studentId }: { studentId: string }) {
+  const [exams, setExams] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    api.get(`/parent/children/${studentId}/exams`)
+      .then((data: any) => { if (!cancelled) { setExams(data || []); setLoading(false); } })
+      .catch(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [studentId]);
+
+  if (loading) return null;
+  if (exams.length === 0) return null;
+
+  return (
+    <Card className="border-border/50 shadow-sm">
+      <CardHeader><CardTitle className="text-sm flex items-center gap-2"><BookOpen size={16} />Exam Schedule</CardTitle></CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          {exams.map((e) => (
+            <div key={e.id} className="flex items-center justify-between gap-2 text-sm p-2.5 rounded-lg border border-border/50">
+              <div className="min-w-0">
+                <p className="font-medium truncate">{e.title}</p>
+                <p className="text-[10px] text-muted-foreground">{e.subjectName}{e.duration ? ` · ${e.duration} min` : ''}</p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="text-[11px] font-medium text-primary">{e.dueDate}</p>
+                {e.totalPoints > 0 && <p className="text-[10px] text-muted-foreground">{e.totalPoints} pts</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ParentClassReportSection({ studentId }: { studentId: string }) {
+  const [report, setReport] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    api.get(`/parent/children/${studentId}/report-card`)
+      .then((data: any) => { if (!cancelled) { setReport(data); setLoading(false); } })
+      .catch(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [studentId]);
+
+  if (loading) return null;
+  if (!report || report.noTerm || report.subjects.length === 0) return null;
+
+  return (
+    <Card className="border-border/50 shadow-sm">
+      <CardHeader>
+        <CardTitle className="text-sm flex items-center gap-2"><FileText size={16} />Class Report</CardTitle>
+        {report.term && <p className="text-xs text-muted-foreground">{report.term.name} · {report.term.academicYear}</p>}
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-1">
+          {report.subjects.map((s: any) => (
+            <div key={s.subjectId} className="flex items-center justify-between text-sm py-1.5 border-b border-border/30">
+              <div>
+                <span className="font-medium">{s.subjectName}</span>
+                {s.subjectCode && <span className="text-muted-foreground ml-1 text-xs">({s.subjectCode})</span>}
+                {s.remarks && <span className="block text-[10px] text-muted-foreground">{s.remarks}</span>}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`font-bold ${s.score >= 80 ? 'text-emerald-500' : s.score >= 60 ? 'text-amber-500' : 'text-red-500'}`}>
+                  {s.score > 0 ? `${s.score}%` : '—'}
+                </span>
+                {s.grade && <Badge variant="outline" className="text-[10px]">{s.grade}</Badge>}
+              </div>
+            </div>
+          ))}
+        </div>
+        {report.totalSubjects > 0 && (
+          <div className="flex items-center justify-between mt-3 pt-2 border-t border-border/50 text-sm">
+            <span className="font-semibold">Average</span>
+            <span className={`font-bold ${report.average >= 80 ? 'text-emerald-500' : report.average >= 60 ? 'text-amber-500' : 'text-red-500'}`}>
+              {report.average}%{report.overallGrade && <Badge variant="secondary" className="ml-2 text-[10px]">{report.overallGrade}</Badge>}
+            </span>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -321,6 +413,9 @@ export default function ParentDashboardPage() {
                 </CardContent>
               </Card>
             )}
+
+            <ParentExamScheduleSection studentId={selected.id} />
+            <ParentClassReportSection studentId={selected.id} />
           </>
         ) : (
           <>
