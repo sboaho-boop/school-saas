@@ -63,7 +63,7 @@ export default function TransportPage() {
     fetchTrips();
   };
 
-  const teachingStaff = staff.filter((s) => s.staffType === 'teaching' && s.status === 'active');
+  const teachingStaff = staff.filter((s) => s.status === 'active' && (s.staffType === 'teaching' || (s.role && s.role.toLowerCase().includes('driver'))));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +77,7 @@ export default function TransportPage() {
       driverPhone: driver ? driver.phone : '',
       capacity: parseInt(capacity) || 30,
       status,
+      driverIds: driver ? [driver.id] : [],
     });
     setOpen(false);
     setName(''); setDescription(''); setStopsInput('');

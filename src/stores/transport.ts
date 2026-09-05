@@ -7,8 +7,8 @@ interface TransportStore {
   loading: boolean;
   error: string | null;
   fetchRoutes: () => Promise<void>;
-  addRoute: (route: Omit<TransportRoute, 'id' | 'createdAt'>) => Promise<void>;
-  updateRoute: (id: string, updates: Partial<TransportRoute>) => Promise<void>;
+  addRoute: (route: Omit<TransportRoute, 'id' | 'createdAt'> & { driverIds?: string[] }) => Promise<void>;
+  updateRoute: (id: string, updates: Partial<TransportRoute> & { driverIds?: string[] }) => Promise<void>;
   removeRoute: (id: string) => Promise<void>;
 }
 
