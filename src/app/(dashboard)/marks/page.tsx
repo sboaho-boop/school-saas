@@ -12,9 +12,10 @@ import { useStudentStore } from '@/stores/students';
 import { useMarksStore, COMPONENT_NAMES, COMPONENT_LABELS, COMPONENT_MAX, Grade } from '@/stores/marks';
 import { useAuthStore } from '@/stores/auth';
 import { useI18n } from '@/stores/locale';
+import { api } from '@/lib/api';
 import { ImportDialog } from '@/components/import-dialog';
 import Link from 'next/link';
-import { Save, Printer, FileText } from 'lucide-react';
+import { Save, Printer, FileText, Settings2 } from 'lucide-react';
 
 function calcTotal(components: Record<string, string>): number {
   return COMPONENT_NAMES.reduce((sum, name) => sum + (parseFloat(components[name]) || 0), 0);
@@ -27,6 +28,13 @@ function scoreToGrade(total: number): string {
   if (total >= 50) return 'D';
   if (total >= 40) return 'E';
   return 'F';
+}
+
+const DEFAULT_WEIGHTS: Record<string, number> = { classExercise: 10, homework: 10, quiz: 30, midterm: 20, exam: 30 };
+
+async function apiGetMarksConfig(): Promise<{ weights: Record<string, number>; hasConfig: boolean }> {
+  const res = await api.get<{ weights: Record<string, number>; hasConfig: boolean }>('/marks/config');
+  return res || { weights: {}, hasConfig: false };
 }
 
 export default function MarksPage() {
@@ -46,6 +54,10 @@ export default function MarksPage() {
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedTerm, setSelectedTerm] = useState('');
   const [components, setComponents] = useState<Record<string, Record<string, string>>>({});
+  const [weights, setWeights] = useState<Record<string, number>>({ ...DEFAULT_WEIGHTS });
+  const [loadWeightsError, setLoadWeightsError] = useState(false);
+  const [hasCustomWeights, setHasCustomWeights] = useState(false);
+  const showWeightsEditor = currentUser?.staffType === 'headteacher' || currentUser?.staffType === 'admin';
 
   const isTeaching = currentUser?.staffType === 'teaching';
   const availableClasses = isTeaching
@@ -58,6 +70,19 @@ export default function MarksPage() {
     fetchStudents();
     fetchTerms();
   }, [fetchClasses, fetchSubjects, fetchStudents, fetchTerms]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const cfg = await apiGetMarksConfig();
+        setWeights({ ...DEFAULT_WEIGHTS, ...(cfg.weights || {}) });
+        setHasCustomWeights(cfg.hasConfig);
+        setLoadWeightsError(false);
+      } catch {
+        setLoadWeightsError(true);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     if (terms.length > 0 && !selectedTerm) {
@@ -110,6 +135,41 @@ export default function MarksPage() {
     }));
   };
 
+  const [weightDrafts, setWeightDrafts] = useState<Record<string, string>>(() =>
+    Object.fromEntries(COMPONENT_NAMES.map((n) => [n, String(DEFAULT_WEIGHTS[n] ?? 0)]))
+  );
+  const [savingWeights, setSavingWeights] = useState(false);
+  const [weightsMsg, setWeightsMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  useEffect(() => {
+    if (hasCustomWeights) {
+      setWeightDrafts(Object.fromEntries(COMPONENT_NAMES.map((n) => [n, String(weights[n] ?? 0)])));
+    }
+  }, [hasCustomWeights, weights]);
+
+  const weightsTotal = COMPONENT_NAMES.reduce((sum, n) => sum + (parseFloat(weightDrafts[n]) || 0), 0);
+
+  const handleSaveWeights = async () => {
+    if (weightsTotal !== 100) {
+      setWeightsMsg({ ok: false, text: 'Weights must total 100.' });
+      return;
+    }
+    setSavingWeights(true);
+    setWeightsMsg(null);
+    try {
+      const payload: Record<string, number> = {};
+      COMPONENT_NAMES.forEach((n) => { payload[n] = parseFloat(weightDrafts[n]) || 0; });
+      await api.put('/marks/config', { weights: payload });
+      setWeights(payload);
+      setHasCustomWeights(true);
+      setWeightsMsg({ ok: true, text: 'Weights saved.' });
+    } catch {
+      setWeightsMsg({ ok: false, text: 'Failed to save weights.' });
+    } finally {
+      setSavingWeights(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="flex items-center justify-between rounded-xl bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-6">
@@ -151,6 +211,50 @@ export default function MarksPage() {
         </Select>
       </div>
 
+      {showWeightsEditor && (
+        <Card className="border-border/50 shadow-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-medium flex items-center gap-2">
+                <Settings2 size={16} />
+                Grading Weights
+              </CardTitle>
+              <div className="flex items-center gap-3">
+                <span className={`text-xs ${weightsTotal === 100 ? 'text-emerald-600' : 'text-destructive'}`}>
+                  Total: {weightsTotal}/100
+                </span>
+                {loadWeightsError && <span className="text-xs text-destructive">Defaults shown (no config found).</span>}
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap items-center gap-3">
+              {COMPONENT_NAMES.map((n) => (
+                <div key={n} className="flex items-center gap-2">
+                  <label className="text-xs text-muted-foreground whitespace-nowrap">{COMPONENT_LABELS[n]}</label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    className="w-20 text-center h-8"
+                    value={weightDrafts[n] ?? ''}
+                    onChange={(e) => setWeightDrafts((prev) => ({ ...prev, [n]: e.target.value }))}
+                  />
+                </div>
+              ))}
+              <Button size="sm" variant="outline" onClick={handleSaveWeights} disabled={savingWeights}>
+                <Save size={14} className="mr-2" />
+                {savingWeights ? 'Saving…' : 'Save Weights'}
+              </Button>
+              {weightsMsg && (
+                <span className={`text-xs ${weightsMsg.ok ? 'text-emerald-600' : 'text-destructive'}`}>{weightsMsg.text}</span>
+              )}
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">Component scores are marked out of these weights (must total 100). Applies across the whole school.</p>
+          </CardContent>
+        </Card>
+      )}
+
       {selectedClass && selectedSubject && selectedTerm && (
         <Card className="border-border/50 shadow-sm">
           <CardHeader className="pb-3">
@@ -158,7 +262,7 @@ export default function MarksPage() {
               <CardTitle className="text-base font-medium">Score Entry</CardTitle>
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 {COMPONENT_NAMES.map((n) => (
-                  <span key={n}>{COMPONENT_LABELS[n]}/{COMPONENT_MAX[n]}</span>
+                  <span key={n}>{COMPONENT_LABELS[n]}/{weights[n] ?? COMPONENT_MAX[n]}</span>
                 ))}
                 <span className="font-semibold text-foreground">Total/100</span>
                 <span className="font-semibold text-foreground">Grade</span>
@@ -184,7 +288,7 @@ export default function MarksPage() {
                           key={name}
                           type="number"
                           min="0"
-                          max={COMPONENT_MAX[name]}
+                          max={weights[name] ?? COMPONENT_MAX[name]}
                           className="w-16 text-center text-xs h-8"
                           placeholder="0"
                           value={comps[name] ?? ''}

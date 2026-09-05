@@ -107,6 +107,7 @@ const sidebarItems: SidebarItem[] = [
   { id: 'behavior', labelKey: 'nav.behavior', icon: 'AlertTriangle', href: '/behavior' },
   { id: 'alumni', labelKey: 'nav.alumni', icon: 'UserCircle', href: '/alumni' },
   { id: 'assignments', labelKey: 'nav.assignments', icon: 'FileText', href: '/assignments' },
+  { id: 'course-sites', labelKey: 'nav.courseSites', icon: 'BookOpen', href: '/course-site' },
   { id: 'exams', labelKey: 'nav.exams', icon: 'Pencil', href: '/exams' },
   { id: 'lesson-plans', labelKey: 'nav.lessonPlans', icon: 'GraduationCap', href: '/lesson-plans' },
   { id: 'feedback', labelKey: 'nav.feedback', icon: 'MessageSquareText', href: '/feedback' },

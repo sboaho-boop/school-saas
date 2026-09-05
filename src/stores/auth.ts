@@ -21,10 +21,10 @@ interface AuthStore {
 }
 
 export const ROLE_NAV_ITEMS: Record<StaffType, string[]> = {
-  headteacher: ['dashboard', 'students', 'staff', 'academics', 'meetings', 'attendance', 'marks', 'wallet', 'tasks', 'transport', 'finance', 'communication', 'conferences', 'calendar', 'reports', 'audit-logs', 'terminal', 'settings', 'orders', 'library', 'hostel', 'inventory', 'behavior', 'alumni', 'assignments', 'exams', 'lesson-plans', 'feedback', 'ai-tutor'],
-  admin: ['dashboard', 'students', 'staff', 'academics', 'meetings', 'attendance', 'marks', 'wallet', 'tasks', 'transport', 'finance', 'communication', 'conferences', 'calendar', 'reports', 'audit-logs', 'terminal', 'settings', 'orders', 'library', 'hostel', 'inventory', 'behavior', 'alumni', 'assignments', 'exams', 'lesson-plans', 'feedback', 'ai-tutor'],
+  headteacher: ['dashboard', 'students', 'staff', 'academics', 'meetings', 'attendance', 'marks', 'wallet', 'tasks', 'transport', 'finance', 'communication', 'conferences', 'calendar', 'reports', 'audit-logs', 'terminal', 'settings', 'orders', 'library', 'hostel', 'inventory', 'behavior', 'alumni', 'assignments', 'course-sites', 'exams', 'lesson-plans', 'feedback', 'ai-tutor'],
+  admin: ['dashboard', 'students', 'staff', 'academics', 'meetings', 'attendance', 'marks', 'wallet', 'tasks', 'transport', 'finance', 'communication', 'conferences', 'calendar', 'reports', 'audit-logs', 'terminal', 'settings', 'orders', 'library', 'hostel', 'inventory', 'behavior', 'alumni', 'assignments', 'course-sites', 'exams', 'lesson-plans', 'feedback', 'ai-tutor'],
   accountant: ['dashboard', 'finance', 'tasks', 'communication', 'reports', 'library', 'inventory', 'feedback', 'ai-tutor'],
-  teaching: ['dashboard', 'students', 'academics', 'meetings', 'attendance', 'marks', 'tasks', 'communication', 'conferences', 'calendar', 'library', 'behavior', 'assignments', 'exams', 'lesson-plans', 'feedback', 'ai-tutor'],
+  teaching: ['dashboard', 'students', 'academics', 'meetings', 'attendance', 'marks', 'tasks', 'communication', 'conferences', 'calendar', 'library', 'behavior', 'assignments', 'course-sites', 'exams', 'lesson-plans', 'feedback', 'ai-tutor'],
   'non-teaching': ['dashboard', 'tasks', 'communication', 'library', 'hostel', 'inventory', 'alumni', 'feedback', 'ai-tutor'],
 };
 
