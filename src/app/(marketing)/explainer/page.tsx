@@ -339,8 +339,8 @@ const scenes: Scene[] = [
       <div className="space-y-4 text-center">
         <div className="flex justify-center gap-4">
           {[
-            { plan: 'Free', students: '30', staff: '10' },
-            { plan: 'Professional', students: '200', staff: '50' },
+            { plan: 'Free', students: '100', staff: '10' },
+            { plan: 'Professional', students: '1,000', staff: '50' },
             { plan: 'Enterprise', students: 'Unlimited', staff: 'Unlimited' },
           ].map((p, i) => (
             <motion.div key={p.plan} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.15 }}

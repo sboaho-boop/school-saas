@@ -823,7 +823,7 @@ export default function HomePage() {
           <div className="grid gap-8 md:grid-cols-3 max-w-5xl mx-auto">
             {[
               { name: 'Starter', price: 'Free', desc: 'Perfect for small schools getting started.', features: ['Up to 100 students', 'Basic dashboard', 'Student management', 'Attendance tracking', 'Email support'], cta: 'Get Started', popular: false },
-              { name: 'Professional', price: '$49', period: '/month', desc: 'For growing schools that need more features.', features: ['Up to 1,000 students', 'Full dashboard & analytics', 'Fee management', 'Task management', 'Custom branding', 'Priority support'], cta: 'Start Free Trial', popular: true },
+              { name: 'Professional', price: 'GHS 299', period: '/month', desc: 'For growing schools that need more features.', features: ['Up to 1,000 students', 'Full dashboard & analytics', 'Fee management', 'Task management', 'Custom branding', 'Priority support'], cta: 'Start Free Trial', popular: true },
               { name: 'Enterprise', price: 'Custom', desc: 'For school chains and large institutions.', features: ['Unlimited students', 'Multi-campus support', 'API access', 'Dedicated manager', 'Custom integrations', 'SLA guarantee'], cta: 'Contact Sales', popular: false },
             ].map((plan, i) => {
               const planColors = [
