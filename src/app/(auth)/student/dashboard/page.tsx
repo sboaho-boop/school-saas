@@ -10,10 +10,138 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api, getToken, setToken, API_URL } from '@/lib/api';
-import { GraduationCap, Wallet, Check, X, Clock, AlertCircle, Eye, LogOut, Send, Plus, FileText, BookOpen, Calendar, Bell, Upload, File, Image, Loader2, User, BarChart3, Percent, Trophy, Users, Sparkles } from 'lucide-react';
+import { GraduationCap, Wallet, Check, X, Clock, AlertCircle, Eye, LogOut, Send, Plus, FileText, BookOpen, Calendar, Bell, Upload, File, Image, Loader2, User, BarChart3, Percent, Trophy, Users, Sparkles, Megaphone, LayoutGrid, ClipboardList, Presentation } from 'lucide-react';
 import { KofiAvatar } from '@/components/ai/kofi-avatar';
 
 const DAY_LABELS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+function CourseSiteSection() {
+  const [site, setSite] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get('/student/course-site')
+      .then((data: any) => { setSite(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  if (loading) return null;
+  if (!site) return null;
+
+  const upcomingMeetings = (site.meetings || [])
+    .filter((m: any) => m.status === 'scheduled' || m.status === 'live')
+    .slice(0, 3);
+  const latestAnnouncements = (site.announcements || []).slice(0, 5);
+  const lessonTopics = (site.lessonPlans || []).slice(0, 5);
+
+  return (
+    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+      <div className="flex items-center justify-between rounded-xl bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10 p-4">
+        <div>
+          <h2 className="text-base font-bold flex items-center gap-2"><BookOpen size={16} />My Course</h2>
+          <p className="text-xs text-muted-foreground">
+            {site.class.name}{site.class.section ? ` · ${site.class.section}` : ''}
+            {site.class.teacher ? ` · ${site.class.teacher}` : ''}
+            {site.term ? ` · ${site.term.name} ${site.term.academicYear}` : ''}
+          </p>
+        </div>
+        <Badge variant="outline" className="text-[10px shrink-0">{site.stats.subjectCount} subjects</Badge>
+      </div>
+
+      {latestAnnouncements.length > 0 && (
+        <Card className="border-border/50 shadow-sm">
+          <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Megaphone size={16} />Announcements</CardTitle></CardHeader>
+          <CardContent className="space-y-2">
+            {latestAnnouncements.map((a: any) => (
+              <div key={a.id} className="text-sm p-2.5 rounded-lg border border-border/50">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-medium">{a.title}</p>
+                  {a.priority === 'high' && <Badge variant="destructive" className="text-[10px] shrink-0">High</Badge>}
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{a.body}</p>
+                <p className="text-[10px] text-muted-foreground mt-1">{new Date(a.createdAt).toLocaleDateString()}{a.author?.name ? ` · ${a.author.name}` : ''}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {site.subjects.length > 0 && (
+        <Card className="border-border/50 shadow-sm">
+          <CardHeader><CardTitle className="text-sm flex items-center gap-2"><LayoutGrid size={16} />Subjects</CardTitle></CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {site.subjects.map((s: any) => (
+                <div key={s.id} className="text-xs p-2 rounded-lg border border-border/50 bg-muted/20">
+                  <p className="font-medium">{s.name}{s.code ? ` (${s.code})` : ''}</p>
+                  <p className="text-[10px] text-muted-foreground">{s.teacher || '—'}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {site.assignments.length > 0 && (
+        <Card className="border-border/50 shadow-sm">
+          <CardHeader><CardTitle className="text-sm flex items-center gap-2"><ClipboardList size={16} />Assignments</CardTitle></CardHeader>
+          <CardContent className="space-y-1">
+            {site.assignments.map((a: any) => (
+              <div key={a.id} className="flex items-center justify-between gap-2 text-sm py-1.5 border-b border-border/30">
+                <div className="min-w-0">
+                  <p className="font-medium truncate">{a.title}</p>
+                  <p className="text-[10px] text-muted-foreground">{a.subject ? `${a.subject} · ` : ''}Due {a.dueDate}</p>
+                </div>
+                <Badge
+                  variant={a.submission ? (a.submission.status === 'graded' ? 'default' : a.submission.status === 'returned' ? 'secondary' : 'outline') : new Date(a.dueDate) <= new Date() ? 'destructive' : 'outline'}
+                  className="text-[10px] shrink-0"
+                >
+                  {a.submission
+                    ? (a.submission.status === 'graded' ? `${a.submission.grade}/${a.totalPoints}` : a.submission.status === 'returned' ? 'Returned' : 'Submitted')
+                    : new Date(a.dueDate) <= new Date() ? 'Overdue' : 'Pending'}
+                </Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {upcomingMeetings.length > 0 && (
+        <Card className="border-border/50 shadow-sm">
+          <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Presentation size={16} />Parent Meetings</CardTitle></CardHeader>
+          <CardContent className="space-y-2">
+            {upcomingMeetings.map((m: any) => (
+              <div key={m.id} className="flex items-center justify-between gap-2 text-sm p-2.5 rounded-lg border border-border/50">
+                <div className="min-w-0">
+                  <p className="font-medium truncate">{m.title}</p>
+                  <p className="text-[10px] text-muted-foreground">{m.meetingDate} · {m.startTime}-{m.endTime}{m.status === 'live' ? ' · Live' : ''}</p>
+                </div>
+                {m.agenda && <p className="text-[10px] text-muted-foreground shrink-0 max-w-[120px] truncate">{m.agenda}</p>}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {lessonTopics.length > 0 && (
+        <Card className="border-border/50 shadow-sm">
+          <CardHeader><CardTitle className="text-sm flex items-center gap-2"><BookOpen size={16} />Weekly Topics</CardTitle></CardHeader>
+          <CardContent className="space-y-1">
+            {lessonTopics.map((lp: any) => (
+              <div key={lp.id} className="flex items-center justify-between gap-2 text-sm py-1.5 border-b border-border/30">
+                <div className="min-w-0">
+                  <p className="font-medium truncate">{lp.topic}</p>
+                  <p className="text-[10px] text-muted-foreground">{lp.subjectName}</p>
+                </div>
+                {lp.week && <span className="text-[10px] text-muted-foreground shrink-0">{lp.week}</span>}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+    </motion.div>
+  );
+}
 
 function TimetableSection() {
   const [slots, setSlots] = useState<any[]>([]);
@@ -365,6 +493,7 @@ export default function StudentDashboardPage() {
           </CardContent>
         </Card>
 
+        <CourseSiteSection />
         <TimetableSection />
         <ExamScheduleSection />
         <ClassReportSection />
