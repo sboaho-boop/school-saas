@@ -71,7 +71,7 @@ export function TutorCurriculumCard() {
             <span className="text-sm font-semibold">My Curriculum</span>
           </div>
           <p className="text-xs text-muted-foreground">
-            Start learning with Teacher Kofi and your past lessons will appear here as book chapters. 🎒
+            Start learning with Teacher Kofi and your past lessons will appear here as book chapters.
           </p>
         </CardContent>
       </Card>

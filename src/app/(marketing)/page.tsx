@@ -781,8 +781,8 @@ export default function HomePage() {
                 </div>
                 <div className="space-y-3">
                   {[
-                    { role: 'user', text: 'Help me with fractions 😩' },
-                    { role: 'kofi', text: 'Sure! 🎉 Imagine a pizza cut into 8 slices. If you eat 2, you ate 2/8 = 1/4 of it. Great start!' },
+                    { role: 'user', text: 'Help me with fractions' },
+                    { role: 'kofi', text: 'Sure! Imagine a pizza cut into 8 slices. If you eat 2, you ate 2/8 = 1/4 of it. Great start!' },
                     { role: 'kofi', text: 'Want a quick practice quiz on that?' },
                   ].map((m, i) => (
                     <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>

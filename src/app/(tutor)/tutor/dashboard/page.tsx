@@ -96,7 +96,7 @@ function TutorDashboardContent() {
     useTutorChat.setState((s) => ({
       messages: [
         ...s.messages,
-        { role: 'user', content: '🎤 ' + data.transcribed },
+        { role: 'user', content: data.transcribed },
         { role: 'assistant', content: data.reply },
       ],
     }));
@@ -133,10 +133,10 @@ function TutorDashboardContent() {
   const limitReached = remaining !== null && remaining === 0;
 
   const quickActions = [
-    { label: '📚 ' + t('tutor.quizMe'), prompt: 'Give me a short quiz on the last topic we just covered. 3-5 questions with A/B/C/D options. I will answer and you grade me.' },
-    { label: '📝 ' + t('tutor.summarize'), prompt: 'Summarize the last lesson we covered into a short, clear study note I can revise from (key points only, easy to remember).' },
-    { label: '⬆️ ' + t('tutor.nextLevel'), prompt: 'I understood the last topic. Teach me the next level / more advanced part of it, a little harder this time.' },
-    { label: '✏️ ' + t('tutor.checkMyWork'), prompt: 'I am going to show you my schoolwork/answers. Please check it kindly, point out any mistakes gently, and show me how to fix them.' },
+    { label: t('tutor.quizMe'), prompt: 'Give me a short quiz on the last topic we just covered. 3-5 questions with A/B/C/D options. I will answer and you grade me.' },
+    { label: t('tutor.summarize'), prompt: 'Summarize the last lesson we covered into a short, clear study note I can revise from (key points only, easy to remember).' },
+    { label: t('tutor.nextLevel'), prompt: 'I understood the last topic. Teach me the next level / more advanced part of it, a little harder this time.' },
+    { label: t('tutor.checkMyWork'), prompt: 'I am going to show you my schoolwork/answers. Please check it kindly, point out any mistakes gently, and show me how to fix them.' },
   ];
 
   const runQuickAction = async (prompt: string) => {

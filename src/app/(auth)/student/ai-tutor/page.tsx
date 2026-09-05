@@ -18,7 +18,7 @@ interface ChatMessage {
   content: string;
 }
 
-const WELCOME_MESSAGE = "Hi there! I'm Teacher Kofi, your AI study companion 🎉\n\nI can help you with:\n• Mathematics 📐 — step-by-step working\n• English 📖 — grammar, spelling, reading\n• Science 🔬 — explained with everyday examples\n• Social Studies 🌍 — Ghanaian history and culture\n• Homework help 📝 — I'll guide you, not give answers\n• Ghanaian languages 🗣️ — Twi, Ga, Ewe, Fante, Dagbani\n\nWhat would you like to learn today?";
+const WELCOME_MESSAGE = "Hi there! I'm Teacher Kofi, your AI study companion\n\nI can help you with:\n• Mathematics — step-by-step working\n• English — grammar, spelling, reading\n• Science — explained with everyday examples\n• Social Studies — Ghanaian history and culture\n• Homework help — I'll guide you, not give answers\n• Ghanaian languages — Twi, Ga, Ewe, Fante, Dagbani\n\nWhat would you like to learn today?";
 
 export default function StudentAITutorPage() {
   const router = useRouter();
@@ -65,7 +65,7 @@ export default function StudentAITutorPage() {
     speakText(data.reply, data.language);
     setMessages((prev) => [
       ...prev,
-      { role: 'user', content: `🎤 ${data.transcribed}` },
+      { role: 'user', content: `${data.transcribed}` },
       { role: 'assistant', content: data.reply },
     ]);
   };
@@ -199,7 +199,7 @@ export default function StudentAITutorPage() {
               </Button>
             </div>
             <p className="text-[10px] text-muted-foreground mt-2 text-center">
-              Tap 🎤 to speak in English, Twi, Ga, Ewe, Fante, Hausa, or Dagbani. Responses are AI-generated — verify important information.
+              Tap to speak in English, Twi, Ga, Ewe, Fante, Hausa, or Dagbani. Responses are AI-generated — verify important information.
             </p>
           </div>
         </Card>

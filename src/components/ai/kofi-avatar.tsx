@@ -23,9 +23,6 @@ export function KofiAvatar({ size = 20, className, title }: KofiAvatarProps) {
       )}
       style={{ width: size * 1.9, height: size * 1.9, fontSize: size * 0.95 }}
     >
-      <span aria-hidden="true" style={{ lineHeight: 1 }}>
-        👨‍🏫
-      </span>
     </span>
   );
 }

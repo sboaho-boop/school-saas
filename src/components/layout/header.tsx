@@ -22,31 +22,6 @@ import { SidebarNavContent } from '@/components/layout/sidebar';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
-const notificationIcons: Record<string, string> = {
-  student_absent: '🚨',
-  student_late: '⏰',
-  fee_payment_received: '💰',
-  fee_payment_overdue: '⚠️',
-  result_published: '📊',
-  assignment_posted: '📝',
-  announcement_created: '📢',
-  event_reminder: '📅',
-  new_message: '💬',
-  report_card_available: '📄',
-  task_assigned: '📋',
-  task_completed: '✅',
-  incident_reported: '⚠️',
-  subscription_changed: '💳',
-  low_wallet_balance: '💸',
-  submission_graded: '✅',
-  exam_published: '📝',
-  fee_reminder: '💰',
-  task_deadline: '📋',
-  attendance_alert: '📊',
-  exam_announcement: '📝',
-  general: '📢',
-};
-
 const roleLabels: Record<string, string> = {
   headteacher: 'roles.headteacher',
   admin: 'roles.admin',
@@ -125,7 +100,6 @@ export function Header() {
                   onClick={() => markAsRead(notification.id)}
                 >
                   <div className="flex w-full items-center gap-2">
-                    <span>{notificationIcons[notification.type] || '📢'}</span>
                     <span className="text-sm font-medium">{notification.title}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">{notification.message}</p>

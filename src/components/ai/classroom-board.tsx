@@ -201,7 +201,7 @@ export function ClassroomBoard({ messages, loading, speakingIdx, onToggleSpeak }
                   {/* chalk tray hint */}
                   <div className="mt-auto pt-4">
                     <div className="chalk-tray rounded-md px-4 py-2 flex items-center justify-between text-[11px] text-emerald-100/70">
-                      <span>✏️ Speak or type to learn on the board</span>
+                      <span>Speak or type to learn on the board</span>
                       {loading && <Loader2 size={13} className="animate-spin" />}
                     </div>
                   </div>

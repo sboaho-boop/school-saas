@@ -48,7 +48,7 @@ function levelFromXp(xp: number): string {
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  mastered: 'Mastered 🏆',
+  mastered: 'Mastered',
   in_progress: 'In progress',
   unlocked: 'Unlocked',
   locked: 'Locked',

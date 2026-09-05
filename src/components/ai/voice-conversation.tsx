@@ -10,12 +10,12 @@ import { VOICE_LANGUAGES } from '@/i18n/voice-languages';
 
 function getLessonIdeas(t: (k: string) => string) {
   return [
-    { label: t('tutor.lessonMaths'), emoji: '➕', prompt: 'Let us start a fun maths quiz for me. Ask me one question at a time and wait for my answer.' },
-    { label: t('tutor.lessonFractions'), emoji: '🍕', prompt: 'Teach me fractions using pizza and food. Ask me a simple question.' },
-    { label: t('tutor.lessonSpelling'), emoji: '✏️', prompt: 'Give me a spelling test. Say a word and ask me to spell it.' },
-    { label: t('tutor.lessonStories'), emoji: '📖', prompt: 'Let us make up a fun story together. You start the story and ask me what happens next.' },
-    { label: t('tutor.lessonScience'), emoji: '🔬', prompt: 'Teach me a simple science fact and ask me a question about it.' },
-    { label: t('tutor.lessonCounting'), emoji: '🔢', prompt: 'Let us practice counting. Count with me and ask me to count along.' },
+    { label: t('tutor.lessonMaths'), prompt: 'Let us start a fun maths quiz for me. Ask me one question at a time and wait for my answer.' },
+    { label: t('tutor.lessonFractions'), prompt: 'Teach me fractions using pizza and food. Ask me a simple question.' },
+    { label: t('tutor.lessonSpelling'), prompt: 'Give me a spelling test. Say a word and ask me to spell it.' },
+    { label: t('tutor.lessonStories'), prompt: 'Let us make up a fun story together. You start the story and ask me what happens next.' },
+    { label: t('tutor.lessonScience'), prompt: 'Teach me a simple science fact and ask me a question about it.' },
+    { label: t('tutor.lessonCounting'), prompt: 'Let us practice counting. Count with me and ask me to count along.' },
   ];
 }
 
@@ -166,7 +166,7 @@ export function VoiceLesson() {
       .map(([code]) => labels[code] || code)
       .join(', ');
     const parts = [
-      good ? `✅ Good: ${good}` : 'No native Ghanaian-lang voice found.',
+      good ? ` Good: ${good}` : 'No native Ghanaian-lang voice found.',
       `Pairs: ${listDeviceVoices().length} voices on this device.`,
     ];
     setVoiceCheck(parts.join('  •  '));
@@ -196,7 +196,7 @@ export function VoiceLesson() {
     <div className="rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-violet-950/30 dark:to-fuchsia-950/30 dark:border-violet-800/40 p-4 mb-4">
       <div className="flex items-center justify-between mb-3">
         <p className="text-sm font-semibold text-violet-700 dark:text-violet-300">
-          🗣️ {t('tutor.talkToKofi')}
+           {t('tutor.talkToKofi')}
         </p>
         <div className="flex items-center gap-2">
           <select
@@ -230,7 +230,7 @@ export function VoiceLesson() {
                 onClick={() => startLesson(idea.prompt)}
                 className="inline-flex items-center gap-1.5 rounded-full border border-violet-300 bg-white px-3 py-1.5 text-sm font-medium text-violet-700 shadow-sm hover:bg-violet-100 active:scale-95 transition dark:bg-card dark:text-violet-300 dark:border-violet-800 dark:hover:bg-violet-900/40"
               >
-                <span>{idea.emoji}</span> {idea.label}
+                {idea.label}
               </button>
             ))}
           </div>

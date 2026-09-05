@@ -41,7 +41,7 @@ export function mediaSrc(raw?: string): string | undefined {
   return origin + raw;
 }
 
-const WELCOME_MESSAGE = "Hi! I'm Teacher Kofi, your AI learning companion 🎉\n\nI can help you with:\n• Mathematics 📐\n• English 📖\n• Science 🔬\n• Ghanaian languages (Twi, Ga, Ewe, Fante, Dagbani) 🗣️\n• Homework help 📝\n• Quizzes and learning games 🎮\n\nWhat would you like to learn today?";
+const WELCOME_MESSAGE = "Hi! I'm Teacher Kofi, your AI learning companion\n\nI can help you with:\n• Mathematics\n• English\n• Science\n• Ghanaian languages (Twi, Ga, Ewe, Fante, Dagbani)\n• Homework help\n• Quizzes and learning games\n\nWhat would you like to learn today?";
 
 function authHeaders(extra?: Record<string, string>): Record<string, string> {
   const headers: Record<string, string> = { ...(extra || {}) };
@@ -181,7 +181,7 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
 
   sendLessonPrompt: async (message: string) => {
     const { messages } = get();
-    const userMsg: ChatMessage = { role: 'user', content: '🎯 ' + message };
+    const userMsg: ChatMessage = { role: 'user', content: message };
     const placeholder: ChatMessage = { role: 'assistant', content: '' };
     set({ messages: [...messages, userMsg, placeholder], loading: true });
 
@@ -230,7 +230,7 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
       set((s) => ({
         messages: [
           ...s.messages,
-          { role: 'user', content: '🎤 ' + data.transcribed },
+          { role: 'user', content: data.transcribed },
           { role: 'assistant', content: data.reply },
         ],
         remaining: data.remaining,
@@ -249,7 +249,7 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
 
   sendImage: async (prompt: string, style?: string) => {
     const { messages } = get();
-    const userMsg: ChatMessage = { role: 'user', content: '🎨 ' + prompt };
+    const userMsg: ChatMessage = { role: 'user', content: prompt };
     set({ messages: [...messages, userMsg], loading: true });
 
     try {
@@ -260,7 +260,7 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
       set((s) => ({
         messages: [
           ...s.messages,
-          { role: 'assistant', content: "Here's your picture! 🖼️ Ask me to draw something else anytime.", image: res.imageData },
+          { role: 'assistant', content: "Here's your picture! Ask me to draw something else anytime.", image: res.imageData },
         ],
         remaining: res.remaining,
         loading: false,
@@ -274,7 +274,7 @@ export const useTutorChat = create<TutorChatStore>((set, get) => ({
   },
 
   sendPhoto: async (file: File, caption?: string) => {
-    const text = (caption || '').trim() || '📷 Look at this picture — what do you see?';
+    const text = (caption || '').trim() || 'Look at this picture — what do you see?';
     try {
       const formData = new FormData();
       formData.append('file', file);
