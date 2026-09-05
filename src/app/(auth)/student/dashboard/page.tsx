@@ -16,6 +16,7 @@ import { KofiAvatar } from '@/components/ai/kofi-avatar';
 const DAY_LABELS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
 function CourseSiteSection() {
+  const router = useRouter();
   const [site, setSite] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -78,6 +79,25 @@ function CourseSiteSection() {
                 </div>
               ))}
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {site.exams.length > 0 && (
+        <Card className="border-border/50 shadow-sm">
+          <CardHeader><CardTitle className="text-sm flex items-center gap-2"><ClipboardList size={16} />Exams</CardTitle></CardHeader>
+          <CardContent className="space-y-1">
+            {site.exams.map((e: any) => (
+              <div key={e.id} className="flex items-center justify-between gap-2 text-sm py-1.5 border-b border-border/30">
+                <div className="min-w-0">
+                  <p className="font-medium truncate">{e.title}</p>
+                  <p className="text-[10px] text-muted-foreground">{e.subjectName}{e.duration ? ` · ${e.duration} min` : ''}{e.totalPoints ? ` · ${e.totalPoints} pts` : ''}</p>
+                </div>
+                <Button size="sm" variant="outline" className="text-[11px] shrink-0" onClick={() => router.push(`/student/exam/${e.id}`)}>
+                  Sit Exam
+                </Button>
+              </div>
+            ))}
           </CardContent>
         </Card>
       )}
@@ -190,13 +210,18 @@ function TimetableSection() {
 }
 
 function ExamScheduleSection() {
+  const router = useRouter();
   const [exams, setExams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/student/exams')
-      .then((data: any) => { setExams(data || []); setLoading(false); })
-      .catch(() => setLoading(false));
+    api.get('/student/exam/list')
+      .then((data: any) => { setExams(data.exams || []); setLoading(false); })
+      .catch(() => {
+        api.get('/student/exams')
+          .then((d: any) => { setExams(d || []); setLoading(false); })
+          .catch(() => setLoading(false));
+      });
   }, []);
 
   if (loading) return null;
@@ -207,18 +232,32 @@ function ExamScheduleSection() {
       <CardHeader><CardTitle className="text-sm flex items-center gap-2"><BookOpen size={16} />Exam Schedule</CardTitle></CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {exams.map((e) => (
-            <div key={e.id} className="flex items-center justify-between gap-2 text-sm p-2.5 rounded-lg border border-border/50">
-              <div className="min-w-0">
-                <p className="font-medium truncate">{e.title}</p>
-                <p className="text-[10px] text-muted-foreground">{e.subjectName}{e.duration ? ` · ${e.duration} min` : ''}</p>
+          {exams.map((e) => {
+            const canTake = e.status === 'not_started' || e.status === 'started';
+            return (
+              <div key={e.id} className="flex items-center justify-between gap-2 text-sm p-2.5 rounded-lg border border-border/50">
+                <div className="min-w-0">
+                  <p className="font-medium truncate">{e.title}</p>
+                  <p className="text-[10px] text-muted-foreground">{e.subjectName}{e.duration ? ` · ${e.duration} min` : ''}{e.status === 'graded' && e.grade ? ` · Grade ${e.grade}` : ''}</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="text-right">
+                    <p className="text-[11px] font-medium text-primary">{e.dueDate}</p>
+                    {e.status === 'graded' && e.score != null && <p className="text-[10px] text-muted-foreground">{e.score}/{e.totalScore} pts</p>}
+                  </div>
+                  {canTake ? (
+                    <Button size="sm" variant="outline" className="text-[11px]" onClick={() => router.push(`/student/exam/${e.id}`)}>
+                      {e.status === 'started' ? 'Resume' : 'Take Exam'}
+                    </Button>
+                  ) : (
+                    <Button size="sm" variant="ghost" className="text-[11px]" onClick={() => router.push(`/student/exam/${e.id}`)}>
+                      <Eye size={13} className="mr-1" />Result
+                    </Button>
+                  )}
+                </div>
               </div>
-              <div className="text-right shrink-0">
-                <p className="text-[11px] font-medium text-primary">{e.dueDate}</p>
-                {e.totalPoints > 0 && <p className="text-[10px] text-muted-foreground">{e.totalPoints} pts</p>}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
     </Card>
