@@ -23,6 +23,7 @@ import { Building, Palette, Globe, Bell, Shield, CreditCard, Check, Sparkles, XC
 import { api, getToken } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
 import { useI18n } from '@/stores/locale';
+import { APP_VERSION, APP_RELEASE_YEAR } from '@/lib/version';
 
 const SMS_EVENT_LABELS: Record<string, string> = {
   registration_confirmation: 'Registration confirmation',
@@ -609,6 +610,11 @@ export default function SettingsPage() {
               <CardDescription>Your subscription and usage.</CardDescription>
             </CardHeader>
             <CardContent>
+              <div className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1 rounded-full border border-border/50 bg-white/5 px-2.5 py-0.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-green-500" /> v{APP_VERSION} · {APP_RELEASE_YEAR} Release
+                </span>
+              </div>
               {loading && !subscription ? (
                 <p className="text-muted-foreground">Loading...</p>
               ) : subscription ? (

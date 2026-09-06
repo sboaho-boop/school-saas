@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
+import { APP_VERSION, APP_RELEASE_YEAR } from '@/lib/version';
 import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
@@ -991,6 +992,11 @@ export default function HomePage() {
             <p>
               &copy; {new Date().getFullYear()} EDUPLATFORM SOFTWARE SERVICES. All rights reserved.
               <Link href="/super-admin/login" className="ml-2 opacity-0 hover:opacity-30 transition-all select-none" tabIndex={-1} aria-hidden="true">[admin]</Link>
+            </p>
+            <p className="mt-1">
+              <span className="inline-flex items-center gap-1 rounded-full border border-border/50 bg-white/5 px-2.5 py-0.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-500" /> v{APP_VERSION} · {APP_RELEASE_YEAR} Release
+              </span>
             </p>
           </div>
         </div>
