@@ -10,6 +10,18 @@ interface TransportStore {
   addRoute: (route: Omit<TransportRoute, 'id' | 'createdAt'> & { driverIds?: string[] }) => Promise<void>;
   updateRoute: (id: string, updates: Partial<TransportRoute> & { driverIds?: string[] }) => Promise<void>;
   removeRoute: (id: string) => Promise<void>;
+  assignStudents: (routeId: string, assignments: { studentId: string; pickupStop: string }[]) => Promise<void>;
+  unassignStudent: (routeId: string, studentId: string) => Promise<void>;
+  fetchRouteStudents: (routeId: string) => Promise<RouteStudent[]>;
+}
+
+export interface RouteStudent {
+  id: string;
+  firstName: string;
+  lastName: string;
+  indexNumber: string | null;
+  className: string;
+  pickupStop: string | null;
 }
 
 export const useTransportStore = create<TransportStore>((set) => ({
@@ -36,5 +48,15 @@ export const useTransportStore = create<TransportStore>((set) => ({
   removeRoute: async (id) => {
     await api.delete(`/transport/${id}`);
     set((s) => ({ routes: s.routes.filter((r) => r.id !== id) }));
+  },
+  assignStudents: async (routeId, assignments) => {
+    await api.put(`/transport/${routeId}/students`, { assignments });
+  },
+  unassignStudent: async (routeId, studentId) => {
+    await api.delete(`/transport/${routeId}/students/${studentId}`);
+  },
+  fetchRouteStudents: async (routeId) => {
+    const students = await api.get<RouteStudent[]>(`/transport/${routeId}/students`);
+    return Array.isArray(students) ? students : [];
   },
 }));

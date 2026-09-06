@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { BackButton } from '@/components/ui/back-button';
 import { Logo } from '@/components/logo';
 import { driverApi, getDriverToken, setDriverToken } from '@/lib/driver-api';
-import { Bus, LogOut, MapPin, RefreshCw, CheckCircle2, CircleDashed } from 'lucide-react';
+import { Bus, LogOut, MapPin, RefreshCw, CheckCircle2, CircleDashed, UserCheck, UserX } from 'lucide-react';
 
 type Stop = { name: string; time?: string };
 type Route = { id: string; name: string; description?: string; stops: Stop[]; capacity?: number; status: string };
@@ -24,6 +24,16 @@ type Trip = {
   route?: { id: string; name: string };
 };
 type Driver = { id: string; name: string; indexNumber: string; role?: string; phone?: string };
+type RollStatus = 'awaiting' | 'onboard' | 'dropped';
+type RouteStudent = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  indexNumber: string | null;
+  className: string;
+  pickupStop: string | null;
+  rollCall: { status: RollStatus; markedAt: string | null };
+};
 
 const STATUS_STEPS = ['checked_in', 'departed', 'arrived', 'completed'] as const;
 
@@ -45,6 +55,25 @@ export default function DriverDashboardPage() {
   const [acting, setActing] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [today, setToday] = useState('');
+  const [students, setStudents] = useState<RouteStudent[]>([]);
+  const [rollLoading, setRollLoading] = useState(false);
+
+  const loadStudents = async (tripId?: string) => {
+    const id = tripId ?? trip?.id;
+    if (!id) {
+      setStudents([]);
+      return;
+    }
+    setRollLoading(true);
+    try {
+      const data = await driverApi.get<{ tripId: string; routeId: string; students: RouteStudent[] }>(`/driver/trip/${id}/students`);
+      setStudents(data.students);
+    } catch {
+      /* ignore polling errors */
+    } finally {
+      setRollLoading(false);
+    }
+  };
 
   const load = useCallback(async () => {
     try {
@@ -53,6 +82,16 @@ export default function DriverDashboardPage() {
       setRoutes(data.routes);
       setTrip(data.trip);
       setToday(data.trip?.date ? new Date(data.trip.date + 'T00:00:00').toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }));
+      if (data.trip) {
+        try {
+          const s = await driverApi.get<{ tripId: string; routeId: string; students: RouteStudent[] }>(`/driver/trip/${data.trip.id}/students`);
+          setStudents(s.students);
+        } catch {
+          setStudents([]);
+        }
+      } else {
+        setStudents([]);
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -68,6 +107,13 @@ export default function DriverDashboardPage() {
     load();
   }, [load, router]);
 
+  useEffect(() => {
+    if (!trip) return;
+    loadStudents(trip.id);
+    const iv = setInterval(() => loadStudents(trip.id), 20000);
+    return () => clearInterval(iv);
+  }, [trip?.id, trip?.status]);
+
   const act = async (kind: 'start' | 'depart' | 'arrive' | 'complete') => {
     setActing(kind);
     setError('');
@@ -79,10 +125,21 @@ export default function DriverDashboardPage() {
         updated = await driverApi.put<Trip>(`/driver/trip/${trip!.id}/${kind}`);
       }
       setTrip(updated);
+      loadStudents(updated.id);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setActing(null);
+    }
+  };
+
+  const markStudent = async (studentId: string, status: RollStatus) => {
+    if (!trip) return;
+    try {
+      await driverApi.put(`/driver/trip/${trip.id}/students/${studentId}`, { status });
+      setStudents((prev) => prev.map((s) => (s.id === studentId ? { ...s, rollCall: { status, markedAt: new Date().toISOString() } } : s)));
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
@@ -96,6 +153,43 @@ export default function DriverDashboardPage() {
       {acting === kind ? 'Updating...' : label}
     </Button>
   );
+
+  const renderStudentRow = (s: RouteStudent) => {
+    const rc = s.rollCall.status;
+    return (
+      <div key={s.id} className="flex items-center gap-2 rounded-lg border border-border/60 bg-background px-3 py-2 text-sm">
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-medium">{s.firstName} {s.lastName}</p>
+          <p className="truncate text-xs text-muted-foreground">{s.className}{s.indexNumber ? ` · ${s.indexNumber}` : ''}</p>
+        </div>
+        {rc === 'awaiting' && (
+          <Button size="sm" variant="outline" className="shrink-0 text-xs" onClick={() => markStudent(s.id, 'onboard')}>
+            <UserCheck size={14} className="mr-1 text-blue-500" /> Picked up
+          </Button>
+        )}
+        {rc === 'onboard' && (
+          <Button size="sm" variant="outline" className="shrink-0 text-xs" onClick={() => markStudent(s.id, 'dropped')}>
+            <UserX size={14} className="mr-1 text-emerald-600" /> Drop off
+          </Button>
+        )}
+        {rc === 'dropped' && (
+          <Badge variant="outline" className="shrink-0 border-emerald-300 text-xs text-emerald-600">Dropped off</Badge>
+        )}
+      </div>
+    );
+  };
+
+  const renderStopGroup = (label: string, list: RouteStudent[]) => {
+    if (list.length === 0) return null;
+    return (
+      <div>
+        <p className="mb-1 flex items-center gap-1 text-xs font-medium text-muted-foreground">
+          <MapPin size={12} /> {label}
+        </p>
+        <div className="space-y-1">{list.map(renderStudentRow)}</div>
+      </div>
+    );
+  };
 
   const tripStatus = trip?.status ?? null;
   const tripIndex = tripStatus ? STATUS_STEPS.indexOf(tripStatus as (typeof STATUS_STEPS)[number]) : -1;
@@ -207,6 +301,36 @@ export default function DriverDashboardPage() {
                         <CheckCircle2 size={24} className="text-green-500" />
                         <p className="text-sm font-medium">Trip completed</p>
                         <p className="text-xs text-muted-foreground">Completed at {fmt(trip!.completedAt)}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="rounded-lg border border-border/50 bg-muted/40 p-4">
+                    <div className="mb-3 flex items-center justify-between">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Students on this route</p>
+                      {students.length > 0 && (
+                        <Badge variant="secondary" className="text-xs">
+                          On board {students.filter((s) => s.rollCall.status === 'onboard').length}/{students.length}
+                        </Badge>
+                      )}
+                    </div>
+                    {!tripStatus ? (
+                      <p className="text-sm text-muted-foreground">Start the trip to take roll call.</p>
+                    ) : rollLoading && students.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">Loading students...</p>
+                    ) : students.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No students assigned to this route yet. Ask the school admin to assign students.</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {(() => {
+                          const stopNames = route.stops.map((s) => (typeof s === 'string' ? s : s.name));
+                          return (
+                            <>
+                              {stopNames.map((stop) => renderStopGroup(stop, students.filter((s) => s.pickupStop === stop)))}
+                              {renderStopGroup('Other', students.filter((s) => !s.pickupStop || !stopNames.includes(s.pickupStop)))}
+                            </>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>

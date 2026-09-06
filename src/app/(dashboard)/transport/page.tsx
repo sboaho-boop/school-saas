@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
 import { motion } from 'framer-motion';
-import { Plus, Bus, MapPin, Phone, Users, Clock, CheckCircle, ArrowRight, MapPin as PinArrive } from 'lucide-react';
+import { Plus, Bus, MapPin, Phone, Users, Clock, CheckCircle, ArrowRight, MapPin as PinArrive, UserPlus, X } from 'lucide-react';
 import { useTransportStore } from '@/stores/transport';
 import { useStaffStore } from '@/stores/staff';
+import { useStudentStore } from '@/stores/students';
 import { useI18n } from '@/stores/locale';
 import { api } from '@/lib/api';
 
@@ -32,8 +33,10 @@ const statusConfig = {
 };
 
 export default function TransportPage() {
-  const { routes, addRoute } = useTransportStore();
+  const { routes, addRoute, assignStudents, unassignStudent, fetchRouteStudents } = useTransportStore();
   const staff = useStaffStore((s) => s.staff);
+  const students = useStudentStore((s) => s.students);
+  const fetchStudents = useStudentStore((s) => s.fetchStudents);
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
@@ -44,10 +47,70 @@ export default function TransportPage() {
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
   const [trips, setTrips] = useState<DriverTrip[]>([]);
   const [tripLoading, setTripLoading] = useState(false);
+  const [assignRouteId, setAssignRouteId] = useState<string | null>(null);
+  const [routeAssignment, setRouteAssignment] = useState<Record<string, string>>({});
+  const [prevAssignment, setPrevAssignment] = useState<string[]>([]);
+  const [routeCounts, setRouteCounts] = useState<Record<string, number>>({});
+  const [assignLoading, setAssignLoading] = useState(false);
 
   useEffect(() => {
     fetchTrips();
+    fetchStudents();
+    loadRouteCounts();
   }, []);
+
+  const loadRouteCounts = async () => {
+    const counts: Record<string, number> = {};
+    await Promise.all(
+      routes.map(async (r) => {
+        try {
+          const list = await fetchRouteStudents(r.id);
+          counts[r.id] = list.length;
+        } catch { counts[r.id] = 0; }
+      })
+    );
+    setRouteCounts(counts);
+  };
+
+  const openAssign = async (routeId: string) => {
+    setAssignRouteId(routeId);
+    const list = await fetchRouteStudents(routeId);
+    const map: Record<string, string> = {};
+    list.forEach((s) => { if (s.pickupStop) map[s.id] = s.pickupStop; });
+    setRouteAssignment(map);
+    setPrevAssignment(list.map((s) => s.id));
+  };
+
+  const toggleAssign = (studentId: string, firstStop: string) => {
+    setRouteAssignment((prev) => {
+      const next = { ...prev };
+      if (studentId in next) delete next[studentId];
+      else next[studentId] = firstStop;
+      return next;
+    });
+  };
+
+  const saveAssignment = async () => {
+    if (!assignRouteId) return;
+    setAssignLoading(true);
+    try {
+      const assignments = Object.entries(routeAssignment).map(([studentId, pickupStop]) => ({ studentId, pickupStop }));
+      await assignStudents(assignRouteId, assignments);
+      for (const id of prevAssignment) {
+        if (!(id in routeAssignment)) await unassignStudent(assignRouteId, id);
+      }
+      const list = await fetchRouteStudents(assignRouteId);
+      setRouteCounts((c) => ({ ...c, [assignRouteId]: list.length }));
+      setAssignRouteId(null);
+    } catch {
+      /* keep dialog open */
+    } finally {
+      setAssignLoading(false);
+    }
+  };
+
+  const assignRoute = routes.find((r) => r.id === assignRouteId);
+  const firstStop = typeof assignRoute?.stops[0] === 'string' ? assignRoute.stops[0] : '';
 
   const fetchTrips = async () => {
     setTripLoading(true);
@@ -224,6 +287,15 @@ export default function TransportPage() {
                     <Badge key={stop} variant="outline" className="text-xs">{stop}</Badge>
                   ))}
                 </div>
+                <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-3">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Users size={14} />
+                    <span><strong className="text-foreground">{routeCounts[route.id] ?? 0}</strong> assigned</span>
+                  </div>
+                  <Button size="sm" variant="outline" className="text-xs" onClick={() => openAssign(route.id)}>
+                    <UserPlus size={14} className="mr-1" /> Assign Students
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           );
@@ -298,6 +370,63 @@ export default function TransportPage() {
           </div>
         )}
       </motion.div>
+
+      <Dialog open={!!assignRouteId} onOpenChange={(v) => { if (!v) setAssignRouteId(null); }}>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Assign Students — {assignRoute?.name}</DialogTitle>
+            <DialogDescription>
+              Select students riding this route and set each one's pickup stop.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            {students.filter((s) => s.status === 'active').length === 0 && (
+              <p className="text-sm text-muted-foreground">No active students yet.</p>
+            )}
+            {students
+              .filter((s) => s.status === 'active')
+              .map((s) => {
+                const assigned = s.id in routeAssignment;
+                return (
+                  <div key={s.id} className={`flex items-center gap-3 rounded-lg border p-3 text-sm ${assigned ? 'border-primary bg-primary/5' : 'border-border'}`}>
+                    <button
+                      onClick={() => toggleAssign(s.id, firstStop || (Array.isArray(assignRoute?.stops) ? String(assignRoute?.stops[0]) : ''))}
+                      className="flex flex-1 items-center gap-3 text-left"
+                    >
+                      <div className={`flex size-5 shrink-0 items-center justify-center rounded-full border text-xs ${assigned ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/30'}`}>
+                        {assigned ? <CheckCircle size={12} /> : null}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium truncate">{s.firstName} {s.lastName}</p>
+                        <p className="text-xs text-muted-foreground truncate">{s.className}{s.indexNumber ? ` · ${s.indexNumber}` : ''}</p>
+                      </div>
+                    </button>
+                    {assigned && (
+                      <select
+                        value={routeAssignment[s.id] || ''}
+                        onChange={(e) => setRouteAssignment((prev) => ({ ...prev, [s.id]: e.target.value }))}
+                        className="h-8 rounded-lg border border-input bg-transparent px-2 text-xs"
+                      >
+                        {(assignRoute?.stops ?? []).map((stop) => (
+                          <option key={stop} value={stop}>{stop}</option>
+                        ))}
+                      </select>
+                    )}
+                    <button onClick={() => toggleAssign(s.id, firstStop || String(assignRoute?.stops?.[0]))} className="rounded-lg p-1 text-muted-foreground hover:bg-accent">
+                      <X size={14} />
+                    </button>
+                  </div>
+                );
+              })}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssignRouteId(null)}>Cancel</Button>
+            <Button onClick={saveAssignment} disabled={assignLoading}>
+              {assignLoading ? 'Saving...' : `Save (${Object.keys(routeAssignment).length} students)`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
