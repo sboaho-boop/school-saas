@@ -9,10 +9,13 @@ import { useTransportStore } from '@/stores/transport';
 import { useTaskStore } from '@/stores/tasks';
 import { useAcademicsStore } from '@/stores/academics';
 import { useNotificationStore } from '@/stores/notifications';
+import { useThemeStore } from '@/stores/theme';
+import { api } from '@/lib/api';
 
 export function DataLoader() {
   const currentUser = useAuthStore((s) => s.currentUser);
   const initialize = useAuthStore((s) => s.initialize);
+  const setTheme = useThemeStore((s) => s.setTheme);
   const fetchStudents = useStudentStore((s) => s.fetchStudents);
   const fetchStaff = useStaffStore((s) => s.fetchStaff);
   const fetchRecords = useFinanceStore((s) => s.fetchRecords);
@@ -29,6 +32,9 @@ export function DataLoader() {
 
   useEffect(() => {
     if (!currentUser) return;
+    api.get<{ school: { name: string; primaryColor: string } }>('/school/profile').then((r) => {
+      if (r.school) setTheme({ schoolName: r.school.name || 'My School', primaryColor: r.school.primaryColor || '#6366f1' });
+    }).catch(() => {});
     fetchStudents();
     fetchStaff();
     fetchRecords();
@@ -38,7 +44,7 @@ export function DataLoader() {
     fetchSubjects();
     fetchTerms();
     fetchNotifications();
-  }, [currentUser, fetchStudents, fetchStaff, fetchRecords, fetchRoutes, fetchTasks, fetchClasses, fetchSubjects, fetchTerms, fetchNotifications]);
+  }, [currentUser, setTheme, fetchStudents, fetchStaff, fetchRecords, fetchRoutes, fetchTasks, fetchClasses, fetchSubjects, fetchTerms, fetchNotifications]);
 
   return null;
 }

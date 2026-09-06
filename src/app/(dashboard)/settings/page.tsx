@@ -60,6 +60,9 @@ export default function SettingsPage() {
   const [twoFactorError, setTwoFactorError] = useState('');
   const [settingUp2fa, setSettingUp2fa] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState('');
+  const [email, setEmail] = useState('');
+  const [regionCountry, setRegionCountry] = useState('GH');
+  const [schoolType, setSchoolType] = useState('');
 
   const [globalLoading, setGlobalLoading] = useState(false);
 
@@ -85,7 +88,15 @@ export default function SettingsPage() {
     }).catch(() => {});
     api.get<{ id: string; email: string; name: string; phone: string; twoFactorEnabled: boolean }>('/auth/me').then((r) => {
       setPhone(r.phone || '');
+      setEmail(r.email || '');
       setTwoFactorEnabled(r.twoFactorEnabled);
+    }).catch(() => {});
+    api.get<{ school: { name: string; country: string; schoolType: string; primaryColor: string } }>('/school/profile').then((r) => {
+      if (r.school) {
+        setTheme({ schoolName: r.school.name || 'My School', primaryColor: r.school.primaryColor || '#6366f1' });
+        setRegionCountry(r.school.country || 'GH');
+        setSchoolType(r.school.schoolType || '');
+      }
     }).catch(() => {});
     api.get<{ credentials: typeof hubtel }>('/school/hubtel').then((r) => {
       if (r.credentials) setHubtel(r.credentials);
@@ -96,6 +107,7 @@ export default function SettingsPage() {
     setGlobalLoading(true);
     try {
       await api.put('/auth/sms-preferences', smsPrefs);
+      await api.put('/auth/me', { phone }).catch(() => {});
       setTwoFactorMsg('Notification preferences saved');
     } catch (err: any) {
       setTwoFactorError(err.message);
@@ -160,6 +172,59 @@ export default function SettingsPage() {
       setHubtelError(err.message);
     }
     setHubtelLoading(false);
+  };
+
+  const saveSchoolInfo = async () => {
+    setGlobalLoading(true);
+    setTwoFactorMsg('');
+    setTwoFactorError('');
+    try {
+      await api.put('/school/profile', { name: theme.schoolName });
+      await api.put('/auth/me', { phone });
+      setTwoFactorMsg('School information saved successfully');
+    } catch (err: any) {
+      setTwoFactorError(err.message);
+    }
+    setGlobalLoading(false);
+  };
+
+  const saveBranding = async () => {
+    setGlobalLoading(true);
+    setTwoFactorMsg('');
+    setTwoFactorError('');
+    try {
+      await api.put('/school/profile', { name: theme.schoolName, primaryColor: theme.primaryColor });
+      setTwoFactorMsg('Branding saved successfully');
+    } catch (err: any) {
+      setTwoFactorError(err.message);
+    }
+    setGlobalLoading(false);
+  };
+
+  const saveRegional = async () => {
+    setGlobalLoading(true);
+    setTwoFactorMsg('');
+    setTwoFactorError('');
+    try {
+      await api.put('/school/profile', { country: regionCountry, schoolType });
+      setTwoFactorMsg('Regional settings saved successfully');
+    } catch (err: any) {
+      setTwoFactorError(err.message);
+    }
+    setGlobalLoading(false);
+  };
+
+  const savePhone = async () => {
+    setGlobalLoading(true);
+    setTwoFactorMsg('');
+    setTwoFactorError('');
+    try {
+      await api.put('/auth/me', { phone });
+      setTwoFactorMsg('Phone number updated');
+    } catch (err: any) {
+      setTwoFactorError(err.message);
+    }
+    setGlobalLoading(false);
   };
 
   return (
@@ -231,14 +296,17 @@ export default function SettingsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" defaultValue="admin@school.edu" />
+                  <Input id="email" type="email" value={email} readOnly />
+                  <p className="text-xs text-muted-foreground">Login email for this account.</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" type="tel" defaultValue="+233 24 123 4567" />
+                  <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+233XXXXXXXXX" />
                 </div>
               </div>
-              <Button>Save Changes</Button>
+              <Button onClick={saveSchoolInfo} disabled={globalLoading}>
+                {globalLoading ? 'Saving...' : 'Save Changes'}
+              </Button>
             </CardContent>
           </Card>
 
@@ -251,14 +319,14 @@ export default function SettingsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Start Date</Label>
-                  <Input type="date" defaultValue="2026-09-01" />
+                  <Input type="date" disabled />
                 </div>
                 <div className="space-y-2">
                   <Label>End Date</Label>
-                  <Input type="date" defaultValue="2027-07-31" />
+                  <Input type="date" disabled />
                 </div>
               </div>
-              <Button>Save Changes</Button>
+              <p className="text-xs text-muted-foreground">Academic year configuration is coming in a future update. Term dates can already be set from the Academics page.</p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -300,7 +368,10 @@ export default function SettingsPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button>Save Branding</Button>
+              <Button onClick={saveBranding} disabled={globalLoading}>
+                {globalLoading ? 'Saving...' : 'Save Branding'}
+              </Button>
+              <p className="text-xs text-muted-foreground">The primary color and school name are saved to your school profile and shown across the portal.</p>
             </CardContent>
           </Card>
 
@@ -314,7 +385,10 @@ export default function SettingsPage() {
                 <div className="size-20 rounded-lg bg-muted flex items-center justify-center">
                   <span className="text-muted-foreground text-xs">Logo</span>
                 </div>
-                <Button variant="outline">Upload Logo</Button>
+                <div>
+                  <Button variant="outline" disabled>Upload Logo</Button>
+                  <p className="text-xs text-muted-foreground mt-1">Logo upload is coming in a future update.</p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -329,7 +403,7 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>Country</Label>
-                <Select defaultValue="GH">
+                <Select value={regionCountry} onValueChange={(v) => v && setRegionCountry(v)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -343,8 +417,23 @@ export default function SettingsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
+                <Label>School Type</Label>
+                <Select value={schoolType} onValueChange={(v) => v && setSchoolType(v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select school type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="basic">Basic / Primary</SelectItem>
+                    <SelectItem value="shs">Senior High / Secondary</SelectItem>
+                    <SelectItem value="both">Basic + Secondary</SelectItem>
+                    <SelectItem value="tertiary">Tertiary</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
                 <Label>Currency</Label>
-                <Select defaultValue="GHS">
+                <Select defaultValue="GHS" disabled>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -359,7 +448,7 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label>Language</Label>
-                <Select defaultValue="en">
+                <Select defaultValue="en" disabled>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -374,7 +463,7 @@ export default function SettingsPage() {
               <Separator />
               <div className="space-y-2">
                 <Label>Academic Structure</Label>
-                <Select defaultValue="ghana">
+                <Select defaultValue="ghana" disabled>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -385,8 +474,11 @@ export default function SettingsPage() {
                     <SelectItem value="custom">Custom</SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground">Currency, language, and academic structure are coming in a future update.</p>
               </div>
-              <Button>Save Regional Settings</Button>
+              <Button onClick={saveRegional} disabled={globalLoading}>
+                {globalLoading ? 'Saving...' : 'Save Regional Settings'}
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -589,14 +681,9 @@ export default function SettingsPage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                 />
-                <Button onClick={async () => {
-                  setGlobalLoading(true);
-                  try {
-                    await api.put('/auth/sms-preferences', { ...smsPrefs });
-                    setTwoFactorMsg('Phone number updated');
-                  } catch (err: any) { setTwoFactorError(err.message); }
-                  setGlobalLoading(false);
-                }}>Save</Button>
+                <Button onClick={savePhone} disabled={globalLoading}>
+                  {globalLoading ? 'Saving...' : 'Save'}
+                </Button>
               </div>
               <p className="text-xs text-muted-foreground mt-2">Used for SMS alerts: login notifications, fee receipts, attendance alerts, and more.</p>
             </CardContent>
