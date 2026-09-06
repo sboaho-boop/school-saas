@@ -100,7 +100,6 @@ const sidebarItems: SidebarItem[] = [
   { id: 'reports', labelKey: 'nav.reports', icon: 'BarChart3', href: '/reports' },
   { id: 'audit-logs', labelKey: 'nav.auditLogs', icon: 'Shield', href: '/audit-logs' },
   { id: 'terminal', labelKey: 'nav.terminal', icon: 'Scan', href: '/terminal' },
-  { id: 'orders', labelKey: 'nav.fulfillment', icon: 'Package', href: '/orders/admin' },
   { id: 'library', labelKey: 'nav.library', icon: 'BookOpen', href: '/library' },
   { id: 'hostel', labelKey: 'nav.hostel', icon: 'Building2', href: '/hostel' },
   { id: 'inventory', labelKey: 'nav.inventory', icon: 'Box', href: '/inventory' },

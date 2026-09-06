@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSuperAdminStore } from '@/stores/super-admin';
-import { Building2, LayoutDashboard, LogOut, School, ChevronLeft, ChevronRight, Shield } from 'lucide-react';
+import { Building2, LayoutDashboard, LogOut, School, ChevronLeft, ChevronRight, Shield, Nfc } from 'lucide-react';
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const { admin, initialized, initialize, logout } = useSuperAdminStore();
@@ -22,6 +22,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   const nav = [
     { label: 'Dashboard', icon: LayoutDashboard, href: '/super-admin/dashboard' },
     { label: 'Schools', icon: School, href: '/super-admin/schools' },
+    { label: 'NFC Orders', icon: Nfc, href: '/super-admin/orders' },
   ];
 
   return (

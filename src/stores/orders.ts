@@ -15,10 +15,8 @@ export interface CardOrder {
 
 interface OrdersStore {
   orders: CardOrder[];
-  allOrders: CardOrder[];
   loading: boolean;
   fetchOrders: () => Promise<void>;
-  fetchAllOrders: () => Promise<void>;
   createOrder: (studentIds: string[], notes?: string) => Promise<CardOrder>;
   updateStatus: (id: string, status: string) => Promise<void>;
   deleteOrder: (id: string) => Promise<void>;
@@ -26,7 +24,6 @@ interface OrdersStore {
 
 export const useOrdersStore = create<OrdersStore>((set) => ({
   orders: [],
-  allOrders: [],
   loading: false,
 
   fetchOrders: async () => {
@@ -34,14 +31,6 @@ export const useOrdersStore = create<OrdersStore>((set) => ({
     try {
       const orders = await api.get<CardOrder[]>('/orders');
       set({ orders, loading: false });
-    } catch { set({ loading: false }); }
-  },
-
-  fetchAllOrders: async () => {
-    set({ loading: true });
-    try {
-      const allOrders = await api.get<CardOrder[]>('/orders/all');
-      set({ allOrders, loading: false });
     } catch { set({ loading: false }); }
   },
 
@@ -55,7 +44,6 @@ export const useOrdersStore = create<OrdersStore>((set) => ({
     const updated = await api.patch<CardOrder>(`/orders/${id}/status`, { status });
     set((s) => ({
       orders: s.orders.map((o) => o.id === id ? updated : o),
-      allOrders: s.allOrders.map((o) => o.id === id ? updated : o),
     }));
   },
 

@@ -19,7 +19,7 @@ import { useThemeStore } from '@/stores/theme';
 import { useBillingStore } from '@/stores/billing';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { Building, Palette, Globe, Bell, Shield, CreditCard, Check, Sparkles, XCircle, Smartphone, QrCode, KeyRound, Download, Trash2, FileText, Wallet, Eye, EyeOff, Nfc, ShoppingCart, Zap } from 'lucide-react';
+import { Building, Palette, Globe, Bell, Shield, CreditCard, Check, Sparkles, XCircle, Smartphone, QrCode, KeyRound, Download, Trash2, FileText, Wallet, Eye, EyeOff, Nfc, ShoppingCart, Zap, MessageCircle, Mail } from 'lucide-react';
 import { api, getToken } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
 import { useI18n } from '@/stores/locale';
@@ -934,8 +934,8 @@ export default function SettingsPage() {
                     <p className="text-xs text-muted-foreground">
                       For students. Blank cards that get programmed with a unique ID. Buy in bulk — cheaper per card.
                     </p>
-                    <p className="text-xs font-medium">~GH₵ 3–8 each</p>
-                    <p className="text-xs text-muted-foreground">Search: &quot;NTAG213 NFC card bulk&quot;</p>
+                    <p className="text-xs font-medium">Bulk pricing for 50+</p>
+                    <p className="text-xs text-muted-foreground">Order from EduPlatform — delivered ready to issue.</p>
                   </div>
                   <div className="rounded-lg border border-border/50 p-4 space-y-2">
                     <div className="flex items-center gap-2 text-sm font-medium">
@@ -945,8 +945,8 @@ export default function SettingsPage() {
                     <p className="text-xs text-muted-foreground">
                       For younger students (KG–Primary). Harder to lose, comfortable to wear daily.
                     </p>
-                    <p className="text-xs font-medium">~GH₵ 5–12 each</p>
-                    <p className="text-xs text-muted-foreground">Search: &quot;NTAG213 NFC wristband bulk&quot;</p>
+                    <p className="text-xs font-medium">Bulk pricing for 50+</p>
+                    <p className="text-xs text-muted-foreground">Order from EduPlatform — delivered ready to issue.</p>
                   </div>
                   <div className="rounded-lg border border-border/50 p-4 space-y-2">
                     <div className="flex items-center gap-2 text-sm font-medium">
@@ -956,8 +956,8 @@ export default function SettingsPage() {
                     <p className="text-xs text-muted-foreground">
                       For staff. Attach to lanyard or keyring. Professional look.
                     </p>
-                    <p className="text-xs font-medium">~GH₵ 8–15 each</p>
-                    <p className="text-xs text-muted-foreground">Search: &quot;NTAG213 NFC key fob&quot;</p>
+                    <p className="text-xs font-medium">Bulk pricing for 50+</p>
+                    <p className="text-xs text-muted-foreground">Order from EduPlatform — delivered ready to issue.</p>
                   </div>
                 </div>
               </div>
@@ -974,45 +974,34 @@ export default function SettingsPage() {
                   <p className="text-xs text-muted-foreground">
                     Connects to your computer via USB. Used to write the generated card ID onto blank NFC cards. Only the school admin needs one.
                   </p>
-                  <p className="text-xs font-medium">~GH₵ 150–300 (one-time)</p>
-                  <p className="text-xs text-muted-foreground">Search: &quot;ACR122U NFC reader writer&quot; on Jumia Ghana or Amazon</p>
+                  <p className="text-xs font-medium">Included in EduPlatform starter kits</p>
+                  <p className="text-xs text-muted-foreground">Supplied with your EduPlatform order — one per school.</p>
                 </div>
               </div>
 
               <Separator />
 
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold">Where to Buy in Ghana</h3>
-                <div className="grid gap-2 md:grid-cols-2">
-                  <div className="flex items-start gap-2 text-sm">
-                    <ShoppingCart size={14} className="text-muted-foreground mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-medium">Jumia Ghana</p>
-                      <p className="text-xs text-muted-foreground">Search &quot;NFC card&quot; or &quot;NFC wristband&quot; — fastest delivery</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2 text-sm">
-                    <ShoppingCart size={14} className="text-muted-foreground mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-medium">AliExpress</p>
-                      <p className="text-xs text-muted-foreground">Cheapest for bulk orders (50+ cards). Ships in 15-30 days</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2 text-sm">
-                    <ShoppingCart size={14} className="text-muted-foreground mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-medium">Local Printing Shops</p>
-                      <p className="text-xs text-muted-foreground">Some print custom NFC cards with school logos — ask around Accra/Kumasi</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2 text-sm">
-                    <ShoppingCart size={14} className="text-muted-foreground mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-medium">Amazon (via freight forwarder)</p>
-                      <p className="text-xs text-muted-foreground">Best quality. Use GhanaShip or ShopToGhana to receive</p>
-                    </div>
-                  </div>
+              <div className="rounded-lg border-2 border-primary/30 bg-primary/5 p-5 space-y-3">
+                <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                  <ShoppingCart size={16} />
+                  Order Directly From EduPlatform
                 </div>
+                <p className="text-sm text-foreground">
+                  EduPlatform is the official supplier of the NFC cards, wristbands, key fobs, and USB writers for this system. Place an order and we deliver them ready to issue — batch pricing applies on orders of 50+.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Button size="sm" onClick={() => window.open('https://wa.me/447735310744?text=' + encodeURIComponent("Hi, I'd like to order NFC cards/wristbands for my school"), '_blank')}>
+                    <MessageCircle size={14} className="mr-1" />
+                    Order via WhatsApp
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => window.open('mailto:sboaho@gmail.com?subject=NFC%20Supply%20Order', '_blank')}>
+                    <Mail size={14} className="mr-1" />
+                    Email an Order
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Call / WhatsApp: <strong>+44 7735 310744</strong> or <strong>055 667 4353</strong>
+                </p>
               </div>
 
               <Separator />
