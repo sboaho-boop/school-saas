@@ -47,6 +47,7 @@ export default function TakeExamPage() {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
   const [showSubmit, setShowSubmit] = useState(false);
+  const [showLeave, setShowLeave] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [result, setResult] = useState<any>(null);
@@ -315,10 +316,13 @@ export default function TakeExamPage() {
               <p className="text-[10px] text-muted-foreground">{exam?.totalPoints ?? 0} marks · {exam?.duration} min</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <span className={`inline-flex items-center gap-1 text-sm font-semibold tabular-nums ${secondsLeft < 60 ? 'text-red-600' : 'text-foreground'}`}>
               <Clock size={15} />{formatClock(secondsLeft)}
             </span>
+            <Button size="sm" variant="ghost" className="text-[11px] text-muted-foreground hover:text-foreground" onClick={() => setShowLeave(true)} disabled={submitting}>
+              <LogOut size={13} className="mr-1" /><span className="hidden sm:inline">Leave</span>
+            </Button>
             <Button size="sm" variant="outline" className="text-[11px]" onClick={() => setShowSubmit(true)} disabled={submitting}>
               <Send size={13} className="mr-1" />Submit
             </Button>
@@ -445,6 +449,22 @@ export default function TakeExamPage() {
             <Button size="sm" variant="outline" onClick={() => setShowSubmit(false)} disabled={submitting}>Keep Working</Button>
             <Button size="sm" onClick={() => submitExam()} disabled={submitting}>
               {submitting ? <Loader2 size={14} className="mr-1 animate-spin" /> : <Send size={14} className="mr-1" />}{submitting ? 'Submitting...' : 'Submit Exam'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    <Dialog open={showLeave} onOpenChange={(o: boolean) => !submitting && setShowLeave(o)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Leave exam?</DialogTitle>
+            <DialogDescription>
+              Your answers are saved automatically. You can come back and resume before the time runs out. The timer keeps counting while you are away.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button size="sm" variant="outline" onClick={() => setShowLeave(false)} disabled={submitting}>Keep Working</Button>
+            <Button size="sm" onClick={() => router.push('/student/dashboard')} disabled={submitting}>
+              <LogOut size={14} className="mr-1" />Leave Exam
             </Button>
           </div>
         </DialogContent>
