@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { BackButton } from '@/components/ui/back-button';
 import { Logo } from '@/components/logo';
 import { driverApi, getDriverToken, setDriverToken } from '@/lib/driver-api';
 import { Bus, LogOut, MapPin, RefreshCw, CheckCircle2, CircleDashed } from 'lucide-react';
@@ -115,6 +116,7 @@ export default function DriverDashboardPage() {
       <header className="sticky top-0 z-10 border-b border-border/50 bg-background/80 backdrop-blur">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
+            <BackButton fallback="/" className="h-8 w-8" />
             <Logo />
             <span className="text-sm font-semibold">Driver</span>
           </div>

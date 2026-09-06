@@ -1,3 +1,5 @@
+import { StudentBackNav } from '@/components/layout/student-back-nav';
+
 export default function AuthLayout({
   children,
 }: {
@@ -5,6 +7,7 @@ export default function AuthLayout({
 }) {
   return (
     <div className="min-h-screen bg-background">
+      <StudentBackNav />
       {children}
     </div>
   );
