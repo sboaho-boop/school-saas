@@ -212,7 +212,7 @@ const scenes: Scene[] = [
             <span className="text-emerald-300 font-bold">GHS 35.00</span>
           </div>
           <ProgressBar value={35} max={100} color="bg-emerald-400" />
-          <div className="text-[10px] text-white/40 text-center mt-1">Tap to top up</div>
+          <div className="text-[10px] text-white/50 text-center mt-1">Tap to top up</div>
         </motion.div>
       </div>
     ),
@@ -321,8 +321,8 @@ const scenes: Scene[] = [
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
           className="bg-white/5 border border-white/10 rounded-lg p-2 max-h-16 overflow-hidden"
         >
-          <div className="text-[9px] text-white/40 font-mono">headteacher@school.com created Student "Kwame" — 10:32 AM</div>
-          <div className="text-[9px] text-white/40 font-mono">admin@school.com updated Fee Record — 11:15 AM</div>
+          <div className="text-[9px] text-white/50 font-mono">headteacher@school.com created Student "Kwame" — 10:32 AM</div>
+          <div className="text-[9px] text-white/50 font-mono">admin@school.com updated Fee Record — 11:15 AM</div>
         </motion.div>
       </div>
     ),
@@ -485,26 +485,26 @@ export default function ExplainerPage() {
 
       <div className="flex items-center gap-4 mt-4">
         <button onClick={() => { setIsPlaying(false); prev(); }} disabled={currentScene === 0}
-          className="text-white/40 hover:text-white/80 disabled:opacity-20 transition-colors"
+          className="text-white/50 hover:text-white/80 disabled:opacity-20 transition-colors"
         ><SkipBack size={18} /></button>
 
         <button onClick={() => { setMuted(!muted); }}
-          className="text-white/40 hover:text-white/80 transition-colors"
+          className="text-white/50 hover:text-white/80 transition-colors"
         >{muted ? <VolumeX size={16} /> : <Volume2 size={16} />}</button>
 
         <button onClick={() => setIsPlaying(!isPlaying)}
           className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center hover:bg-white/90 transition-all shadow-lg"
         >{isPlaying ? <Pause size={20} /> : <Play size={20} />}</button>
 
-        <span className="text-xs text-white/40 font-mono w-12 text-left">{scene.duration}s</span>
+        <span className="text-xs text-white/50 font-mono w-12 text-left">{scene.duration}s</span>
 
         <button onClick={() => { setIsPlaying(false); next(); }} disabled={isLast}
-          className="text-white/40 hover:text-white/80 disabled:opacity-20 transition-colors"
+          className="text-white/50 hover:text-white/80 disabled:opacity-20 transition-colors"
         ><SkipForward size={18} /></button>
       </div>
 
       <div className="mt-3 text-center max-w-md">
-        <p className="text-xs text-white/30 italic leading-relaxed">{scene.narration}</p>
+        <p className="text-xs text-white/40 italic leading-relaxed">{scene.narration}</p>
       </div>
 
       <div className="mt-4 flex gap-1.5">
@@ -515,7 +515,7 @@ export default function ExplainerPage() {
         ))}
       </div>
 
-      <a href="/" className="mt-4 text-[10px] text-white/20 hover:text-white/40 transition-colors underline">
+      <a href="/" className="mt-4 text-[10px] text-white/40 hover:text-white/60 transition-colors underline">
         Back to Home
       </a>
     </div>
