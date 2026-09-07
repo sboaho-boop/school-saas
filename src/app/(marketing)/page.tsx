@@ -1015,6 +1015,7 @@ export default function HomePage() {
                 { label: 'Contact Us', href: 'mailto:sboaho@gmail.com' },
                 { label: 'WhatsApp', href: 'https://wa.me/447735310744' },
                 { label: 'Privacy Policy', href: '/privacy' },
+                { label: 'Refund Policy', href: '/refund' },
               ],
             }).map(([category, links]) => (
               <div key={category}>

@@ -10,7 +10,7 @@ export default function PrivacyPage() {
           Back to Home
         </Link>
         <h1 className="text-3xl font-bold mb-2">Privacy Policy</h1>
-        <p className="text-sm text-muted-foreground mb-8">Last updated: June 2026</p>
+        <p className="text-sm text-muted-foreground mb-8">Last updated: September 2026</p>
 
         <div className="space-y-6 text-sm leading-relaxed text-muted-foreground">
           <section>
@@ -63,7 +63,7 @@ export default function PrivacyPage() {
             <ul className="list-disc pl-5 mt-2 space-y-1">
               <li>With Hubtel (our payment processor) for subscription billing — limited to transaction amounts and references</li>
               <li>With Hubtel SMS for sending notification messages to provided phone numbers</li>
-              <li>With our hosting providers (Railway, Vercel) who process data on our behalf under strict data processing agreements</li>
+              <li>With our hosting providers (Render, Vercel) who process data on our behalf under strict data processing agreements</li>
               <li>When required by law or to protect our legal rights</li>
             </ul>
             <p className="mt-2">All third-party processors are contractually bound to protect your data and process it only in accordance with our instructions.</p>
@@ -122,7 +122,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-lg font-semibold text-foreground mb-2">10. International Data Transfers</h2>
             <p>
-              Your data is hosted on servers in the United States (Railway, Vercel) and may be processed in other
+              Your data is hosted on servers in the United States (Render, Vercel) and may be processed in other
               jurisdictions where our service providers operate. We ensure appropriate safeguards are in place through
               data processing agreements and standard contractual clauses.
             </p>
