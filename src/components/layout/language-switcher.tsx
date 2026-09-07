@@ -40,6 +40,9 @@ export function LanguageSwitcher({ compact = false, persistToBackend = false }: 
       <button
         type="button"
         onClick={() => setOpen(!open)}
+        aria-label={t('header.language')}
+        aria-expanded={open}
+        aria-haspopup="menu"
         className="rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
       >
         <Globe size={20} />

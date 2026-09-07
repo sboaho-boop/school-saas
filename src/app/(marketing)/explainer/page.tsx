@@ -484,21 +484,21 @@ export default function ExplainerPage() {
       </div>
 
       <div className="flex items-center gap-4 mt-4">
-        <button onClick={() => { setIsPlaying(false); prev(); }} disabled={currentScene === 0}
+        <button onClick={() => { setIsPlaying(false); prev(); }} disabled={currentScene === 0} aria-label="Previous scene"
           className="text-white/50 hover:text-white/80 disabled:opacity-20 transition-colors"
         ><SkipBack size={18} /></button>
 
-        <button onClick={() => { setMuted(!muted); }}
+        <button onClick={() => { setMuted(!muted); }} aria-label={muted ? 'Unmute narration' : 'Mute narration'}
           className="text-white/50 hover:text-white/80 transition-colors"
         >{muted ? <VolumeX size={16} /> : <Volume2 size={16} />}</button>
 
-        <button onClick={() => setIsPlaying(!isPlaying)}
+        <button onClick={() => setIsPlaying(!isPlaying)} aria-label={isPlaying ? 'Pause' : 'Play'}
           className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center hover:bg-white/90 transition-all shadow-lg"
         >{isPlaying ? <Pause size={20} /> : <Play size={20} />}</button>
 
         <span className="text-xs text-white/50 font-mono w-12 text-left">{scene.duration}s</span>
 
-        <button onClick={() => { setIsPlaying(false); next(); }} disabled={isLast}
+        <button onClick={() => { setIsPlaying(false); next(); }} disabled={isLast} aria-label="Next scene"
           className="text-white/50 hover:text-white/80 disabled:opacity-20 transition-colors"
         ><SkipForward size={18} /></button>
       </div>
@@ -509,7 +509,7 @@ export default function ExplainerPage() {
 
       <div className="mt-4 flex gap-1.5">
         {scenes.map((s, i) => (
-          <button key={s.id} onClick={() => { setIsPlaying(false); goTo(i); }}
+          <button key={s.id} onClick={() => { setIsPlaying(false); goTo(i); }} aria-label={`Go to scene ${i + 1} of ${scenes.length}`}
             className={`h-1.5 rounded-full transition-all ${i === currentScene ? 'w-6 bg-white' : 'w-1.5 bg-white/20 hover:bg-white/40'}`}
           />
         ))}

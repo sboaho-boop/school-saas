@@ -221,12 +221,15 @@ export default function HomePage() {
             className="md:hidden text-white"
             onClick={() => setMobileMenu(!mobileMenu)}
             aria-label="Toggle menu"
+            aria-expanded={mobileMenu}
+            aria-controls="mobile-menu"
           >
             {mobileMenu ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
         {mobileMenu && (
           <motion.div
+            id="mobile-menu"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="md:hidden border-t border-white/10 bg-background/95 backdrop-blur-xl px-4 py-4 space-y-3"
@@ -1016,6 +1019,7 @@ export default function HomePage() {
                 { label: 'WhatsApp', href: 'https://wa.me/447735310744' },
                 { label: 'Privacy Policy', href: '/privacy' },
                 { label: 'Refund Policy', href: '/refund' },
+                { label: 'Cookie Policy', href: '/cookies' },
               ],
             }).map(([category, links]) => (
               <div key={category}>
@@ -1078,6 +1082,9 @@ export default function HomePage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Watch the EduPlatform demo"
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
           onClick={() => setShowVideo(false)}
         >
@@ -1099,6 +1106,7 @@ export default function HomePage() {
             <iframe
               src="https://www.youtube.com/embed/MhqlAqyyMf4?rel=0"
               className="w-full h-full"
+              title="EduPlatform demo video"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
