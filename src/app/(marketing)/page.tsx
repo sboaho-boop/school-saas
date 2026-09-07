@@ -178,7 +178,7 @@ function FeatureCard({ icon: Icon, title, desc, index }: { icon: any; title: str
 function SectionHeading({ pill, title, sub }: { pill: string; title: string; sub?: string }) {
   return (
     <div className="text-center mb-16">
-      <span className="inline-flex items-center rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-500 mb-4">
+      <span className="inline-flex items-center rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-400 mb-4">
         {pill}
       </span>
       <h2 className="text-3xl lg:text-4xl font-bold tracking-tight">{title}</h2>
@@ -324,13 +324,13 @@ export default function HomePage() {
                     <div className="w-3 h-3 rounded-full bg-red-400/50" />
                     <div className="w-3 h-3 rounded-full bg-amber-400/50" />
                     <div className="w-3 h-3 rounded-full bg-emerald-400/50" />
-                    <div className="ml-3 text-xs text-white/30 font-mono">EduPlatform Dashboard</div>
+                    <div className="ml-3 text-xs text-white/40 font-mono">EduPlatform Dashboard</div>
                   </div>
                   <div className="p-4 space-y-3">
                     <div className="grid grid-cols-3 gap-2">
                       {['Total Students', 'Revenue', 'Attendance'].map((label, i) => (
                         <div key={i} className="bg-white/5 rounded-lg p-3 border border-white/5">
-                          <div className="text-[10px] text-white/40">{label}</div>
+                          <div className="text-[10px] text-white/50">{label}</div>
                           <div className="text-lg font-bold text-white mt-1">
                             {['1,247', 'GHS 48.2K', '96.3%'][i]}
                           </div>
@@ -356,13 +356,13 @@ export default function HomePage() {
                         <div className="flex items-center gap-2 text-xs text-white/60">
                           <Clock size={12} /> Recent Activity
                         </div>
-                        <div className="text-[10px] text-white/40 mt-1">5 new enrollments today</div>
+                        <div className="text-[10px] text-white/50 mt-1">5 new enrollments today</div>
                       </div>
                       <div className="bg-white/5 rounded-lg p-2 border border-white/5">
                         <div className="flex items-center gap-2 text-xs text-white/60">
                           <Wallet size={12} /> Fee Collections
                         </div>
-                        <div className="text-[10px] text-white/40 mt-1">GHS 12,450 collected</div>
+                        <div className="text-[10px] text-white/50 mt-1">GHS 12,450 collected</div>
                       </div>
                     </div>
                   </div>
@@ -455,7 +455,7 @@ export default function HomePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <span className="inline-flex items-center rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-500 mb-4">
+              <span className="inline-flex items-center rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-400 mb-4">
                 <Nfc size={14} className="mr-1" /> NFC Payments & Cards
               </span>
               <h2 className="text-3xl lg:text-4xl font-bold tracking-tight mb-6">
@@ -490,7 +490,7 @@ export default function HomePage() {
               </ul>
               <div className="flex flex-wrap gap-3">
                 <a href="https://wa.me/447735310744" target="_blank" rel="noopener noreferrer">
-                  <Button size="lg" className="bg-emerald-600 text-white hover:bg-emerald-700 font-semibold shadow-xl shadow-emerald-500/20 text-base px-6">
+                  <Button size="lg" className="bg-emerald-700 text-white hover:bg-emerald-800 font-semibold shadow-xl shadow-emerald-500/20 text-base px-6">
                     <MessageCircle size={18} className="mr-2" /> Order NFC Cards
                   </Button>
                 </a>
@@ -518,7 +518,7 @@ export default function HomePage() {
                       </div>
                       <div>
                         <div className="text-sm font-semibold text-white">School Wallet</div>
-                        <div className="text-xs text-white/40">Tap to pay</div>
+                        <div className="text-xs text-white/50">Tap to pay</div>
                       </div>
                     </div>
                     <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 text-[10px] font-medium">
@@ -526,11 +526,11 @@ export default function HomePage() {
                     </span>
                   </div>
                   <div className="rounded-xl bg-white/5 border border-white/5 p-4">
-                    <div className="text-[10px] text-white/40">Available Balance</div>
+                    <div className="text-[10px] text-white/50">Available Balance</div>
                     <div className="text-3xl font-bold text-white mt-1">GHS 142.50</div>
                     <div className="mt-3 flex items-center gap-2 rounded-lg bg-white/5 border border-white/10 px-3 py-2">
-                      <QrCode className="h-4 w-4 text-white/40" />
-                      <span className="text-xs text-white/40 flex-1">Tap card or scan QR</span>
+                      <QrCode className="h-4 w-4 text-white/50" />
+                      <span className="text-xs text-white/50 flex-1">Tap card or scan QR</span>
                       <Zap className="h-4 w-4 text-amber-400" />
                     </div>
                   </div>
@@ -574,7 +574,7 @@ export default function HomePage() {
                     </div>
                     <div>
                       <div className="text-sm font-semibold text-white">Route A — KM 5</div>
-                      <div className="text-xs text-white/40">Driver: Mr. Acheampong</div>
+                      <div className="text-xs text-white/50">Driver: Mr. Acheampong</div>
                     </div>
                   </div>
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 text-[10px] font-medium">
@@ -593,7 +593,7 @@ export default function HomePage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-xs font-medium text-white">{row.stop}</div>
-                        <div className="text-[10px] text-white/40">{row.label}</div>
+                        <div className="text-[10px] text-white/50">{row.label}</div>
                       </div>
                       {row.onboard ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 text-emerald-400 px-2 py-0.5 text-[10px] font-medium">
@@ -734,7 +734,7 @@ export default function HomePage() {
                   <div className="w-3 h-3 rounded-full bg-red-400/50" />
                   <div className="w-3 h-3 rounded-full bg-amber-400/50" />
                   <div className="w-3 h-3 rounded-full bg-emerald-400/50" />
-                  <div className="ml-3 text-xs text-white/30 font-mono">Teacher Kofi — Student Chat</div>
+                  <div className="ml-3 text-xs text-white/40 font-mono">Teacher Kofi — Student Chat</div>
                 </div>
                 <div className="space-y-3">
                   {[
@@ -756,8 +756,8 @@ export default function HomePage() {
                   ))}
                 </div>
                 <div className="mt-4 flex items-center gap-2 rounded-lg bg-white/5 border border-white/10 px-3 py-2">
-                  <Mic className="h-4 w-4 text-white/40" />
-                  <span className="text-xs text-white/40 flex-1">Talk in English, Twi or Ga...</span>
+                  <Mic className="h-4 w-4 text-white/50" />
+                  <span className="text-xs text-white/50 flex-1">Talk in English, Twi or Ga...</span>
                   <Send className="h-4 w-4 text-fuchsia-400" />
                 </div>
               </div>
@@ -775,7 +775,7 @@ export default function HomePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              <span className="inline-flex items-center rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-500 mb-4">
+              <span className="inline-flex items-center rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-400 mb-4">
                 <Shield size={14} className="mr-1" /> Security & Trust
               </span>
               <h2 className="text-3xl lg:text-4xl font-bold tracking-tight mb-6">
@@ -916,7 +916,7 @@ export default function HomePage() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-500/10 text-indigo-500 mb-4 mx-auto">
                   <s.icon size={28} />
                 </div>
-                <div className="text-xs font-semibold text-indigo-500 mb-1">{s.step}</div>
+                <div className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mb-1">{s.step}</div>
                 <h3 className="text-lg font-semibold mb-2">{s.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
               </motion.div>
