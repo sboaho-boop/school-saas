@@ -147,7 +147,7 @@ export default function SchoolDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link href="/super-admin/schools"><Button variant="ghost" size="icon"><ArrowLeft size={18} /></Button></Link>
+        <Link href="/super-admin/schools"><Button variant="ghost" size="icon" aria-label="Back"><ArrowLeft size={18} /></Button></Link>
         <div className="flex-1">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">{school.name}</h1>

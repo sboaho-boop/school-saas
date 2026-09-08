@@ -504,8 +504,9 @@ export default function SettingsPage() {
               <Separator />
               {Object.entries(SMS_EVENT_LABELS).map(([key, label]) => (
                 <div key={key} className="flex items-center justify-between">
-                  <Label className="cursor-pointer">{label}</Label>
+                  <Label htmlFor={`sms-${key}`} className="cursor-pointer">{label}</Label>
                   <input
+                    id={`sms-${key}`}
                     type="checkbox"
                     checked={smsPrefs[key] || false}
                     onChange={(e) => setSmsPrefs((p) => ({ ...p, [key]: e.target.checked }))}

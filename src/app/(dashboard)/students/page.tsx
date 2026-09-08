@@ -332,11 +332,11 @@ export default function StudentsPage() {
                   </div>
                   <div className="flex items-center gap-1">
                     {isAdminOrHead && (
-                      <Button variant="ghost" size="icon" className="size-8" onClick={() => { setEditing(!editing); if (!editing) setEditForm({ ...selectedStudent }); }}>
+                      <Button variant="ghost" size="icon" className="size-8" onClick={() => { setEditing(!editing); if (!editing) setEditForm({ ...selectedStudent }); }} aria-label="Edit student">
                         <Pencil size={14} />
                       </Button>
                     )}
-                    <Button variant="ghost" size="icon" className="size-8" onClick={closeDetail}><X size={16} /></Button>
+                    <Button variant="ghost" size="icon" className="size-8" onClick={closeDetail} aria-label="Close student details"><X size={16} /></Button>
                   </div>
                 </div>
 

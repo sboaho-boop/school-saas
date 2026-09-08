@@ -59,7 +59,7 @@ export default function NewSchoolPage() {
   return (
     <div className="max-w-lg mx-auto space-y-6">
       <div className="flex items-center gap-4">
-        <Link href="/super-admin/schools"><Button variant="ghost" size="icon"><ArrowLeft size={18} /></Button></Link>
+        <Link href="/super-admin/schools"><Button variant="ghost" size="icon" aria-label="Back"><ArrowLeft size={18} /></Button></Link>
         <div><h1 className="text-2xl font-bold">New School</h1><p className="text-muted-foreground">Create a school and its admin account.</p></div>
       </div>
 

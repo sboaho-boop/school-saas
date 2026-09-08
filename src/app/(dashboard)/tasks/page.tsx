@@ -47,7 +47,7 @@ function TaskCard({ task }: { task: Task }) {
                 {task.description}
               </p>
             </div>
-            <Button variant="ghost" size="icon" className="size-7 shrink-0">
+            <Button variant="ghost" size="icon" className="size-7 shrink-0" aria-label="Task actions">
               <MoreHorizontal size={14} />
             </Button>
           </div>

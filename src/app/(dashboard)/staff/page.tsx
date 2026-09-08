@@ -200,7 +200,7 @@ export default function StaffPage() {
                         </div>
                       </div>
                       <DropdownMenu>
-                        <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="size-8" />}>
+                        <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="size-8" aria-label="Staff actions" />}>
                           <MoreHorizontal size={16} />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">

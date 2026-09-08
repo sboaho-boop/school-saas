@@ -179,7 +179,7 @@ export default function CommunicationPage() {
           {!msg.read && msg.toId === currentUser.id && (
             <Button size="sm" variant="outline" onClick={() => markRead(msg.id)}><MailOpen size={14} className="mr-1" /> Mark Read</Button>
           )}
-          <Button size="sm" variant="outline" onClick={onClose}><Trash2 size={14} /></Button>
+          <Button size="sm" variant="outline" onClick={onClose} aria-label="Close message"><Trash2 size={14} /></Button>
         </div>
       </div>
       <div className="rounded-lg bg-muted/50 p-4">

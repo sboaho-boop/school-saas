@@ -191,7 +191,7 @@ export default function StudentAITutorPage() {
                 disabled={loading}
                 className="flex-1"
               />
-              <Button onClick={handleSend} disabled={!input.trim() || loading} size="icon">
+              <Button onClick={handleSend} disabled={!input.trim() || loading} size="icon" aria-label="Send message">
                 <Send size={16} />
               </Button>
               <Button variant="outline" onClick={resetChat} size="icon" title="New chat">

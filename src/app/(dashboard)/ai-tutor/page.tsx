@@ -189,7 +189,7 @@ export default function AITutorPage() {
               disabled={loading}
               className="flex-1"
             />
-            <Button onClick={handleSend} disabled={!input.trim() || loading} size="icon">
+            <Button onClick={handleSend} disabled={!input.trim() || loading} size="icon" aria-label="Send message">
               <Send size={16} />
             </Button>
           </div>
