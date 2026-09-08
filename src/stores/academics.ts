@@ -37,8 +37,10 @@ interface AcademicsStore {
   fetchTerms: () => Promise<void>;
   addClass: (cls: Omit<AcademicClass, 'id'>) => Promise<void>;
   removeClass: (id: string) => Promise<void>;
+  updateClass: (id: string, data: Partial<Pick<AcademicClass, 'name' | 'section' | 'teacher'>>) => Promise<void>;
   addSubject: (subj: Omit<Subject, 'id'>) => Promise<void>;
   removeSubject: (id: string) => Promise<void>;
+  updateSubject: (id: string, data: Partial<Pick<Subject, 'name' | 'code' | 'teacher'>>) => Promise<void>;
   addTerm: (term: Omit<Term, 'id'>) => Promise<void>;
   setActiveTerm: (id: string) => Promise<void>;
 }
@@ -81,6 +83,10 @@ export const useAcademicsStore = create<AcademicsStore>((set) => ({
     await api.delete(`/academics/classes/${id}`);
     set((s) => ({ classes: s.classes.filter((c) => c.id !== id) }));
   },
+  updateClass: async (id, data) => {
+    const updated = await api.put<AcademicClass>(`/academics/classes/${id}`, data);
+    set((s) => ({ classes: s.classes.map((c) => (c.id === id ? updated : c)) }));
+  },
   addSubject: async (subj) => {
     const created = await api.post<Subject>('/academics/subjects', subj);
     set((s) => ({ subjects: [...s.subjects, created] }));
@@ -88,6 +94,10 @@ export const useAcademicsStore = create<AcademicsStore>((set) => ({
   removeSubject: async (id) => {
     await api.delete(`/academics/subjects/${id}`);
     set((s) => ({ subjects: s.subjects.filter((s2) => s2.id !== id) }));
+  },
+  updateSubject: async (id, data) => {
+    const updated = await api.put<Subject>(`/academics/subjects/${id}`, data);
+    set((s) => ({ subjects: s.subjects.map((sub) => (sub.id === id ? updated : sub)) }));
   },
   addTerm: async (term) => {
     const created = await api.post<Term>('/academics/terms', term);

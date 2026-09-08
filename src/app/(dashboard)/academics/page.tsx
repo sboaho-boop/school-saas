@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { motion } from 'framer-motion';
-import { Plus, GraduationCap, BookOpen, Calendar, Trash2 } from 'lucide-react';
+import { Plus, GraduationCap, BookOpen, Calendar, Trash2, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { useAcademicsStore } from '@/stores/academics';
+import { useStaffStore } from '@/stores/staff';
 import { useAuthStore } from '@/stores/auth';
 import { useI18n } from '@/stores/locale';
 
@@ -18,8 +19,11 @@ const sections = ['Kindergarten', 'Lower Primary', 'Upper Primary', 'Junior High
 
 export default function AcademicsPage() {
   const currentUser = useAuthStore((s) => s.currentUser);
-  const { classes, subjects, terms, addClass, removeClass, addSubject, removeSubject, setActiveTerm } = useAcademicsStore();
+  const { classes, subjects, terms, addClass, removeClass, updateClass, addSubject, removeSubject, updateSubject, setActiveTerm } = useAcademicsStore();
+  const staff = useStaffStore((s) => s.staff);
   const { t } = useI18n();
+  const canManage = currentUser?.staffType === 'headteacher' || currentUser?.staffType === 'admin';
+  const teacherOptions = staff.filter((m) => m.staffType === 'teaching' || m.staffType === 'headteacher').map((m) => m.name);
   const [classOpen, setClassOpen] = useState(false);
   const [subjectOpen, setSubjectOpen] = useState(false);
   const [newClassName, setNewClassName] = useState('');
@@ -150,11 +154,30 @@ export default function AcademicsPage() {
                     <h3 className="text-xs font-medium text-muted-foreground mb-2">{section}</h3>
                     <div className="flex flex-wrap gap-2">
                       {sectionClasses.map((cls) => (
-                        <div key={cls.id} className="group relative">
-                          <Badge variant="secondary" className="text-xs py-1.5">
-                            {cls.name} — {cls.students} students
-                          </Badge>
-                          <button onClick={() => removeClass(cls.id)} className="absolute -right-1.5 -top-1.5 hidden group-hover:flex size-4 items-center justify-center rounded-full bg-destructive text-destructive-foreground"><Trash2 size={8} /></button>
+                        <div key={cls.id} className="group relative w-full max-w-[220px]">
+                          <div className="rounded-lg border border-border/50 bg-card p-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-xs font-medium">{cls.name}</span>
+                                <span className="text-[10px] text-muted-foreground shrink-0">· {cls.students}</span>
+                              </div>
+                              <button onClick={() => removeClass(cls.id)} aria-label={`Delete class ${cls.name}`} className="hidden group-hover:flex size-4 shrink-0 items-center justify-center rounded-full bg-destructive text-destructive-foreground"><Trash2 size={8} /></button>
+                            </div>
+                            <div className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground">
+                              <UserRound size={10} className="shrink-0" />
+                              <span className="truncate">{cls.teacher && cls.teacher !== 'Unassigned' ? cls.teacher : 'Unassigned'}</span>
+                            </div>
+                            {canManage && (
+                              <Select value={cls.teacher} onValueChange={(v) => v && updateClass(cls.id, { teacher: v })}>
+                                <SelectTrigger aria-label={`Assign class teacher for ${cls.name}`} size="sm" className="mt-1.5 h-6 w-full">
+                                  <SelectValue placeholder="Assign teacher" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {teacherOptions.map((name) => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -177,10 +200,24 @@ export default function AcademicsPage() {
                     <div className="flex flex-wrap gap-1.5">
                       {clsSubjects.map((subj) => (
                         <div key={subj.id} className="group relative">
-                          <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                            {subj.code}
-                          </span>
-                          <button onClick={() => removeSubject(subj.id)} className="absolute -right-1 -top-1 hidden group-hover:flex size-3.5 items-center justify-center rounded-full bg-destructive text-destructive-foreground"><Trash2 size={7} /></button>
+                          <div className="rounded-md bg-primary/10 px-2 py-1">
+                            <span className="text-xs font-medium text-primary">{subj.code}</span>
+                            <div className="flex items-center gap-1 text-[10px] text-primary/70">
+                              <UserRound size={9} className="shrink-0" />
+                              <span className="truncate max-w-[110px]">{subj.teacher && subj.teacher !== 'Unassigned' ? subj.teacher : 'Unassigned'}</span>
+                            </div>
+                            {canManage && (
+                              <Select value={subj.teacher} onValueChange={(v) => v && updateSubject(subj.id, { teacher: v })}>
+                                <SelectTrigger aria-label={`Assign teacher for ${subj.name}`} size="sm" className="mt-1 h-5 w-full">
+                                  <SelectValue placeholder="Assign" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {teacherOptions.map((name) => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </div>
+                          <button onClick={() => removeSubject(subj.id)} aria-label={`Delete subject ${subj.name}`} className="absolute -right-1 -top-1 hidden group-hover:flex size-3.5 items-center justify-center rounded-full bg-destructive text-destructive-foreground"><Trash2 size={7} /></button>
                         </div>
                       ))}
                       {clsSubjects.length === 0 && <span className="text-xs text-muted-foreground">No subjects assigned</span>}
