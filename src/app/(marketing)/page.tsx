@@ -56,6 +56,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { KofiAvatar } from '@/components/ai/kofi-avatar';
+import { API_URL } from '@/lib/api';
 
 const features = [
   { icon: Users, title: 'Students & Admissions', desc: 'Enrol, store records, and generate student credentials in seconds.' },
@@ -254,6 +255,37 @@ export default function HomePage() {
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
   const heroOpacity = useTransform(scrollYProgress, [0, 1], [1, 0.3]);
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
+  const [demoMsgs, setDemoMsgs] = useState<Array<{ role: 'user' | 'kofi'; text: string }>>([
+    { role: 'kofi', text: 'Sure! Imagine a pizza cut into 8 slices. If you eat 2, you ate 2/8 = 1/4 of it. Great start!' },
+    { role: 'kofi', text: 'Want a quick practice quiz on that?' },
+  ]);
+  const [demoInput, setDemoInput] = useState('');
+  const [demoLoading, setDemoLoading] = useState(false);
+
+  const sendDemo = async () => {
+    const text = demoInput.trim();
+    if (!text || demoLoading) return;
+    setDemoInput('');
+    setDemoMsgs((prev) => [...prev.slice(-5), { role: 'user', text }]);
+    setDemoLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/kofi/demo/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          history: demoMsgs.map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text })),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+      setDemoMsgs((prev) => [...prev, { role: 'kofi', text: data.reply || '' }]);
+    } catch {
+      setDemoMsgs((prev) => [...prev, { role: 'kofi', text: "Oops, Kofi couldn't answer right now. Please try again." }]);
+    } finally {
+      setDemoLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -836,12 +868,8 @@ export default function HomePage() {
                   <div className="w-3 h-3 rounded-full bg-emerald-400/50" />
                   <div className="ml-3 text-xs text-white/40 font-mono">Teacher Kofi — Student Chat</div>
                 </div>
-                <div className="space-y-3">
-                  {[
-                    { role: 'user', text: 'Help me with fractions' },
-                    { role: 'kofi', text: 'Sure! Imagine a pizza cut into 8 slices. If you eat 2, you ate 2/8 = 1/4 of it. Great start!' },
-                    { role: 'kofi', text: 'Want a quick practice quiz on that?' },
-                  ].map((m, i) => (
+                <div className="space-y-3 h-56 overflow-y-auto pr-1">
+                  {demoMsgs.map((m, i) => (
                     <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div
                         className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
@@ -854,12 +882,46 @@ export default function HomePage() {
                       </div>
                     </div>
                   ))}
+                  {demoLoading && (
+                    <div className="flex justify-start">
+                      <div className="bg-amber-500/40 text-white rounded-2xl rounded-bl-md px-4 py-3 text-sm">
+                        <span className="inline-flex gap-1">
+                          <span className="size-1.5 rounded-full bg-white/80 animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <span className="size-1.5 rounded-full bg-white/80 animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <span className="size-1.5 rounded-full bg-white/80 animate-bounce" style={{ animationDelay: '300ms' }} />
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="mt-4 flex items-center gap-2 rounded-lg bg-white/5 border border-white/10 px-3 py-2">
-                  <Mic className="h-4 w-4 text-white/50" />
-                  <span className="text-xs text-white/50 flex-1">Talk in English, Twi or Ga...</span>
-                  <Send className="h-4 w-4 text-amber-400" />
-                </div>
+                <form
+                  className="mt-4 flex items-center gap-2 rounded-lg bg-white/5 border border-white/10 px-3 py-2"
+                  onSubmit={(e) => { e.preventDefault(); sendDemo(); }}
+                >
+                  <Mic className="h-4 w-4 text-white/50 shrink-0" />
+                  <input
+                    name="kofi-demo-message"
+                    id="kofi-demo-message"
+                    value={demoInput}
+                    onChange={(e) => setDemoInput(e.target.value)}
+                    placeholder="Ask Teacher Kofi anything..."
+                    disabled={demoLoading}
+                    aria-label="Ask Teacher Kofi"
+                    autoComplete="off"
+                    className="flex-1 bg-transparent text-white text-sm placeholder:text-white/50 focus:outline-none min-w-0"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!demoInput.trim() || demoLoading}
+                    aria-label="Send message"
+                    className="text-amber-400 hover:text-amber-300 disabled:opacity-40 disabled:pointer-events-none"
+                  >
+                    <Send className="h-4 w-4" />
+                  </button>
+                </form>
+                <p className="mt-2 text-[10px] text-white/40 text-center">
+                  Live preview — create a free account for the full classroom board.
+                </p>
               </div>
             </motion.div>
           </div>
