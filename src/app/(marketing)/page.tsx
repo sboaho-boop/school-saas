@@ -123,7 +123,7 @@ const plans = [
     price: 'GHS 999',
     period: '/month',
     desc: 'For school chains and large institutions.',
-    features: ['Unlimited students & staff', 'Multi-campus support', 'API access', 'Dedicated onboarding manager', 'Custom integrations', 'SLA guarantee'],
+    features: ['Unlimited students & staff', 'Multi-campus support', 'API access', 'Custom integrations', 'Priority support'],
     cta: 'Contact Sales',
     popular: false,
   },
@@ -1104,9 +1104,11 @@ export default function HomePage() {
               <X size={16} />
             </button>
             <iframe
-              src="https://www.youtube.com/embed/MhqlAqyyMf4?rel=0"
+              src="https://www.youtube-nocookie.com/embed/MhqlAqyyMf4?rel=0"
               className="w-full h-full"
               title="EduPlatform demo video"
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />

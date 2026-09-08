@@ -25,7 +25,7 @@ export default function TutorLanding() {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 via-fuchsia-500/5 to-transparent" />
         <div className="relative max-w-6xl mx-auto px-4 py-20 md:py-32 text-center">
-          <div className="inline-flex items-center gap-2 bg-violet-500/10 text-violet-600 rounded-full px-4 py-1.5 text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 bg-violet-500/10 text-violet-600 dark:text-violet-400 rounded-full px-4 py-1.5 text-sm font-medium mb-6">
             <Star size={14} /> {t('tutor.builtForGhana')}
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
@@ -104,7 +104,7 @@ export default function TutorLanding() {
             {t('tutor.joinThousands')}
           </p>
           <Link href="/tutor/signup">
-            <Button size="lg" className="bg-white text-violet-600 hover:bg-white/90 text-base px-8 font-semibold">
+            <Button size="lg" className="bg-white text-violet-600 dark:text-violet-700 hover:bg-white/90 text-base px-8 font-semibold">
               {t('tutor.startLearningFree')}
             </Button>
           </Link>

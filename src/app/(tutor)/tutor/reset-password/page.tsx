@@ -7,6 +7,7 @@ import { Suspense } from 'react';
 import { useTutorAuth } from '@/stores/tutor-auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { KofiAvatar } from '@/components/ai/kofi-avatar';
 import { useI18n } from '@/stores/locale';
@@ -94,7 +95,9 @@ function ResetPasswordForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="relative">
               <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Label htmlFor="tutorNewPw" className="sr-only">{t('tutor.newPasswordPlaceholder')}</Label>
               <Input
+                id="tutorNewPw"
                 type="password"
                 placeholder={t('tutor.newPasswordPlaceholder')}
                 value={password}
@@ -106,7 +109,9 @@ function ResetPasswordForm() {
             </div>
             <div className="relative">
               <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Label htmlFor="tutorConfirmPw" className="sr-only">{t('tutor.confirmPassword')}</Label>
               <Input
+                id="tutorConfirmPw"
                 type="password"
                 placeholder={t('tutor.confirmPassword')}
                 value={confirm}
@@ -122,7 +127,7 @@ function ResetPasswordForm() {
           </form>
 
           <p className="text-sm text-center mt-6 text-muted-foreground">
-            <Link href="/tutor/login" className="text-violet-600 hover:underline font-medium">{t('tutor.backToSignIn')}</Link>
+            <Link href="/tutor/login" className="text-violet-600 dark:text-violet-400 hover:underline font-medium">{t('tutor.backToSignIn')}</Link>
           </p>
         </CardContent>
       </Card>

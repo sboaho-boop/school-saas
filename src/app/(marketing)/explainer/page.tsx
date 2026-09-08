@@ -331,7 +331,7 @@ const scenes: Scene[] = [
     id: 'cta',
     title: 'Start Free Today',
     subtitle: 'Built for Africa. Ready for the World.',
-    narration: 'Start free with up to 30 students. Upgrade as you grow. Questions? We are one WhatsApp away.',
+    narration: 'Start free with up to 100 students. Upgrade as you grow. Questions? We are one WhatsApp away.',
     duration: 6,
     icon: Globe,
     color: 'from-indigo-600 to-purple-600',

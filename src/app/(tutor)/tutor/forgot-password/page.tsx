@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useTutorAuth } from '@/stores/tutor-auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { KofiAvatar } from '@/components/ai/kofi-avatar';
 import { useI18n } from '@/stores/locale';
@@ -58,7 +59,9 @@ export default function TutorForgotPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="relative">
               <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Label htmlFor="tutorForgotEmail" className="sr-only">{t('tutor.emailAddress')}</Label>
               <Input
+                id="tutorForgotEmail"
                 type="email"
                 placeholder={t('tutor.emailAddress')}
                 value={email}
@@ -74,7 +77,7 @@ export default function TutorForgotPasswordPage() {
 
           <p className="text-sm text-center mt-6 text-muted-foreground">
             {t('tutor.rememberPassword')}{' '}
-            <Link href="/tutor/login" className="text-violet-600 hover:underline font-medium">{t('tutor.signIn')}</Link>
+            <Link href="/tutor/login" className="text-violet-600 dark:text-violet-400 hover:underline font-medium">{t('tutor.signIn')}</Link>
           </p>
         </CardContent>
       </Card>

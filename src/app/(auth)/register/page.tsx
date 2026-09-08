@@ -280,6 +280,7 @@ export default function RegisterPage() {
                         type="checkbox"
                         checked={privacyConsent}
                         onChange={(e) => setPrivacyConsent(e.target.checked)}
+                        required
                         className="mr-2 size-4 accent-primary align-text-top"
                       />
                       I have read and agree to the{' '}

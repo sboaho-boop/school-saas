@@ -164,7 +164,7 @@ function TutorDashboardContent() {
         <div className="flex items-center gap-2">
           {user?.plan === 'free' && (
             <Link href="/tutor/pricing">
-              <Button variant="outline" size="sm" className="text-violet-600 border-violet-300 hover:bg-violet-50">
+              <Button variant="outline" size="sm" className="text-violet-600 dark:text-violet-400 border-violet-300 hover:bg-violet-50">
                 {t('tutor.upgrade')}
               </Button>
             </Link>

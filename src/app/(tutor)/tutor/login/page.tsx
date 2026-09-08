@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useTutorAuth } from '@/stores/tutor-auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { KofiAvatar } from '@/components/ai/kofi-avatar';
 import { useI18n } from '@/stores/locale';
@@ -46,7 +47,9 @@ export default function TutorLoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="relative">
               <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Label htmlFor="tutorLoginEmail" className="sr-only">{t('tutor.emailAddress')}</Label>
               <Input
+                id="tutorLoginEmail"
                 type="email"
                 placeholder={t('tutor.emailAddress')}
                 value={email}
@@ -57,7 +60,9 @@ export default function TutorLoginPage() {
             </div>
             <div className="relative">
               <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Label htmlFor="tutorLoginPassword" className="sr-only">{t('auth.password')}</Label>
               <Input
+                id="tutorLoginPassword"
                 type="password"
                 placeholder={t('auth.password')}
                 value={password}
@@ -67,7 +72,7 @@ export default function TutorLoginPage() {
               />
             </div>
             <div className="flex items-center justify-end -mt-1">
-              <Link href="/tutor/forgot-password" className="text-xs text-violet-600 hover:underline">{t('tutor.forgotPassword')}</Link>
+              <Link href="/tutor/forgot-password" className="text-xs text-violet-600 dark:text-violet-400 hover:underline">{t('tutor.forgotPassword')}</Link>
             </div>
             <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600">
               {loading ? t('tutor.signingIn') : t('tutor.signInBtn')}
@@ -76,7 +81,7 @@ export default function TutorLoginPage() {
 
           <p className="text-sm text-center mt-6 text-muted-foreground">
             {t('tutor.dontHaveAccount')}{' '}
-            <Link href="/tutor/signup" className="text-violet-600 hover:underline font-medium">{t('tutor.signUpFree')}</Link>
+            <Link href="/tutor/signup" className="text-violet-600 dark:text-violet-400 hover:underline font-medium">{t('tutor.signUpFree')}</Link>
           </p>
         </CardContent>
       </Card>
