@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
 import { APP_VERSION, APP_RELEASE_YEAR } from '@/lib/version';
 import { LanguageSwitcher } from '@/components/layout/language-switcher';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   ArrowRight,
   Award,
@@ -129,12 +129,70 @@ const plans = [
   },
 ];
 
-function AnimatedGradient() {
+function SectionGlow() {
+  const reduceMotion = useReducedMotion();
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '4s' }} />
+      <div className="absolute -top-40 left-1/2 -translate-x-1/2 h-[420px] w-[80%] max-w-3xl">
+        {reduceMotion ? (
+          <div className="h-full w-full rounded-full bg-white/[0.05] blur-3xl" />
+        ) : (
+          <motion.div
+            className="h-full w-full rounded-full bg-white/[0.05] blur-3xl"
+            animate={{ x: ['-30%', '30%', '-30%'] }}
+            transition={{ duration: 50, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function HeroVideo() {
+  const reduceMotion = useReducedMotion();
+  if (reduceMotion) return null;
+  return (
+    <video
+      className="absolute inset-0 h-full w-full object-cover opacity-60"
+      src="https://upload.wikimedia.org/wikipedia/commons/5/5b/Playing.webm"
+      poster="https://commons.wikimedia.org/wiki/Special:FilePath/Playing.webm?width=1920"
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      aria-hidden="true"
+      tabIndex={-1}
+    />
+  );
+}
+
+function DriftingParticles() {
+  const reduceMotion = useReducedMotion();
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 10 }, (_, i) => ({
+        id: i,
+        left: `${(i * 97 + 5) % 100}%`,
+        size: 2 + ((i * 13) % 3),
+        delay: (i * 3.7) % 12,
+        duration: 18 + ((i * 5) % 10),
+      })),
+    []
+  );
+  if (reduceMotion) return null;
+  return (
+    <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          className="absolute bottom-0 rounded-full bg-white/[0.06]"
+          style={{ left: p.left, width: p.size, height: p.size }}
+          initial={{ y: 0, opacity: 0 }}
+          animate={{ y: -900, opacity: [0, 0.7, 0] }}
+          transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: 'linear' }}
+        />
+      ))}
     </div>
   );
 }
@@ -208,7 +266,7 @@ export default function HomePage() {
             <Link href="#payments" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Payments</Link>
             <Link href="#transport" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Transport</Link>
             <Link href="#pricing" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Pricing</Link>
-            <Link href="#kofi" className="text-sm text-muted-foreground hover:text-fuchsia-400 transition-colors flex items-center gap-1"><KofiAvatar size={5} title="Teacher Kofi" />Teacher Kofi</Link>
+            <Link href="#kofi" className="text-sm text-muted-foreground hover:text-amber-400 transition-colors flex items-center gap-1"><KofiAvatar size={5} title="Teacher Kofi" />Teacher Kofi</Link>
             <Link href="/download" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors flex items-center gap-1"><Smartphone className="h-3.5 w-3.5" />Download App</Link>
             <LanguageSwitcher />
             <Link href="/login">
@@ -252,11 +310,11 @@ export default function HomePage() {
 
       {/* Hero */}
       <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden pt-16">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-purple-950 to-amber-950">
-          <AnimatedGradient />
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='60' height='60' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 60 0 L 0 0 0 60' fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='0.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E")`,
-          }} />
+        <div className="absolute inset-0 bg-emerald-950">
+          <SectionGlow />
+          <HeroVideo />
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/80 via-emerald-950/40 to-emerald-950/20" />
+          <DriftingParticles />
           <div className="absolute bottom-0 inset-x-0 h-64 bg-gradient-to-t from-background to-transparent" />
         </div>
 
@@ -277,7 +335,7 @@ export default function HomePage() {
 
                   <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
                     Run your entire school from
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-amber-400">
+                    <span className="text-emerald-300">
                       {' '}one place
                     </span>
                   </h1>
@@ -321,7 +379,7 @@ export default function HomePage() {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="relative"
               >
-                <div className="absolute -inset-4 bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-amber-500/20 rounded-2xl blur-3xl" />
+                <div className="absolute -inset-4 bg-emerald-500/10 rounded-2xl blur-3xl" />
                 <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border border-white/10 shadow-2xl overflow-hidden">
                   <div className="bg-slate-800/50 px-4 py-3 border-b border-white/5 flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-red-400/50" />
@@ -434,7 +492,7 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section id="features" className="py-24 bg-gradient-to-b from-indigo-500/[0.02] via-transparent to-purple-500/[0.02]">
+      <section id="features" className="py-24 bg-gradient-to-b from-emerald-500/[0.02] via-transparent to-amber-500/[0.02]">
         <div className="container mx-auto px-4 lg:px-6">
           <SectionHeading
             pill="All-in-one platform"
@@ -511,12 +569,12 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="absolute -inset-4 bg-gradient-to-br from-emerald-500/20 via-indigo-500/20 to-purple-500/20 rounded-3xl blur-3xl" />
+              <div className="absolute -inset-4 bg-emerald-500/10 rounded-3xl blur-3xl" />
               <div className="relative space-y-4">
                 <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-white/10 shadow-2xl p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-9 h-9 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center">
                         <Wallet size={18} />
                       </div>
                       <div>
@@ -558,8 +616,8 @@ export default function HomePage() {
       </section>
 
       {/* Transport */}
-      <section id="transport" className="py-24 bg-gradient-to-br from-slate-900 to-indigo-950 relative overflow-hidden">
-        <AnimatedGradient />
+      <section id="transport" className="py-24 bg-slate-950 relative overflow-hidden">
+        <SectionGlow />
         <div className="container mx-auto px-4 lg:px-6 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -568,7 +626,7 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="relative order-2 lg:order-1"
             >
-              <div className="absolute -inset-4 bg-gradient-to-br from-indigo-500/20 to-amber-500/20 rounded-3xl blur-3xl" />
+              <div className="absolute -inset-4 bg-amber-500/[0.07] rounded-3xl blur-3xl" />
               <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-white/10 shadow-2xl p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
@@ -671,10 +729,9 @@ export default function HomePage() {
       </section>
 
       {/* Teacher Kofi */}
-      <section id="kofi" className="relative py-24 overflow-hidden bg-gradient-to-br from-violet-950 via-fuchsia-950 to-purple-950">
+      <section id="kofi" className="relative py-24 overflow-hidden bg-gradient-to-b from-amber-950 to-stone-950">
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-32 -left-32 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-fuchsia-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+          <SectionGlow />
         </div>
         <div className="container mx-auto px-4 lg:px-6 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -688,7 +745,7 @@ export default function HomePage() {
               </span>
               <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6 tracking-tight">
                 Your AI tutor now follows students{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">home</span>
+                <span className="text-amber-300">home</span>
               </h2>
               <p className="text-white/60 mb-8 max-w-lg">
                 Teacher Kofi helps students learn anytime, anywhere — Math, English, Science, and Ghanaian
@@ -704,7 +761,7 @@ export default function HomePage() {
                     transition={{ delay: i * 0.1 }}
                     className="flex items-center gap-3 text-white/80"
                   >
-                    <div className="w-6 h-6 rounded-full bg-fuchsia-500/20 text-fuchsia-400 flex items-center justify-center shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0">
                       <Check size={14} />
                     </div>
                     {item}
@@ -713,7 +770,7 @@ export default function HomePage() {
               </ul>
               <div className="flex flex-wrap gap-3">
                 <Link href="/tutor">
-                  <Button size="lg" className="bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 font-semibold shadow-xl shadow-fuchsia-500/20 text-base px-8">
+                  <Button size="lg" className="bg-amber-500 text-stone-950 hover:bg-amber-600 font-semibold shadow-xl shadow-amber-500/20 text-base px-8">
                     <KofiAvatar size={9} title="Teacher Kofi" className="mr-2" /> Try Teacher Kofi Free
                   </Button>
                 </Link>
@@ -731,7 +788,7 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="absolute -inset-4 bg-gradient-to-br from-violet-500/20 via-fuchsia-500/20 to-purple-500/20 rounded-3xl blur-3xl" />
+              <div className="absolute -inset-4 bg-amber-500/10 rounded-3xl blur-3xl" />
               <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-white/10 shadow-2xl p-6">
                 <div className="bg-slate-800/50 px-4 py-3 border-b border-white/5 flex items-center gap-2 -mx-6 -mt-6 mb-6 rounded-t-2xl">
                   <div className="w-3 h-3 rounded-full bg-red-400/50" />
@@ -750,7 +807,7 @@ export default function HomePage() {
                         className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm ${
                           m.role === 'user'
                             ? 'bg-white/10 text-white rounded-br-md'
-                            : 'bg-gradient-to-r from-violet-500/90 to-fuchsia-500/90 text-white rounded-bl-md'
+                            : 'bg-amber-500/90 text-stone-950 rounded-bl-md'
                         }`}
                       >
                         {m.text}
@@ -761,7 +818,7 @@ export default function HomePage() {
                 <div className="mt-4 flex items-center gap-2 rounded-lg bg-white/5 border border-white/10 px-3 py-2">
                   <Mic className="h-4 w-4 text-white/50" />
                   <span className="text-xs text-white/50 flex-1">Talk in English, Twi or Ga...</span>
-                  <Send className="h-4 w-4 text-fuchsia-400" />
+                  <Send className="h-4 w-4 text-amber-400" />
                 </div>
               </div>
             </motion.div>
@@ -817,9 +874,9 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="absolute -inset-4 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-3xl blur-3xl" />
+              <div className="absolute -inset-4 bg-emerald-500/10 rounded-3xl blur-3xl" />
               <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-white/10 shadow-2xl p-8">
-                <Shield size={48} className="text-indigo-400 mb-4" />
+                <Shield size={48} className="text-emerald-300 mb-4" />
                 <h3 className="text-xl font-bold text-white mb-2">Made in Ghana, built to last</h3>
                 <p className="text-white/60 text-sm">
                   Local team, local support, and clear plans in Ghana Cedis.
@@ -839,7 +896,7 @@ export default function HomePage() {
 
       {/* Pricing */}
       <section id="pricing" className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 via-transparent to-amber-500/5" />
+        <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 via-transparent to-amber-500/5" />
         <div className="container mx-auto px-4 lg:px-6 relative">
           <SectionHeading
             pill="Simple Plans"
@@ -900,7 +957,7 @@ export default function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section className="py-24 bg-gradient-to-b from-indigo-500/[0.02] via-transparent to-amber-500/[0.02]">
+      <section className="py-24 bg-gradient-to-b from-emerald-500/[0.02] via-transparent to-amber-500/[0.02]">
         <div className="container mx-auto px-4 lg:px-6">
           <SectionHeading
             pill="Get started"
@@ -930,8 +987,8 @@ export default function HomePage() {
 
       {/* CTA */}
       <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-amber-600">
-          <AnimatedGradient />
+        <div className="absolute inset-0 bg-emerald-950">
+          <SectionGlow />
         </div>
         <div className="container mx-auto px-4 lg:px-6 text-center relative z-10">
           <motion.div
@@ -964,7 +1021,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-gradient-to-b from-background to-indigo-500/5 pt-16 pb-8">
+      <footer className="border-t border-border bg-gradient-to-b from-background to-emerald-500/5 pt-16 pb-8">
         <div className="container mx-auto px-4 lg:px-6">
           <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5 mb-12">
             <div className="lg:col-span-2">
@@ -1066,6 +1123,9 @@ export default function HomePage() {
             <p>
               &copy; {new Date().getFullYear()} EduPlatform. All rights reserved.
               <Link href="/super-admin/login" className="ml-2 opacity-0 hover:opacity-30 transition-all select-none" tabIndex={-1} aria-hidden="true">[admin]</Link>
+            </p>
+            <p className="mt-1">
+              Hero background video: &ldquo;Playing&rdquo; by Salifu Wumpini Hussein, CC BY-SA 4.0, via Wikimedia Commons.
             </p>
             <p className="mt-1">
               <span className="inline-flex items-center gap-1 rounded-full border border-border/50 bg-white/5 px-2.5 py-0.5">
