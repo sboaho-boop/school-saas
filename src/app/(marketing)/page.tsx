@@ -18,6 +18,7 @@ import {
   Calendar,
   Check,
   CheckCircle2,
+  ChevronDown,
   ChevronRight,
   ClipboardCheck,
   Clock,
@@ -247,6 +248,7 @@ function SectionHeading({ pill, title, sub }: { pill: string; title: string; sub
 
 export default function HomePage() {
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
@@ -261,7 +263,7 @@ export default function HomePage() {
           <Link href="/">
             <Logo />
           </Link>
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-5">
             <Link href="#features" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Features</Link>
             <Link href="#payments" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Payments</Link>
             <Link href="#transport" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors">Transport</Link>
@@ -269,6 +271,43 @@ export default function HomePage() {
             <Link href="#kofi" className="text-sm text-muted-foreground hover:text-amber-400 transition-colors flex items-center gap-1"><KofiAvatar size={5} title="Teacher Kofi" />Teacher Kofi</Link>
             <Link href="/download" className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors flex items-center gap-1"><Smartphone className="h-3.5 w-3.5" />Download App</Link>
             <LanguageSwitcher />
+            <div className="relative">
+              <button
+                onClick={() => setLoginOpen(!loginOpen)}
+                aria-expanded={loginOpen}
+                aria-haspopup="true"
+                className="text-sm text-muted-foreground hover:text-indigo-400 transition-colors flex items-center gap-0.5"
+              >
+                Log In
+                <ChevronDown size={14} className={`transition-transform ${loginOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {loginOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setLoginOpen(false)} aria-hidden="true" />
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="absolute right-0 top-full mt-2 z-20 w-48 rounded-xl border border-border/50 bg-background p-1.5 shadow-xl"
+                  >
+                    {[
+                      { href: '/login', label: 'School / Staff' },
+                      { href: '/parent/login', label: 'Parent' },
+                      { href: '/student/login', label: 'Student' },
+                      { href: '/driver/login', label: 'Driver' },
+                    ].map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setLoginOpen(false)}
+                        className="block rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </motion.div>
+                </>
+              )}
+            </div>
             <Link href="/login">
               <Button size="sm" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-500/20">
                 Start Free
@@ -300,6 +339,7 @@ export default function HomePage() {
             <Link href="/download" className="block text-sm text-muted-foreground py-2" onClick={() => setMobileMenu(false)}>Download App</Link>
             <Link href="/student/login" className="block text-sm text-muted-foreground py-2" onClick={() => setMobileMenu(false)}>Students</Link>
             <Link href="/parent/login" className="block text-sm text-muted-foreground py-2" onClick={() => setMobileMenu(false)}>Parents</Link>
+            <Link href="/driver/login" className="block text-sm text-muted-foreground py-2" onClick={() => setMobileMenu(false)}>Drivers</Link>
             <Link href="/login" className="block text-sm text-muted-foreground py-2" onClick={() => setMobileMenu(false)}>Login</Link>
             <Link href="/register" onClick={() => setMobileMenu(false)}>
               <Button className="w-full bg-indigo-600 text-white mt-2">Start Free</Button>
