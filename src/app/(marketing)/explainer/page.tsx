@@ -504,7 +504,7 @@ export default function ExplainerPage() {
       </div>
 
       <div className="mt-3 text-center max-w-md">
-        <p className="text-xs text-white/40 italic leading-relaxed">{scene.narration}</p>
+        <p className="text-xs text-white/60 italic leading-relaxed">{scene.narration}</p>
       </div>
 
       <div className="mt-4 flex gap-1.5">
@@ -515,7 +515,7 @@ export default function ExplainerPage() {
         ))}
       </div>
 
-      <a href="/" className="mt-4 text-[10px] text-white/40 hover:text-white/60 transition-colors underline">
+      <a href="/" className="mt-4 text-[10px] text-white/60 hover:text-white/80 transition-colors underline">
         Back to Home
       </a>
     </div>

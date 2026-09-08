@@ -76,9 +76,9 @@ export default function CookiePolicyPage() {
             <h2 className="text-lg font-semibold text-foreground mb-2">6. Contact</h2>
             <p>
               Questions about this Cookie Policy can be sent to{' '}
-              <a href="mailto:sboaho@gmail.com" className="text-primary hover:underline">sboaho@gmail.com</a> or on
+              <a href="mailto:sboaho@gmail.com" className="text-primary underline hover:underline">sboaho@gmail.com</a> or on
               WhatsApp at{' '}
-              <a href="https://wa.me/447735310744" className="text-primary hover:underline">+44 7735 310744</a>.
+              <a href="https://wa.me/447735310744" className="text-primary underline hover:underline">+44 7735 310744</a>.
             </p>
           </section>
 

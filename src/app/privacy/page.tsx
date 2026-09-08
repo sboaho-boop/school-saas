@@ -61,7 +61,7 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-semibold text-foreground mb-2">5. Data Sharing and Disclosure</h2>
             <p>We do not sell your personal data. We may share data only:</p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
-              <li>With Hubtel (our payment processor) for subscription billing — limited to transaction amounts and references</li>
+              <li>With Hubtel (our payment processor) for subscription billing â€” limited to transaction amounts and references</li>
               <li>With Hubtel SMS for sending notification messages to provided phone numbers</li>
               <li>With our hosting providers (Render, Vercel) who process data on our behalf under strict data processing agreements</li>
               <li>When required by law or to protect our legal rights</li>
@@ -105,8 +105,8 @@ export default function PrivacyPage() {
               <li><strong>Withdraw Consent:</strong> Withdraw your consent at any time (without affecting the lawfulness of prior processing)</li>
             </ul>
             <p className="mt-2">
-              To exercise these rights, visit your Settings page — Data &amp; Privacy tab, or contact us at{' '}
-              <a href="mailto:sboaho@gmail.com" className="text-primary hover:underline">sboaho@gmail.com</a>.
+              To exercise these rights, visit your Settings page â€” Data &amp; Privacy tab, or contact us at{' '}
+              <a href="mailto:sboaho@gmail.com" className="text-primary underline hover:underline">sboaho@gmail.com</a>.
             </p>
           </section>
 
@@ -136,14 +136,14 @@ export default function PrivacyPage() {
             </p>
             <div className="mt-2 bg-muted p-4 rounded-lg space-y-1">
               <p><strong>EDUPLATFORM SOFTWARE SERVICES</strong></p>
-              <p>Email: <a href="mailto:sboaho@gmail.com" className="text-primary hover:underline">sboaho@gmail.com</a></p>
-              <p>Phone: <a href="tel:+233556674353" className="text-primary hover:underline">055 667 4353</a></p>
-              <p>WhatsApp: <a href="https://wa.me/447735310744" className="text-primary hover:underline">+44 7735 310744</a></p>
+              <p>Email: <a href="mailto:sboaho@gmail.com" className="text-primary underline hover:underline">sboaho@gmail.com</a></p>
+              <p>Phone: <a href="tel:+233556674353" className="text-primary underline hover:underline">055 667 4353</a></p>
+              <p>WhatsApp: <a href="https://wa.me/447735310744" className="text-primary underline hover:underline">+44 7735 310744</a></p>
               <p>Location: Accra, Ghana</p>
             </div>
             <p className="mt-2">
               You also have the right to lodge a complaint with the Data Protection Commission (DPC) of Ghana
-              at <a href="https://www.dpc.gov.gh" className="text-primary hover:underline">www.dpc.gov.gh</a>.
+              at <a href="https://www.dpc.gov.gh" className="text-primary underline hover:underline">www.dpc.gov.gh</a>.
             </p>
           </section>
 

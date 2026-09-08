@@ -124,7 +124,7 @@ export default function RegisterPage() {
                 <div className="space-y-2">
                   <Label htmlFor="country">Country</Label>
                   <Select value={country} onValueChange={(v) => v && setCountry(v)}>
-                    <SelectTrigger>
+                    <SelectTrigger id="country">
                       <SelectValue placeholder="Select country" />
                     </SelectTrigger>
                     <SelectContent>
@@ -188,7 +188,7 @@ export default function RegisterPage() {
                     value={academicStructure}
                     onValueChange={(v) => v && setAcademicStructure(v)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id="structure">
                       <SelectValue placeholder="Select structure" />
                     </SelectTrigger>
                     <SelectContent>

@@ -70,9 +70,9 @@ export default function RefundPage() {
               To request a refund, contact us with your order or subscription reference:
             </p>
             <div className="mt-2 bg-muted p-4 rounded-lg space-y-1">
-              <p>Email: <a href="mailto:sboaho@gmail.com" className="text-primary hover:underline">sboaho@gmail.com</a></p>
-              <p>Phone: <a href="tel:+233556674353" className="text-primary hover:underline">055 667 4353</a></p>
-              <p>WhatsApp: <a href="https://wa.me/447735310744" className="text-primary hover:underline">+44 7735 310744</a></p>
+              <p>Email: <a href="mailto:sboaho@gmail.com" className="text-primary underline hover:underline">sboaho@gmail.com</a></p>
+              <p>Phone: <a href="tel:+233556674353" className="text-primary underline hover:underline">055 667 4353</a></p>
+              <p>WhatsApp: <a href="https://wa.me/447735310744" className="text-primary underline hover:underline">+44 7735 310744</a></p>
             </div>
             <p className="mt-2">
               We aim to respond within 2 business days and to process approved refunds within 7 business days.
@@ -83,9 +83,9 @@ export default function RefundPage() {
             <h2 className="text-lg font-semibold text-foreground mb-2">6. Contact</h2>
             <p>
               If you have any questions about this Refund Policy, contact us via email at{' '}
-              <a href="mailto:sboaho@gmail.com" className="text-primary hover:underline">sboaho@gmail.com</a>{' '}
+              <a href="mailto:sboaho@gmail.com" className="text-primary underline hover:underline">sboaho@gmail.com</a>{' '}
               or on WhatsApp at{' '}
-              <a href="https://wa.me/447735310744" className="text-primary hover:underline">+44 7735 310744</a>.
+              <a href="https://wa.me/447735310744" className="text-primary underline hover:underline">+44 7735 310744</a>.
             </p>
           </section>
 
