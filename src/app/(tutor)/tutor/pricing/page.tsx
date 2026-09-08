@@ -20,7 +20,7 @@ function buildPlans(t: (k: string) => string) {
       icon: Bot,
       color: 'from-gray-400 to-gray-500',
       features: [
-        '5 ' + t('tutor.messagesPerDay'),
+        '50 ' + t('tutor.messagesPerDay'),
         t('tutor.textChat'),
         t('tutor.ghanaianCurr'),
         t('tutor.languagesCount'),

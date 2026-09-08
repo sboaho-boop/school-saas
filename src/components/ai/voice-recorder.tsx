@@ -97,7 +97,7 @@ export function VoiceRecorder({ onResult, onError, disabled, endpoint = '/ai/voi
 
   return (
     <div className="flex items-center gap-2">
-      <Select value={language} onValueChange={(v) => v && setLanguage(v)} disabled={disabled || processing}>
+      <Select name="kofi-voice-language" value={language} onValueChange={(v) => v && setLanguage(v)} disabled={disabled || processing}>
         <SelectTrigger className="w-[100px] h-9 text-xs">
           <SelectValue />
         </SelectTrigger>

@@ -249,7 +249,7 @@ function TutorDashboardContent() {
             ))}
           </div>
           <div className="chalk-tray rounded-xl px-3 py-3">
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAttachPhoto} />
+            <input ref={fileInputRef} type="file" name="kofi-photo" id="kofi-photo" accept="image/*" className="hidden" onChange={handleAttachPhoto} />
             <div className="flex gap-2 items-center">
               <VoiceRecorder
                 onResult={handleVoiceResult}
@@ -299,6 +299,8 @@ function TutorDashboardContent() {
                 </div>
               )}
               <Input
+                name="kofi-message"
+                id="kofi-message"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}

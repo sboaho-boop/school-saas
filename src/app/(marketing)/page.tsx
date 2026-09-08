@@ -97,7 +97,7 @@ const kofiBullets = [
   '100+ topics from the Ghanaian curriculum',
   'Voice chat in Twi, Ga, Ewe, Fante, Hausa & Dagbani',
   'Read-aloud answers for every response',
-  'Free plan with 5 messages per day',
+  'Free plan with 50 messages per day',
 ];
 
 const plans = [

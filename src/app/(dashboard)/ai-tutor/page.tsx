@@ -182,6 +182,8 @@ export default function AITutorPage() {
           <div className="flex gap-2 items-center">
             <VoiceRecorder onResult={handleVoiceResult} onError={handleVoiceError} disabled={loading} />
             <Input
+              name="kofi-message"
+              id="kofi-message"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
