@@ -1,4 +1,4 @@
-const CACHE_NAME = 'eduplatform-v2';
+const CACHE_NAME = 'eduplatform-v3';
 const PRECACHE = ['/', '/login', '/dashboard', '/favicon-192.png', '/favicon-512.png', '/manifest.json'];
 
 self.addEventListener('install', (event) => {
@@ -17,14 +17,25 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  const isNavigation = event.request.mode === 'navigate';
+  const sameOrigin = new URL(event.request.url).origin === self.location.origin;
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        if (sameOrigin && (isNavigation || (response.ok && /^text\/|^\s*$|javascript|application\/json/.test(response.headers.get('content-type') || '')))) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
         return response;
       })
-      .catch(() => caches.match(event.request).then((cached) => cached || caches.match('/')))
+      .catch(() =>
+        caches.match(event.request).then((cached) => {
+          if (cached) return cached;
+          if (isNavigation) return fetch('/').catch(() => caches.match('/'));
+          return new Response('', { status: 504, statusText: 'Offline' });
+        })
+      )
   );
 });
 

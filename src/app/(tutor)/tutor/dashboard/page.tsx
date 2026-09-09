@@ -69,6 +69,15 @@ function TutorDashboardContent() {
   }, [searchParams, fetchMe, router]);
 
   useEffect(() => {
+    const node = document.querySelector('[data-js-ok] span');
+    if (node) {
+      node.textContent = 'on';
+      const parent = node.parentElement;
+      if (parent) parent.closest('[data-js-ok]')?.setAttribute('data-js-ok', 'yes');
+    }
+  }, []);
+
+  useEffect(() => {
     loadHistory();
   }, [loadHistory]);
 
@@ -338,6 +347,9 @@ function TutorDashboardContent() {
             <div className="text-center mt-1">
               <span data-build-version={APP_VERSION} className="text-[10px] text-emerald-100/40">
                 EduPlatform v{APP_VERSION}
+              </span>
+              <span data-js-ok="no" className="text-[10px] text-emerald-100/40 ml-2">
+                JS: <span>off</span>
               </span>
             </div>
           </div>
