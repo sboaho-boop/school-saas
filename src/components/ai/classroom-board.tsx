@@ -121,9 +121,8 @@ export function ClassroomBoard({ messages, loading, speakingIdx, onToggleSpeak }
                       msg.role === 'assistant' ? (
                         <motion.div
                           key={i}
-                          initial={{ opacity: 0 }}
+                          initial={false}
                           animate={{ opacity: 1 }}
-                          transition={{ duration: 0.4 }}
                           className="chalk-text text-[15px] leading-relaxed"
                         >
                           <div className="flex items-start gap-2">
@@ -158,9 +157,8 @@ export function ClassroomBoard({ messages, loading, speakingIdx, onToggleSpeak }
                       ) : (
                         <motion.div
                           key={i}
-                          initial={{ opacity: 0, rotate: -1 }}
-                          animate={{ opacity: 1, rotate: 0 }}
-                          transition={{ duration: 0.3 }}
+                          initial={false}
+                          animate={{ opacity: 1 }}
                           className="ml-auto max-w-[85%]"
                         >
                           <div className="bg-amber-50 text-amber-900 rounded-md p-2.5 shadow-md shadow-black/30 rotate-[0.5deg] border border-amber-200/60"
@@ -188,7 +186,7 @@ export function ClassroomBoard({ messages, loading, speakingIdx, onToggleSpeak }
                   </AnimatePresence>
 
                   {loading && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="chalk-text flex items-center gap-2 text-sm">
+                    <motion.div initial={false} animate={{ opacity: 1 }} className="chalk-text flex items-center gap-2 text-sm">
                       <span className="chalk-color-green">Kofi is writing&hellip;</span>
                       <div className="flex gap-1.5">
                         <span className="size-2 rounded-full bg-yellow-200 animate-bounce" style={{ animationDelay: '0ms' }} />
