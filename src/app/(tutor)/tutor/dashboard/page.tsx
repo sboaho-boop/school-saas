@@ -17,6 +17,7 @@ import { TutorCurriculumCard } from '@/components/tutor/curriculum-card';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useI18n } from '@/stores/locale';
+import { APP_VERSION } from '@/lib/version';
 
 function TutorDashboardContent() {
   const user = useTutorAuth((s) => s.user);
@@ -298,26 +299,34 @@ function TutorDashboardContent() {
                   </Button>
                 </div>
               )}
-              <Input
-                name="kofi-message"
-                id="kofi-message"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                autoFocus
-                placeholder={
-                  imageMode
-                    ? imgStyle === 'real'
-                      ? t('tutor.describePhoto')
-                      : t('tutor.describePicture')
-                    : t('tutor.askAnything')
-                }
-                disabled={loading || limitReached}
-                className="flex-1 bg-black/25 border-white/25 text-white placeholder:text-white/60"
-              />
-              <Button onClick={handleSend} disabled={!input.trim() || loading || limitReached} size="icon" className="bg-gradient-to-r from-yellow-400 to-amber-500 text-black hover:from-yellow-300 hover:to-amber-400">
-                {imageMode ? <ImageIcon size={16} /> : <Send size={16} />}
-              </Button>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSend();
+                }}
+                className="flex flex-1 gap-2 items-center min-w-0"
+              >
+                <Input
+                  name="kofi-message"
+                  id="kofi-message"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  autoFocus
+                  placeholder={
+                    imageMode
+                      ? imgStyle === 'real'
+                        ? t('tutor.describePhoto')
+                        : t('tutor.describePicture')
+                      : t('tutor.askAnything')
+                  }
+                  disabled={loading || limitReached}
+                  className="flex-1 bg-black/25 border-white/25 text-white placeholder:text-white/60"
+                />
+                <Button type="submit" disabled={!input.trim() || loading || limitReached} size="icon" className="bg-gradient-to-r from-yellow-400 to-amber-500 text-black hover:from-yellow-300 hover:to-amber-400">
+                  {imageMode ? <ImageIcon size={16} /> : <Send size={16} />}
+                </Button>
+              </form>
             </div>
             <p className="text-[10px] text-emerald-100/60 mt-2 text-center">
               {imageMode
@@ -326,6 +335,11 @@ function TutorDashboardContent() {
                   : t('tutor.cartoonHint')
                 : t('tutor.tapMicHint')}
             </p>
+            <div className="text-center mt-1">
+              <span data-build-version={APP_VERSION} className="text-[10px] text-emerald-100/40">
+                EduPlatform v{APP_VERSION}
+              </span>
+            </div>
           </div>
         </div>
       </div>
