@@ -304,6 +304,7 @@ function TutorDashboardContent() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
+                autoFocus
                 placeholder={
                   imageMode
                     ? imgStyle === 'real'
