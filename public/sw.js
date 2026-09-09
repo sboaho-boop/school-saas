@@ -1,4 +1,4 @@
-const CACHE_NAME = 'eduplatform-v1';
+const CACHE_NAME = 'eduplatform-v2';
 const PRECACHE = ['/', '/login', '/dashboard', '/favicon-192.png', '/favicon-512.png', '/manifest.json'];
 
 self.addEventListener('install', (event) => {
