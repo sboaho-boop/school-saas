@@ -180,7 +180,7 @@ export default function LoginPage() {
             <div className="mt-4 text-xs text-muted-foreground space-y-1">
               <p className="font-medium">{t('auth.demoAccounts')} <code className="bg-muted px-1 rounded">password123</code>):</p>
               <p>headteacher@school.com · admin@school.com · accountant@school.com</p>
-              <p>teacher1@school.com · teacher2@school.com · nont@school.com</p>
+              <p>teacher1@school.com · teacher2@school.com</p>
             </div>
             <div className="mt-4 text-center text-sm">
               <span className="text-muted-foreground">{t('auth.noAccount')} </span>
